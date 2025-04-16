@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -120,8 +121,23 @@ const EbookPersonalizado = () => {
       // Quebrando o texto em linhas para caber na página
       const splitContent = pdf.splitTextToSize(ebookGerado.conteudo, 170);
       
-      // Adicionando o conteúdo com posição inicial y em 30
-      pdf.text(splitContent, 20, 30);
+      // Conteúdo pode ser muito longo, precisamos verificar e adicionar páginas, se necessário
+      let yPosition = 30;
+      const lineHeight = 7;
+      
+      for (let i = 0; i < splitContent.length; i++) {
+        // Se a posição y atual exceder a altura da página (menos uma margem de 20)
+        if (yPosition + lineHeight > pdf.internal.pageSize.height - 20) {
+          // Adicionar uma nova página
+          pdf.addPage();
+          yPosition = 20; // Resetar a posição Y no topo da nova página (com margem)
+        }
+        
+        // Adicionar a linha na posição atual
+        pdf.text(splitContent[i], 20, yPosition);
+        // Incrementar a posição Y para a próxima linha
+        yPosition += lineHeight;
+      }
       
       // Salvando o PDF com nome baseado no título
       const fileName = `${ebookGerado.titulo.replace(/\s+/g, '_')}.pdf`;
