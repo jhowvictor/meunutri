@@ -1,4 +1,3 @@
-
 // Esta é uma classe para gerenciar as chamadas para a API do OpenAI (ChatGPT)
 import { toast } from "@/components/ui/sonner";
 
@@ -16,22 +15,16 @@ interface OpenAIResponse {
 }
 
 export class OpenAIService {
-  private apiKey: string | null = null;
+  private apiKey: string | null = "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";
   private apiUrl = "https://api.openai.com/v1/chat/completions";
   
   // Método para definir a chave da API
   setApiKey(key: string) {
     this.apiKey = key;
-    // Salvar a chave no localStorage para uso futuro
-    localStorage.setItem("openai_api_key", key);
   }
   
   // Método para obter a chave da API
   getApiKey(): string | null {
-    // Tentar recuperar do localStorage se não estiver definido
-    if (!this.apiKey) {
-      this.apiKey = localStorage.getItem("openai_api_key");
-    }
     return this.apiKey;
   }
   
