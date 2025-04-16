@@ -43,15 +43,41 @@ const MiniChef = () => {
     setInputMessage("");
     setIsLoading(true);
 
-    // Preparar o prompt para o ChatGPT
-    const systemPrompt = "Você é um chef de cozinha e nutricionista chamado Mini Chef. Responda de forma clara, simpática e útil todas as dúvidas da pessoa relacionadas a alimentação saudável, preparo de receitas, substituições de ingredientes, dietas especiais e dicas de nutrição. Sempre use uma linguagem empática, fácil de entender e personalizada.";
+    // Prompt de sistema melhorado para respostas mais completas e detalhadas
+    const systemPrompt = `Você é o Mini Chef, um chef de cozinha e nutricionista especialista. Forneça respostas:
+- Completas e detalhadas, sem limites de caracteres
+- Estruturadas com subtópicos quando necessário
+- Personalizadas para o contexto da pergunta
+- Com exemplos práticos e explicações claras
+- Abrangentes, cobrindo todos os aspectos da pergunta
+- Cientificamente precisas quando se trata de nutrição
+- Utilizando linguagem acessível e empática
+
+Áreas de especialidade:
+- Receitas e técnicas culinárias
+- Substituições de ingredientes e adaptações
+- Valor nutricional dos alimentos
+- Dietas especiais (low-carb, vegana, cetogênica, etc.)
+- Planejamento de refeições
+- Preparo, conservação e armazenamento de alimentos
+- Reaproveitamento de ingredientes
+- Alimentação para objetivos específicos (emagrecimento, ganho de massa, controle de doenças)
+
+Não abrevie suas respostas. Forneça explicações completas e detalhadas para qualquer pergunta.`;
     
+    // Construindo o prompt com o histórico da conversa
     const prompt = `${systemPrompt}\n\nHistórico da conversa:\n${messages
       .map((msg) => `${msg.role === "user" ? "Usuário" : "Mini Chef"}: ${msg.content}`)
       .join("\n")}\n\nUsuário: ${inputMessage}\n\nMini Chef:`;
 
     try {
-      const response = await openAIService.generateContent({ prompt });
+      // Usar o modelo gpt-4o com mais tokens máximos para respostas mais completas
+      const response = await openAIService.generateContent({ 
+        prompt,
+        model: "gpt-4o",  // Modelo mais avançado
+        max_tokens: 2000, // Aumentar o limite de tokens
+        temperature: 0.7  // Manter criatividade equilibrada
+      });
 
       if (!response.isError) {
         // Adicionar resposta do assistente
