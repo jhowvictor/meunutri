@@ -15,6 +15,7 @@ import ApiKeyConfig from "./components/ApiKeyConfig";
 import { AuthProvider } from "./components/AuthProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
+import MiniChef from "./components/MiniChef";
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const App = () => (
             } />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <MiniChef />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
