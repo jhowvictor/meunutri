@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { ChefHat, Utensils, BookOpen } from "lucide-react";
+import { ChefHat, Utensils, BookOpen, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -70,6 +70,24 @@ const Index = () => {
               <Link to="/ebook-personalizado">
                 <Button className="w-full" size="lg">
                   Criar E-book Personalizado
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Lista de Compras */}
+          <Card className="border-2 hover:border-primary/80 hover:shadow-lg transition-all">
+            <CardHeader className="text-center">
+              <ShoppingCart className="h-12 w-12 mx-auto text-primary mb-2" />
+              <CardTitle className="text-xl">Lista de Compras</CardTitle>
+              <CardDescription>
+                Gere uma lista de compras personalizada para suas necessidades culinárias
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center pt-2">
+              <Link to="/lista-compras">
+                <Button className="w-full" size="lg">
+                  Criar Lista de Compras
                 </Button>
               </Link>
             </CardContent>
