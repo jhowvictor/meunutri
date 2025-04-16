@@ -10,7 +10,11 @@ import DietaPersonalizada from "./pages/DietaPersonalizada";
 import EbookPersonalizado from "./pages/EbookPersonalizado";
 import ListaCompras from "./pages/ListaCompras";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
 import ApiKeyConfig from "./components/ApiKeyConfig";
+import { AuthProvider } from "./components/AuthProvider";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Header from "./components/Header";
 
 const queryClient = new QueryClient();
 
@@ -21,15 +25,52 @@ const App = () => (
       <Sonner />
       <ApiKeyConfig />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/receita-personalizada" element={<ReceitaPersonalizada />} />
-          <Route path="/dieta-personalizada" element={<DietaPersonalizada />} />
-          <Route path="/ebook-personalizado" element={<EbookPersonalizado />} />
-          <Route path="/lista-compras" element={<ListaCompras />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <>
+                  <Header />
+                  <Index />
+                </>
+              </ProtectedRoute>
+            } />
+            <Route path="/receita-personalizada" element={
+              <ProtectedRoute>
+                <>
+                  <Header />
+                  <ReceitaPersonalizada />
+                </>
+              </ProtectedRoute>
+            } />
+            <Route path="/dieta-personalizada" element={
+              <ProtectedRoute>
+                <>
+                  <Header />
+                  <DietaPersonalizada />
+                </>
+              </ProtectedRoute>
+            } />
+            <Route path="/ebook-personalizado" element={
+              <ProtectedRoute>
+                <>
+                  <Header />
+                  <EbookPersonalizado />
+                </>
+              </ProtectedRoute>
+            } />
+            <Route path="/lista-compras" element={
+              <ProtectedRoute>
+                <>
+                  <Header />
+                  <ListaCompras />
+                </>
+              </ProtectedRoute>
+            } />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
