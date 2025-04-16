@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
   ArrowLeft, 
@@ -7,7 +6,7 @@ import {
   Check,
   Download,
   Loader2,
-  FilePdf
+  FileText  // Replace FilePdf with FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -249,7 +248,7 @@ const EbookPersonalizado = () => {
                     Modificar E-book
                   </Button>
                   <Button className="bg-primary" onClick={handleDownloadEbook}>
-                    <FilePdf className="mr-2 h-4 w-4" />
+                    <FileText className="mr-2 h-4 w-4" />
                     Baixar E-book
                   </Button>
                 </div>
