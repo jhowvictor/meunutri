@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import ReceitaPersonalizada from "./pages/ReceitaPersonalizada";
 import DietaPersonalizada from "./pages/DietaPersonalizada";
 import EbookPersonalizado from "./pages/EbookPersonalizado";
+import ListaCompras from "./pages/ListaCompras";
 import NotFound from "./pages/NotFound";
 import ApiKeyConfig from "./components/ApiKeyConfig";
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/receita-personalizada" element={<ReceitaPersonalizada />} />
           <Route path="/dieta-personalizada" element={<DietaPersonalizada />} />
           <Route path="/ebook-personalizado" element={<EbookPersonalizado />} />
+          <Route path="/lista-compras" element={<ListaCompras />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
