@@ -5,12 +5,15 @@ import {
   ArrowLeft, 
   BookOpen, 
   Check,
-  Download
+  Download,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { openAIService } from "@/services/openai";
+import { toast } from "@/components/ui/sonner";
 
 const EbookPersonalizado = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +21,11 @@ const EbookPersonalizado = () => {
   });
 
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [ebookGerado, setEbookGerado] = useState({
+    titulo: "",
+    conteudo: ""
+  });
 
   const handleChange = (value: string) => {
     setFormData((prev) => ({
@@ -26,9 +34,67 @@ const EbookPersonalizado = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormSubmitted(true);
+    
+    // Verificar se a chave da API está configurada
+    if (!openAIService.getApiKey()) {
+      toast.error("Por favor, configure sua chave da API OpenAI primeiro.");
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Construir o prompt para a API
+    const prompt = `
+      Por favor, crie um e-book de receitas personalizado com base nas seguintes especificações:
+      
+      ${formData.detalhes}
+      
+      Forneça:
+      1. Um título atrativo para o e-book
+      2. Uma breve introdução
+      3. Uma lista de receitas com ingredientes e modo de preparo
+      4. Informação nutricional para cada receita
+      5. Dicas e conclusão
+    `;
+    
+    try {
+      const result = await openAIService.generateContent({
+        prompt: prompt,
+        max_tokens: 2000  // E-books podem precisar de respostas mais longas
+      });
+      
+      if (!result.isError && result.content) {
+        // Tenta extrair o título do e-book da resposta
+        let titulo = formData.detalhes.toLowerCase().includes("vegetariana") ? "Delícias Vegetarianas" :
+                   formData.detalhes.toLowerCase().includes("vegana") ? "Cardápio Vegano" :
+                   formData.detalhes.toLowerCase().includes("café da manhã") ? "Café da Manhã Saudável" :
+                   formData.detalhes.toLowerCase().includes("jantar") ? "Jantares Nutritivos" :
+                   formData.detalhes.toLowerCase().includes("low carb") ? "Receitas Low Carb" :
+                   "Alimentação Saudável";
+        
+        // Tenta extrair o título da resposta
+        const tituloMatch = result.content.match(/(?:Título|E-book):\s*([^\n]+)/i);
+        if (tituloMatch && tituloMatch[1]) {
+          titulo = tituloMatch[1].trim();
+        }
+        
+        setEbookGerado({
+          titulo: titulo,
+          conteudo: result.content
+        });
+        
+        setFormSubmitted(true);
+      } else {
+        toast.error("Erro ao gerar o e-book. Por favor, tente novamente.");
+      }
+    } catch (error) {
+      console.error("Erro ao gerar e-book:", error);
+      toast.error("Ocorreu um erro ao processar sua solicitação.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const isFormValid = () => {
@@ -81,11 +147,20 @@ const EbookPersonalizado = () => {
                   <Button 
                     type="submit" 
                     size="lg" 
-                    disabled={!isFormValid()} 
+                    disabled={!isFormValid() || isLoading} 
                     className="w-full"
                   >
-                    <BookOpen className="mr-2 h-5 w-5" />
-                    Criar meu E-book
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Criando seu E-book...
+                      </>
+                    ) : (
+                      <>
+                        <BookOpen className="mr-2 h-5 w-5" />
+                        Criar meu E-book
+                      </>
+                    )}
                   </Button>
                 </CardFooter>
               </form>
@@ -105,24 +180,18 @@ const EbookPersonalizado = () => {
                   <div className="h-48 bg-accent/50 flex items-center justify-center">
                     <div className="text-center">
                       <BookOpen className="h-16 w-16 mx-auto text-accent-foreground/70 mb-2" />
-                      <h3 className="font-bold text-lg">Receitas Saudáveis</h3>
+                      <h3 className="font-bold text-lg">{ebookGerado.titulo}</h3>
                       <p className="text-sm">E-book Personalizado</p>
                     </div>
                   </div>
                   <div className="p-6">
                     <h3 className="text-xl font-bold text-primary">
-                      {formData.detalhes.toLowerCase().includes("vegetariana") ? "Delícias Vegetarianas" :
-                       formData.detalhes.toLowerCase().includes("vegana") ? "Cardápio Vegano" :
-                       formData.detalhes.toLowerCase().includes("café da manhã") ? "Café da Manhã Saudável" :
-                       formData.detalhes.toLowerCase().includes("jantar") ? "Jantares Nutritivos" :
-                       formData.detalhes.toLowerCase().includes("low carb") ? "Receitas Low Carb" :
-                       "Alimentação Saudável"}
+                      {ebookGerado.titulo}
                     </h3>
                     
                     <p className="mt-2 text-sm line-clamp-4 text-muted-foreground">
                       Baseado na sua solicitação, preparamos um e-book com receitas saudáveis,
-                      nutritivas e personalizadas de acordo com suas preferências. Inclui informações
-                      nutricionais, dicas de preparação e sugestões de substituições.
+                      nutritivas e personalizadas de acordo com suas preferências.
                     </p>
                     
                     <div className="mt-4 flex items-center justify-between text-sm">
@@ -134,10 +203,12 @@ const EbookPersonalizado = () => {
                   </div>
                 </div>
                 
-                <p className="text-center text-muted-foreground">
-                  Em um sistema real, aqui seria gerado um e-book completo com todas as receitas
-                  personalizadas conforme suas solicitações!
-                </p>
+                <div className="bg-white p-6 rounded-lg shadow-sm border">
+                  <h3 className="text-lg font-medium mb-3">Conteúdo do E-book</h3>
+                  <div className="whitespace-pre-line text-sm">
+                    {ebookGerado.conteudo}
+                  </div>
+                </div>
                 
                 <div className="flex gap-3 justify-center">
                   <Button onClick={() => setFormSubmitted(false)} variant="outline">

@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +9,7 @@ import ReceitaPersonalizada from "./pages/ReceitaPersonalizada";
 import DietaPersonalizada from "./pages/DietaPersonalizada";
 import EbookPersonalizado from "./pages/EbookPersonalizado";
 import NotFound from "./pages/NotFound";
+import ApiKeyConfig from "./components/ApiKeyConfig";
 
 const queryClient = new QueryClient();
 
@@ -16,6 +18,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <ApiKeyConfig />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />

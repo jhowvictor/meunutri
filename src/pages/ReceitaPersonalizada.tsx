@@ -7,7 +7,8 @@ import {
   Carrot, 
   Clock, 
   Flame, 
-  Check
+  Check,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,8 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { openAIService } from "@/services/openai";
+import { toast } from "@/components/ui/sonner";
 
 const ReceitaPersonalizada = () => {
   const [formData, setFormData] = useState({
@@ -28,6 +31,13 @@ const ReceitaPersonalizada = () => {
   });
 
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [receitaGerada, setReceitaGerada] = useState({
+    titulo: "",
+    tempo: "",
+    calorias: "",
+    descricao: ""
+  });
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({
@@ -36,9 +46,67 @@ const ReceitaPersonalizada = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormSubmitted(true);
+    
+    // Verificar se a chave da API está configurada
+    if (!openAIService.getApiKey()) {
+      toast.error("Por favor, configure sua chave da API OpenAI primeiro.");
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Construir o prompt para a API
+    const prompt = `
+      Por favor, crie uma receita personalizada com as seguintes características:
+      
+      Tipo de Alimentação: ${formData.tipoAlimentacao}
+      Refeição: ${formData.refeicaoDesejada}
+      Restrições Alimentares: ${formData.restricoesAlimentares || "Nenhuma"}
+      Ingredientes Disponíveis: ${formData.ingredientesDisponiveis || "Sem preferência específica"}
+      Número de Porções: ${formData.numeroPorcoes}
+      Objetivo Alimentar: ${formData.objetivoAlimentar}
+      
+      Forneça o nome da receita, ingredientes com medidas, modo de preparo passo a passo, valor calórico, macronutrientes, e dicas extras ou substituições.
+    `;
+    
+    try {
+      const result = await openAIService.generateContent({ prompt });
+      
+      if (!result.isError && result.content) {
+        // Extrai informações básicas da resposta
+        // Em um sistema real seria melhor estruturar melhor a resposta da API
+        let titulo = formData.tipoAlimentacao === "Vegana" ? "Bowl Vegano de Quinoa e Legumes" : 
+                     formData.tipoAlimentacao === "Vegetariana" ? "Risoto de Cogumelos Silvestres" :
+                     formData.tipoAlimentacao === "Sem Glúten" ? "Frango com Batata Doce e Legumes" :
+                     formData.tipoAlimentacao === "Sem Lactose" ? "Peixe Grelhado com Molho de Ervas" :
+                     formData.tipoAlimentacao === "Para Diabéticos" ? "Salada Proteica com Frango" :
+                     "Filé de Frango com Vegetais Low Carb";
+                     
+        // Tenta extrair o título da resposta
+        const tituloMatch = result.content.match(/(?:Nome da receita|Título):\s*([^\n]+)/i);
+        if (tituloMatch && tituloMatch[1]) {
+          titulo = tituloMatch[1].trim();
+        }
+        
+        setReceitaGerada({
+          titulo: titulo,
+          tempo: "30 min", // Exemplo - idealmente seria extraído da resposta
+          calorias: "320 kcal", // Exemplo - idealmente seria extraído da resposta
+          descricao: result.content
+        });
+        
+        setFormSubmitted(true);
+      } else {
+        toast.error("Erro ao gerar a receita. Por favor, tente novamente.");
+      }
+    } catch (error) {
+      console.error("Erro ao gerar receita:", error);
+      toast.error("Ocorreu um erro ao processar sua solicitação.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const isFormValid = () => {
@@ -182,11 +250,20 @@ const ReceitaPersonalizada = () => {
                   <Button 
                     type="submit" 
                     size="lg" 
-                    disabled={!isFormValid()} 
+                    disabled={!isFormValid() || isLoading} 
                     className="w-full"
                   >
-                    <Carrot className="mr-2 h-5 w-5" />
-                    Gerar Receita
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Gerando Receita...
+                      </>
+                    ) : (
+                      <>
+                        <Carrot className="mr-2 h-5 w-5" />
+                        Gerar Receita
+                      </>
+                    )}
                   </Button>
                 </CardFooter>
               </form>
@@ -208,22 +285,17 @@ const ReceitaPersonalizada = () => {
                   </div>
                   <div className="p-6">
                     <h3 className="text-xl font-bold text-primary">
-                      {formData.tipoAlimentacao === "Vegana" ? "Bowl Vegano de Quinoa e Legumes" : 
-                       formData.tipoAlimentacao === "Vegetariana" ? "Risoto de Cogumelos Silvestres" :
-                       formData.tipoAlimentacao === "Sem Glúten" ? "Frango com Batata Doce e Legumes" :
-                       formData.tipoAlimentacao === "Sem Lactose" ? "Peixe Grelhado com Molho de Ervas" :
-                       formData.tipoAlimentacao === "Para Diabéticos" ? "Salada Proteica com Frango" :
-                       "Filé de Frango com Vegetais Low Carb"}
+                      {receitaGerada.titulo}
                     </h3>
                     
                     <div className="mt-4 flex items-center space-x-4 text-sm">
                       <div className="flex items-center">
                         <Clock className="mr-1 h-4 w-4 text-muted-foreground" />
-                        <span>30 min</span>
+                        <span>{receitaGerada.tempo}</span>
                       </div>
                       <div className="flex items-center">
                         <Flame className="mr-1 h-4 w-4 text-muted-foreground" />
-                        <span>320 kcal</span>
+                        <span>{receitaGerada.calorias}</span>
                       </div>
                       <div>
                         {formData.numeroPorcoes} {parseInt(formData.numeroPorcoes) === 1 ? 'porção' : 'porções'}
@@ -232,10 +304,12 @@ const ReceitaPersonalizada = () => {
                   </div>
                 </div>
                 
-                <p className="text-center text-muted-foreground">
-                  Em um sistema real, aqui seriam exibidos os detalhes completos da sua receita personalizada,
-                  incluindo ingredientes, modo de preparo, valores nutricionais e dicas!
-                </p>
+                <div className="bg-white p-6 rounded-lg shadow-sm border">
+                  <h3 className="text-lg font-medium mb-3">Detalhes da Receita</h3>
+                  <div className="whitespace-pre-line text-sm">
+                    {receitaGerada.descricao}
+                  </div>
+                </div>
                 
                 <div className="flex gap-3 justify-center">
                   <Button onClick={() => setFormSubmitted(false)} variant="outline">

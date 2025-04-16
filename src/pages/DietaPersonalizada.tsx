@@ -7,7 +7,8 @@ import {
   Calendar, 
   Check,
   Activity, 
-  Scale
+  Scale,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { openAIService } from "@/services/openai";
+import { toast } from "@/components/ui/sonner";
 
 const DietaPersonalizada = () => {
   const [formData, setFormData] = useState({
@@ -28,6 +31,8 @@ const DietaPersonalizada = () => {
   });
 
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [dietaGerada, setDietaGerada] = useState("");
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({
@@ -36,9 +41,49 @@ const DietaPersonalizada = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormSubmitted(true);
+    
+    // Verificar se a chave da API está configurada
+    if (!openAIService.getApiKey()) {
+      toast.error("Por favor, configure sua chave da API OpenAI primeiro.");
+      return;
+    }
+    
+    setIsLoading(true);
+    
+    // Construir o prompt para a API
+    const prompt = `
+      Por favor, crie um plano alimentar personalizado com as seguintes características:
+      
+      Tipo de Alimentação: ${formData.tipoAlimentacao}
+      Altura: ${formData.altura} cm
+      Restrições Alimentares: ${formData.restricoesAlimentares || "Nenhuma"}
+      Peso: ${formData.peso} kg
+      Gênero: ${formData.genero}
+      Objetivo: ${formData.objetivo}
+      Nível de Atividade Física: ${formData.exercicios}
+      
+      Forneça um plano alimentar completo com café da manhã, lanche da manhã, almoço, lanche da tarde e jantar.
+      Para cada refeição, inclua as opções de alimentos, quantidades aproximadas e informações nutricionais.
+      Inclua também recomendações gerais sobre o plano e como seguir a dieta.
+    `;
+    
+    try {
+      const result = await openAIService.generateContent({ prompt });
+      
+      if (!result.isError && result.content) {
+        setDietaGerada(result.content);
+        setFormSubmitted(true);
+      } else {
+        toast.error("Erro ao gerar a dieta. Por favor, tente novamente.");
+      }
+    } catch (error) {
+      console.error("Erro ao gerar dieta:", error);
+      toast.error("Ocorreu um erro ao processar sua solicitação.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const isFormValid = () => {
@@ -192,11 +237,20 @@ const DietaPersonalizada = () => {
                   <Button 
                     type="submit" 
                     size="lg" 
-                    disabled={!isFormValid()} 
+                    disabled={!isFormValid() || isLoading} 
                     className="w-full"
                   >
-                    <Calendar className="mr-2 h-5 w-5" />
-                    Gerar Dieta
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        Gerando Dieta...
+                      </>
+                    ) : (
+                      <>
+                        <Calendar className="mr-2 h-5 w-5" />
+                        Gerar Dieta
+                      </>
+                    )}
                   </Button>
                 </CardFooter>
               </form>
@@ -232,40 +286,10 @@ const DietaPersonalizada = () => {
                     </div>
                   </div>
                   
-                  <div className="space-y-3 mt-6">
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Baseado nos seus dados, criamos um plano alimentar personalizado de aproximadamente
-                      {' '}{formData.genero === "Masculino" ? "2400" : "1800"} calorias diárias.
-                    </p>
-                    
-                    {['Café da Manhã', 'Lanche da Manhã', 'Almoço', 'Lanche da Tarde', 'Jantar'].map((refeicao) => (
-                      <div key={refeicao} className="flex justify-between border-b pb-2">
-                        <div>
-                          <p className="font-medium">{refeicao}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {refeicao === 'Café da Manhã' ? "Omelete de vegetais com torrada integral" : 
-                             refeicao === 'Lanche da Manhã' ? "Iogurte com frutas e granola" : 
-                             refeicao === 'Almoço' ? "Frango grelhado com salada e quinoa" :
-                             refeicao === 'Lanche da Tarde' ? "Smoothie de banana com canela" :
-                             "Peixe assado com legumes"}
-                          </p>
-                        </div>
-                        <div className="text-sm bg-accent px-2 py-1 rounded h-fit">
-                          {refeicao === 'Café da Manhã' ? "350 kcal" : 
-                           refeicao === 'Lanche da Manhã' ? "180 kcal" : 
-                           refeicao === 'Almoço' ? "550 kcal" :
-                           refeicao === 'Lanche da Tarde' ? "200 kcal" :
-                           "420 kcal"}
-                        </div>
-                      </div>
-                    ))}
+                  <div className="whitespace-pre-line text-sm mt-4">
+                    {dietaGerada}
                   </div>
                 </div>
-                
-                <p className="text-center text-muted-foreground">
-                  Em um sistema real, aqui seriam exibidos os detalhes completos do seu plano alimentar,
-                  incluindo todas as refeições, alternativas, macronutrientes e recomendações!
-                </p>
                 
                 <div className="flex gap-3 justify-center">
                   <Button onClick={() => setFormSubmitted(false)} variant="outline">
