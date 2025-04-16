@@ -6,7 +6,8 @@ import {
   BookOpen, 
   Check,
   Download,
-  Loader2
+  Loader2,
+  FilePdf
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { openAIService } from "@/services/openai";
 import { toast } from "@/components/ui/sonner";
+import { jsPDF } from "jspdf";
 
 const EbookPersonalizado = () => {
   const [formData, setFormData] = useState({
@@ -99,6 +101,38 @@ const EbookPersonalizado = () => {
 
   const isFormValid = () => {
     return formData.detalhes.trim() !== "";
+  };
+
+  // Função para baixar o e-book como PDF
+  const handleDownloadEbook = () => {
+    try {
+      // Criando um novo documento PDF
+      const pdf = new jsPDF();
+      
+      // Adicionando título
+      pdf.setFontSize(22);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(ebookGerado.titulo, 20, 20);
+      
+      // Configurando tamanho de fonte para o conteúdo
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      
+      // Quebrando o texto em linhas para caber na página
+      const splitContent = pdf.splitTextToSize(ebookGerado.conteudo, 170);
+      
+      // Adicionando o conteúdo com posição inicial y em 30
+      pdf.text(splitContent, 20, 30);
+      
+      // Salvando o PDF com nome baseado no título
+      const fileName = `${ebookGerado.titulo.replace(/\s+/g, '_')}.pdf`;
+      pdf.save(fileName);
+      
+      toast.success("E-book baixado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast.error("Erro ao baixar o e-book. Por favor, tente novamente.");
+    }
   };
 
   return (
@@ -214,8 +248,8 @@ const EbookPersonalizado = () => {
                   <Button onClick={() => setFormSubmitted(false)} variant="outline">
                     Modificar E-book
                   </Button>
-                  <Button className="bg-primary">
-                    <Download className="mr-2 h-4 w-4" />
+                  <Button className="bg-primary" onClick={handleDownloadEbook}>
+                    <FilePdf className="mr-2 h-4 w-4" />
                     Baixar E-book
                   </Button>
                 </div>
