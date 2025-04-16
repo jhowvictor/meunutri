@@ -207,21 +207,23 @@ const ReceitaPersonalizada = () => {
                   <Label htmlFor="porcoes" className="text-base font-medium block mb-3">
                     5. Número de Porções
                   </Label>
-                  <Select 
-                    value={formData.numeroPorcoes} 
-                    onValueChange={(value) => handleChange('numeroPorcoes', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione o número de porções" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1, 2, 3, 4, 5, 6, 8, 10].map((num) => (
-                        <SelectItem key={num} value={num.toString()}>
-                          {num} {num === 1 ? 'porção' : 'porções'}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div onClick={(e) => e.stopPropagation()}>
+                    <Select 
+                      value={formData.numeroPorcoes} 
+                      onValueChange={(value) => handleChange('numeroPorcoes', value)}
+                    >
+                      <SelectTrigger id="porcoes">
+                        <SelectValue placeholder="Selecione o número de porções" />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        {[1, 2, 3, 4, 5, 6, 8, 10].map((num) => (
+                          <SelectItem key={num} value={num.toString()}>
+                            {num} {num === 1 ? 'porção' : 'porções'}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 {/* Objetivo Alimentar */}
