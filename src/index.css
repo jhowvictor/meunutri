@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,7 +7,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 60 30% 98%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
@@ -16,17 +16,17 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 150 73% 40%;
+    --primary: 332 80% 58%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 25 95% 94%;
-    --secondary-foreground: 20 100% 30%;
+    --secondary: 45 97% 65%;
+    --secondary-foreground: 26 83% 14%;
 
-    --muted: 120 16% 90%;
+    --muted: 220 14% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 39 100% 93%;
-    --accent-foreground: 39 89% 30%;
+    --accent: 130 55% 55%;
+    --accent-foreground: 130 64% 15%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -35,7 +35,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.75rem;
+    --radius: 1rem;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -57,17 +57,17 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 332 80% 58%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 45 97% 65%;
+    --secondary-foreground: 26 83% 14%;
 
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 130 55% 55%;
+    --accent-foreground: 130 64% 15%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
@@ -93,13 +93,13 @@
   }
 
   html {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Montserrat', 'Poppins', sans-serif;
     scroll-behavior: smooth;
   }
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Montserrat', 'Poppins', sans-serif;
   }
 }
 
@@ -147,11 +147,35 @@
   .floating-icon {
     animation: float 3s ease-in-out infinite;
   }
+  
+  .fruit-card {
+    @apply overflow-hidden rounded-2xl border border-white/50 bg-white/60 backdrop-blur-sm shadow-lg;
+  }
+  
+  .fruit-gradient {
+    @apply bg-gradient-to-br from-[#ff758c] to-[#ff7eb3];
+  }
+  
+  .citrus-gradient {
+    @apply bg-gradient-to-br from-[#ffd166] to-[#ffb347];
+  }
+  
+  .berry-gradient {
+    @apply bg-gradient-to-br from-[#4568dc] to-[#b06ab3];
+  }
+  
+  .green-gradient {
+    @apply bg-gradient-to-br from-[#57c84d] to-[#2d8a28];
+  }
 }
 
 @layer utilities {
   .text-gradient {
     @apply bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent;
+  }
+  
+  .text-fruit-gradient {
+    @apply bg-gradient-to-br from-primary via-[#ff9190] to-accent/90 bg-clip-text text-transparent;
   }
 }
 
