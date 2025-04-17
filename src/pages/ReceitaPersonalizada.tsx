@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
   ArrowLeft, 
@@ -8,7 +8,10 @@ import {
   Clock, 
   Flame, 
   Check,
-  Loader2
+  Loader2,
+  Star,
+  Folder,
+  X
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,10 +20,14 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { openAIService } from "@/services/openai";
 import { toast } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/AuthProvider";
 
 const ReceitaPersonalizada = () => {
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     tipoAlimentacao: "",
     refeicaoDesejada: "",
@@ -33,11 +40,44 @@ const ReceitaPersonalizada = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [receitaGerada, setReceitaGerada] = useState({
+    id: "",
     titulo: "",
     tempo: "",
     calorias: "",
-    descricao: ""
+    descricao: "",
+    isFavorite: false
   });
+  
+  // Estados para os diálogos
+  const [showFolderDialog, setShowFolderDialog] = useState(false);
+  const [folderName, setFolderName] = useState("");
+  const [userFolders, setUserFolders] = useState<{id: string, name: string}[]>([]);
+  const [selectedFolder, setSelectedFolder] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Carregar pastas do usuário quando o diálogo é aberto
+  useEffect(() => {
+    if (showFolderDialog && user) {
+      fetchUserFolders();
+    }
+  }, [showFolderDialog, user]);
+
+  // Função para buscar pastas do usuário
+  const fetchUserFolders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('folders')
+        .select('id, name')
+        .eq('user_id', user?.id)
+        .order('name');
+        
+      if (error) throw error;
+      setUserFolders(data || []);
+    } catch (error) {
+      console.error("Erro ao buscar pastas:", error);
+      toast.error("Não foi possível carregar suas pastas");
+    }
+  };
 
   const handleChange = (field: string, value: string) => {
     setFormData((prev) => ({
@@ -90,11 +130,39 @@ const ReceitaPersonalizada = () => {
           titulo = tituloMatch[1].trim();
         }
         
+        // Se o usuário está logado, salve a receita no banco de dados
+        let recipeId = "";
+        if (user) {
+          const { data, error } = await supabase
+            .from('recipes')
+            .insert({
+              user_id: user.id,
+              title: titulo,
+              content: result.content,
+              time: "30 min", // Exemplo - idealmente seria extraído da resposta
+              calories: "320 kcal", // Exemplo - idealmente seria extraído da resposta
+              portions: formData.numeroPorcoes,
+              diet_type: formData.tipoAlimentacao,
+              meal_type: formData.refeicaoDesejada,
+              dietary_restrictions: formData.restricoesAlimentares,
+            })
+            .select('id')
+            .single();
+            
+          if (error) {
+            console.error("Erro ao salvar receita:", error);
+          } else if (data) {
+            recipeId = data.id;
+          }
+        }
+        
         setReceitaGerada({
+          id: recipeId,
           titulo: titulo,
           tempo: "30 min", // Exemplo - idealmente seria extraído da resposta
           calorias: "320 kcal", // Exemplo - idealmente seria extraído da resposta
-          descricao: result.content
+          descricao: result.content,
+          isFavorite: false
         });
         
         setFormSubmitted(true);
@@ -109,9 +177,193 @@ const ReceitaPersonalizada = () => {
     }
   };
 
+  // Salvar como favorita
+  const handleSaveAsFavorite = async () => {
+    if (!user) {
+      toast.error("Você precisa estar logado para salvar receitas favoritas.");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      
+      // Se a receita já está salva (tem ID)
+      if (receitaGerada.id) {
+        const { error } = await supabase
+          .from('recipes')
+          .update({ is_favorite: !receitaGerada.isFavorite })
+          .eq('id', receitaGerada.id);
+          
+        if (error) throw error;
+        
+        setReceitaGerada(prev => ({
+          ...prev,
+          isFavorite: !prev.isFavorite
+        }));
+        
+        toast.success(receitaGerada.isFavorite 
+          ? "Receita removida dos favoritos" 
+          : "Receita adicionada aos favoritos");
+      } else {
+        // Se a receita não estava salva ainda
+        const { data, error } = await supabase
+          .from('recipes')
+          .insert({
+            user_id: user.id,
+            title: receitaGerada.titulo,
+            content: receitaGerada.descricao,
+            time: receitaGerada.tempo,
+            calories: receitaGerada.calorias,
+            portions: formData.numeroPorcoes,
+            diet_type: formData.tipoAlimentacao,
+            meal_type: formData.refeicaoDesejada,
+            dietary_restrictions: formData.restricoesAlimentares,
+            is_favorite: true
+          })
+          .select('id')
+          .single();
+          
+        if (error) throw error;
+        
+        if (data) {
+          setReceitaGerada(prev => ({
+            ...prev,
+            id: data.id,
+            isFavorite: true
+          }));
+          toast.success("Receita adicionada aos favoritos");
+        }
+      }
+    } catch (error) {
+      console.error("Erro ao salvar favorito:", error);
+      toast.error("Não foi possível salvar a receita como favorita");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Salvar em pasta
+  const handleSaveToFolder = async () => {
+    if (!user) {
+      toast.error("Você precisa estar logado para salvar receitas em pastas.");
+      return;
+    }
+
+    // Abrir diálogo para seleção de pasta
+    setShowFolderDialog(true);
+  };
+  
+  // Criar nova pasta ou salvar em pasta existente
+  const handleSaveToFolderConfirm = async () => {
+    try {
+      setIsSaving(true);
+      
+      // Primeiro, garantir que a receita exista
+      let recipeId = receitaGerada.id;
+      
+      if (!recipeId) {
+        // Se a receita não estava salva ainda, salve-a primeiro
+        const { data, error } = await supabase
+          .from('recipes')
+          .insert({
+            user_id: user.id,
+            title: receitaGerada.titulo,
+            content: receitaGerada.descricao,
+            time: receitaGerada.tempo,
+            calories: receitaGerada.calorias,
+            portions: formData.numeroPorcoes,
+            diet_type: formData.tipoAlimentacao,
+            meal_type: formData.refeicaoDesejada,
+            dietary_restrictions: formData.restricoesAlimentares
+          })
+          .select('id')
+          .single();
+          
+        if (error) throw error;
+        
+        if (data) {
+          recipeId = data.id;
+          setReceitaGerada(prev => ({ ...prev, id: data.id }));
+        }
+      }
+      
+      // Verificar se é necessário criar uma nova pasta ou usar existente
+      let folderId = selectedFolder;
+      
+      // Se o usuário informou um nome para nova pasta
+      if (!selectedFolder && folderName.trim()) {
+        // Verificar se a pasta já existe
+        const { data: existingFolder, error: checkError } = await supabase
+          .from('folders')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('name', folderName.trim())
+          .maybeSingle();
+          
+        if (checkError) throw checkError;
+        
+        // Se a pasta já existe, use-a
+        if (existingFolder) {
+          folderId = existingFolder.id;
+        } else {
+          // Caso contrário, crie uma nova pasta
+          const { data: newFolder, error: createError } = await supabase
+            .from('folders')
+            .insert({
+              user_id: user.id,
+              name: folderName.trim()
+            })
+            .select('id')
+            .single();
+            
+          if (createError) throw createError;
+          
+          if (newFolder) {
+            folderId = newFolder.id;
+          }
+        }
+      }
+      
+      // Verificar se temos tanto a receita quanto a pasta
+      if (!recipeId || !folderId) {
+        throw new Error("Falha ao identificar receita ou pasta");
+      }
+      
+      // Adicionar a receita à pasta
+      const { error } = await supabase
+        .from('folder_recipes')
+        .insert({
+          folder_id: folderId,
+          recipe_id: recipeId
+        });
+        
+      if (error) {
+        // Se for erro de receita duplicada na pasta, não é um problema crítico
+        if (error.code === '23505') { // código para violação de constraint unique
+          toast.info("Esta receita já está na pasta selecionada");
+        } else {
+          throw error;
+        }
+      } else {
+        toast.success("Receita salva na pasta com sucesso!");
+      }
+      
+      // Fechar o diálogo
+      setShowFolderDialog(false);
+      setFolderName("");
+      setSelectedFolder("");
+      
+    } catch (error) {
+      console.error("Erro ao salvar em pasta:", error);
+      toast.error("Não foi possível salvar a receita na pasta");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const isFormValid = () => {
     const { tipoAlimentacao, refeicaoDesejada, restricoesAlimentares, numeroPorcoes, objetivoAlimentar } = formData;
-    return tipoAlimentacao && refeicaoDesejada && restricoesAlimentares && numeroPorcoes && objetivoAlimentar;
+    return tipoAlimentacao && refeicaoDesejada && numeroPorcoes && objetivoAlimentar;
   };
 
   return (
@@ -288,6 +540,9 @@ const ReceitaPersonalizada = () => {
                   <div className="p-6">
                     <h3 className="text-xl font-bold text-primary">
                       {receitaGerada.titulo}
+                      {receitaGerada.isFavorite && (
+                        <Star className="inline-block ml-2 h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      )}
                     </h3>
                     
                     <div className="mt-4 flex items-center space-x-4 text-sm">
@@ -313,7 +568,30 @@ const ReceitaPersonalizada = () => {
                   </div>
                 </div>
                 
-                <div className="flex gap-3 justify-center">
+                {/* Botões para salvar receita */}
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <Button
+                    onClick={handleSaveAsFavorite}
+                    variant={receitaGerada.isFavorite ? "outline" : "default"}
+                    disabled={isSaving}
+                    className="flex-1"
+                  >
+                    <Star className={`mr-2 h-5 w-5 ${receitaGerada.isFavorite ? "fill-yellow-400 text-yellow-400" : ""}`} />
+                    {receitaGerada.isFavorite ? "Remover dos favoritos" : "Salvar como favorita"}
+                  </Button>
+                  
+                  <Button
+                    onClick={handleSaveToFolder}
+                    variant="outline"
+                    disabled={isSaving}
+                    className="flex-1"
+                  >
+                    <Folder className="mr-2 h-5 w-5" />
+                    Salvar em pasta
+                  </Button>
+                </div>
+                
+                <div className="flex gap-3 justify-center pt-4">
                   <Button onClick={() => setFormSubmitted(false)} variant="outline">
                     Modificar Receita
                   </Button>
@@ -326,6 +604,65 @@ const ReceitaPersonalizada = () => {
           </Card>
         )}
       </div>
+
+      {/* Diálogo para salvar em pasta */}
+      <Dialog open={showFolderDialog} onOpenChange={setShowFolderDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Salvar receita em pasta</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            {userFolders.length > 0 && (
+              <div className="space-y-2">
+                <Label htmlFor="folder">Selecione uma pasta existente</Label>
+                <Select value={selectedFolder} onValueChange={setSelectedFolder}>
+                  <SelectTrigger id="folder">
+                    <SelectValue placeholder="Selecione uma pasta" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {userFolders.map((folder) => (
+                      <SelectItem key={folder.id} value={folder.id}>
+                        {folder.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="new-folder">Ou crie uma nova pasta</Label>
+              <Input
+                id="new-folder"
+                value={folderName}
+                onChange={(e) => setFolderName(e.target.value)}
+                placeholder="Nome da nova pasta"
+                disabled={!!selectedFolder}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button type="button" variant="outline">
+                Cancelar
+              </Button>
+            </DialogClose>
+            <Button
+              onClick={handleSaveToFolderConfirm}
+              disabled={(!selectedFolder && !folderName.trim()) || isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                "Salvar"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

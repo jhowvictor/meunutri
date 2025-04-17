@@ -9,6 +9,63 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      folder_recipes: {
+        Row: {
+          created_at: string
+          folder_id: string
+          id: string
+          recipe_id: string
+        }
+        Insert: {
+          created_at?: string
+          folder_id: string
+          id?: string
+          recipe_id: string
+        }
+        Update: {
+          created_at?: string
+          folder_id?: string
+          id?: string
+          recipe_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folder_recipes_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "folder_recipes_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      folders: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string | null
@@ -27,6 +84,51 @@ export type Database = {
           id?: string
           language_preference?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      recipes: {
+        Row: {
+          calories: string | null
+          content: string
+          created_at: string
+          diet_type: string | null
+          dietary_restrictions: string | null
+          id: string
+          is_favorite: boolean
+          meal_type: string | null
+          portions: string | null
+          time: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          calories?: string | null
+          content: string
+          created_at?: string
+          diet_type?: string | null
+          dietary_restrictions?: string | null
+          id?: string
+          is_favorite?: boolean
+          meal_type?: string | null
+          portions?: string | null
+          time?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          calories?: string | null
+          content?: string
+          created_at?: string
+          diet_type?: string | null
+          dietary_restrictions?: string | null
+          id?: string
+          is_favorite?: boolean
+          meal_type?: string | null
+          portions?: string | null
+          time?: string | null
+          title?: string
+          user_id?: string
         }
         Relationships: []
       }

@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { ChefHat, Utensils, BookOpen, ShoppingCart } from "lucide-react";
+import { ChefHat, Utensils, BookOpen, ShoppingCart, Star, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/hooks/use-language";
@@ -93,6 +93,42 @@ const Index = () => {
               <Link to="/lista-compras">
                 <Button className="w-full" size="lg">
                   {t("create_shopping_list", { default: "Criar Lista de Compras" })}
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Receitas Favoritas */}
+          <Card className="border-2 hover:border-primary/80 hover:shadow-lg transition-all">
+            <CardHeader className="text-center">
+              <Star className="h-12 w-12 mx-auto text-primary mb-2 fill-yellow-400" />
+              <CardTitle className="text-xl">Receitas Favoritas</CardTitle>
+              <CardDescription>
+                Acesse suas receitas salvas como favoritas com facilidade
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center pt-2">
+              <Link to="/receitas-favoritas">
+                <Button className="w-full" size="lg">
+                  Ver Favoritos
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Minhas Pastas */}
+          <Card className="border-2 hover:border-primary/80 hover:shadow-lg transition-all">
+            <CardHeader className="text-center">
+              <Folder className="h-12 w-12 mx-auto text-primary mb-2" />
+              <CardTitle className="text-xl">Minhas Pastas</CardTitle>
+              <CardDescription>
+                Organize suas receitas em pastas personalizadas por temas
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center pt-2">
+              <Link to="/minhas-pastas">
+                <Button className="w-full" size="lg">
+                  Gerenciar Pastas
                 </Button>
               </Link>
             </CardContent>

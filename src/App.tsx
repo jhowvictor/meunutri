@@ -9,6 +9,9 @@ import ReceitaPersonalizada from "./pages/ReceitaPersonalizada";
 import DietaPersonalizada from "./pages/DietaPersonalizada";
 import EbookPersonalizado from "./pages/EbookPersonalizado";
 import ListaCompras from "./pages/ListaCompras";
+import ReceitasFavoritas from "./pages/ReceitasFavoritas";
+import MinhasPastas from "./pages/MinhasPastas";
+import ConteudoPasta from "./pages/ConteudoPasta";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ApiKeyConfig from "./components/ApiKeyConfig";
@@ -68,6 +71,30 @@ const App = () => (
                   <>
                     <Header />
                     <ListaCompras />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/receitas-favoritas" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <ReceitasFavoritas />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/minhas-pastas" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <MinhasPastas />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/pasta/:folderId" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <ConteudoPasta />
                   </>
                 </ProtectedRoute>
               } />
