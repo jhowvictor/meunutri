@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Dumbbell, FileDown, Edit, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +23,6 @@ interface WorkoutFormData {
 
 const MontarTreino = () => {
   const { t } = useLanguage();
-  const navigate = useNavigate();
   const { toast } = useToast();
   
   const [formData, setFormData] = useState<WorkoutFormData>({
@@ -198,13 +196,12 @@ const MontarTreino = () => {
             <div className="space-y-2">
               <Label htmlFor="frequencia">Frequência semanal de treino</Label>
               <Select 
-                value={formData.frequencia}
                 onValueChange={(value) => handleChange("frequencia", value)}
               >
                 <SelectTrigger id="frequencia">
                   <SelectValue placeholder="Selecione a frequência" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper" className="w-full bg-popover border border-border">
                   <SelectItem value="1">1 vez por semana</SelectItem>
                   <SelectItem value="2">2 vezes por semana</SelectItem>
                   <SelectItem value="3">3 vezes por semana</SelectItem>
@@ -241,13 +238,12 @@ const MontarTreino = () => {
             <div className="space-y-2">
               <Label htmlFor="foco">Foco desejado nos treinos</Label>
               <Select 
-                value={formData.foco}
                 onValueChange={(value) => handleChange("foco", value)}
               >
                 <SelectTrigger id="foco">
                   <SelectValue placeholder="Selecione o foco principal" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper" className="w-full bg-popover border border-border">
                   <SelectItem value="corpo inteiro">Corpo inteiro</SelectItem>
                   <SelectItem value="pernas">Pernas</SelectItem>
                   <SelectItem value="abdômen">Abdômen</SelectItem>
