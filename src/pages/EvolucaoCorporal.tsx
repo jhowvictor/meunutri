@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { format } from "date-fns";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { openAIService } from "@/services/openai";
-import { Loader2, Calendar, PlusCircle, X, Upload, Image as ImageIcon } from "lucide-react";
+import { Loader2, Calendar, PlusCircle, X, Upload, Image as ImageIcon, Edit, Trash2 } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { 
+  AlertDialog,
+  AlertDialogAction, 
+  AlertDialogCancel, 
+  AlertDialogContent, 
+  AlertDialogDescription, 
+  AlertDialogFooter, 
+  AlertDialogHeader, 
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "@/components/ui/sonner";
 
 // Tipos para os dados
@@ -84,6 +94,9 @@ const EvolucaoCorporal = () => {
   const [viewPhotoDialogOpen, setViewPhotoDialogOpen] = useState(false);
   const [currentPhotoUrls, setCurrentPhotoUrls] = useState<string[]>([]);
   const [currentMeasurementId, setCurrentMeasurementId] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [measurementToDelete, setMeasurementToDelete] = useState<string | null>(null);
 
   const form = useForm<MeasurementFormValues>({
     defaultValues: {
@@ -232,7 +245,68 @@ const EvolucaoCorporal = () => {
     setViewPhotoDialogOpen(true);
   };
 
-  // Salvar nova medida
+  // Editar uma medida existente
+  const editMeasurement = (measurement: BodyMeasurement) => {
+    form.reset({
+      weight: measurement.weight?.toString() || "",
+      height: measurement.height?.toString() || "",
+      waist: measurement.waist?.toString() || "",
+      hip: measurement.hip?.toString() || "",
+      arm: measurement.arm?.toString() || "",
+      skin_fold: measurement.skin_fold || "",
+      notes: measurement.notes || "",
+      measured_at: format(new Date(measurement.measured_at), 'yyyy-MM-dd')
+    });
+    
+    setIsEditing(true);
+    setCurrentMeasurementId(measurement.id);
+    setIsDialogOpen(true);
+    
+    // Limpar fotos selecionadas e previews ao editar
+    setSelectedPhotos([]);
+    photoPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+    setPhotoPreviewUrls([]);
+  };
+  
+  // Confirmar exclusão de uma medida
+  const confirmDelete = (id: string) => {
+    setMeasurementToDelete(id);
+    setDeleteDialogOpen(true);
+  };
+  
+  // Excluir uma medida
+  const deleteMeasurement = async () => {
+    if (!measurementToDelete) return;
+    
+    try {
+      const { error } = await supabase
+        .from('body_measurements')
+        .delete()
+        .eq('id', measurementToDelete);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Sucesso!",
+        description: "Medida excluída com sucesso!"
+      });
+      
+      // Atualizar a lista de medidas
+      fetchData();
+    } catch (error) {
+      console.error("Erro ao excluir medida:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível excluir a medida. Por favor, tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setMeasurementToDelete(null);
+    }
+  };
+
+  // Salvar nova medida ou atualizar existente
   const onSubmit = async (values: MeasurementFormValues) => {
     if (!user) return;
     setIsSaving(true);
@@ -251,34 +325,72 @@ const EvolucaoCorporal = () => {
         measured_at: values.measured_at
       };
 
-      const { data, error } = await supabase
-        .from('body_measurements')
-        .insert([measurement])
-        .select()
-        .single();
-
-      if (error) throw new Error(error.message);
-
-      // Se tiver fotos selecionadas, faz o upload
-      let photoUrls: string[] = [];
-      if (selectedPhotos.length > 0) {
-        photoUrls = await uploadPhotos(data.id);
+      let measurementId: string;
+      
+      if (isEditing && currentMeasurementId) {
+        // Atualizando medida existente
+        const { data, error } = await supabase
+          .from('body_measurements')
+          .update(measurement)
+          .eq('id', currentMeasurementId)
+          .select()
+          .single();
+          
+        if (error) throw new Error(error.message);
+        measurementId = currentMeasurementId;
         
-        // Atualiza o registro com as URLs das fotos
-        if (photoUrls.length > 0) {
+        // Obter fotos existentes
+        let existingPhotos = data.photos || [];
+        
+        // Se tiver novas fotos selecionadas, faz o upload e adiciona às existentes
+        if (selectedPhotos.length > 0) {
+          const newPhotoUrls = await uploadPhotos(measurementId);
+          const allPhotos = [...existingPhotos, ...newPhotoUrls];
+          
+          // Atualiza o registro com as URLs atualizadas
           const { error: updateError } = await supabase
             .from('body_measurements')
-            .update({ photos: photoUrls })
-            .eq('id', data.id);
+            .update({ photos: allPhotos })
+            .eq('id', measurementId);
             
           if (updateError) console.error("Erro ao atualizar URLs das fotos:", updateError);
         }
-      }
+        
+        toast({
+          title: "Sucesso!",
+          description: "Medidas atualizadas com sucesso!"
+        });
+      } else {
+        // Criando nova medida
+        const { data, error } = await supabase
+          .from('body_measurements')
+          .insert([measurement])
+          .select()
+          .single();
 
-      toast({
-        title: "Sucesso!",
-        description: "Medidas salvas com sucesso!"
-      });
+        if (error) throw new Error(error.message);
+        measurementId = data.id;
+
+        // Se tiver fotos selecionadas, faz o upload
+        if (selectedPhotos.length > 0) {
+          const photoUrls = await uploadPhotos(measurementId);
+          
+          // Atualiza o registro com as URLs das fotos
+          if (photoUrls.length > 0) {
+            const { error: updateError } = await supabase
+              .from('body_measurements')
+              .update({ photos: photoUrls })
+              .eq('id', measurementId);
+              
+            if (updateError) console.error("Erro ao atualizar URLs das fotos:", updateError);
+          }
+        }
+        
+        toast({
+          title: "Sucesso!",
+          description: "Medidas salvas com sucesso!"
+        });
+      }
 
       form.reset({
         weight: "",
@@ -295,6 +407,10 @@ const EvolucaoCorporal = () => {
       setSelectedPhotos([]);
       photoPreviewUrls.forEach(url => URL.revokeObjectURL(url));
       setPhotoPreviewUrls([]);
+
+      // Resetar estado de edição
+      setIsEditing(false);
+      setCurrentMeasurementId(null);
 
       fetchData();
       setIsDialogOpen(false);
@@ -477,6 +593,7 @@ const EvolucaoCorporal = () => {
               <th className="py-2 px-3 text-right">Quadril</th>
               <th className="py-2 px-3 text-right">Braço</th>
               <th className="py-2 px-3 text-center">Fotos</th>
+              <th className="py-2 px-3 text-center">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -502,6 +619,27 @@ const EvolucaoCorporal = () => {
                   ) : (
                     '-'
                   )}
+                </td>
+                <td className="py-2 px-3 text-center">
+                  <div className="flex justify-center gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => editMeasurement(m)}
+                      title="Editar"
+                    >
+                      <Edit className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => confirmDelete(m.id)}
+                      title="Excluir"
+                      className="hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 text-muted-foreground" />
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -563,7 +701,26 @@ const EvolucaoCorporal = () => {
 
           {/* Botão para adicionar nova medida */}
           <div className="mb-6">
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog open={isDialogOpen} onOpenChange={(open) => {
+              setIsDialogOpen(open);
+              if (!open) {
+                setIsEditing(false);
+                setCurrentMeasurementId(null);
+                setSelectedPhotos([]);
+                photoPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+                setPhotoPreviewUrls([]);
+                form.reset({
+                  weight: "",
+                  height: "",
+                  waist: "",
+                  hip: "",
+                  arm: "",
+                  skin_fold: "",
+                  notes: "",
+                  measured_at: format(new Date(), 'yyyy-MM-dd')
+                });
+              }
+            }}>
               <DialogTrigger asChild>
                 <Button className="gap-2">
                   <PlusCircle className="h-4 w-4" />
@@ -572,9 +729,11 @@ const EvolucaoCorporal = () => {
               </DialogTrigger>
               <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>Registrar Medidas Corporais</DialogTitle>
+                  <DialogTitle>{isEditing ? "Editar Medidas Corporais" : "Registrar Medidas Corporais"}</DialogTitle>
                   <DialogDescription>
-                    Preencha os campos abaixo com suas medidas atuais. Você não precisa preencher todos os campos.
+                    {isEditing 
+                      ? "Edite os campos abaixo com suas medidas atualizadas."
+                      : "Preencha os campos abaixo com suas medidas atuais. Você não precisa preencher todos os campos."}
                   </DialogDescription>
                 </DialogHeader>
                 
@@ -740,18 +899,40 @@ const EvolucaoCorporal = () => {
                       )}
                       <FormDescription>
                         Adicione fotos para acompanhar visualmente seu progresso.
+                        {isEditing && " As fotos existentes serão mantidas."}
                       </FormDescription>
                     </div>
                     
                     <Button type="submit" className="w-full" disabled={isSaving || uploadingPhotos}>
                       {(isSaving || uploadingPhotos) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      {uploadingPhotos ? 'Enviando fotos...' : 'Salvar Medidas'}
+                      {uploadingPhotos ? 'Enviando fotos...' : isEditing ? 'Salvar Alterações' : 'Salvar Medidas'}
                     </Button>
                   </form>
                 </Form>
               </DialogContent>
             </Dialog>
           </div>
+
+          {/* Diálogo de confirmação de exclusão */}
+          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Tem certeza de que deseja excluir esta medida? Esta ação não pode ser desfeita.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={deleteMeasurement}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Excluir
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
 
           {/* Modal para visualizar fotos */}
           <Dialog open={viewPhotoDialogOpen} onOpenChange={setViewPhotoDialogOpen}>
