@@ -35,10 +35,13 @@ interface BodyMeasurement {
   created_at: string;
 }
 
+// Definindo um tipo específico para goal_type
+type GoalType = 'weight_loss' | 'muscle_gain' | 'glucose_control' | 'health_maintenance';
+
 interface UserGoal {
   id: string;
   user_id: string;
-  goal_type: 'weight_loss' | 'muscle_gain' | 'glucose_control' | 'health_maintenance';
+  goal_type: GoalType;
   created_at: string;
   updated_at: string;
 }
@@ -110,7 +113,12 @@ const EvolucaoCorporal = () => {
         .single();
 
       if (!goalError) {
-        setUserGoal(goalData);
+        // Garantir que goal_type seja do tipo correto
+        const typedGoalData = {
+          ...goalData,
+          goal_type: goalData.goal_type as GoalType
+        };
+        setUserGoal(typedGoalData);
       } else if (goalError.code !== 'PGRST116') { // Not found error
         throw new Error(goalError.message);
       }
@@ -191,30 +199,49 @@ const EvolucaoCorporal = () => {
     if (!user) return;
     
     try {
+      // Validar que o goalType é do tipo correto
+      if (!['weight_loss', 'muscle_gain', 'glucose_control', 'health_maintenance'].includes(goalType)) {
+        throw new Error("Tipo de objetivo inválido");
+      }
+      
+      const typedGoalType = goalType as GoalType;
+      
       if (userGoal) {
         // Atualizar objetivo existente
         const { error } = await supabase
           .from('user_goals')
-          .update({ goal_type: goalType })
+          .update({ goal_type: typedGoalType })
           .eq('id', userGoal.id);
           
         if (error) throw new Error(error.message);
+        
+        // Atualizar o estado local com o valor tipado
+        setUserGoal({
+          ...userGoal,
+          goal_type: typedGoalType
+        });
       } else {
         // Criar novo objetivo
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('user_goals')
-          .insert([{ user_id: user.id, goal_type: goalType }]);
+          .insert([{ user_id: user.id, goal_type: typedGoalType }])
+          .select()
+          .single();
           
         if (error) throw new Error(error.message);
+        
+        if (data) {
+          setUserGoal({
+            ...data,
+            goal_type: typedGoalType
+          });
+        }
       }
       
       toast({
         title: "Objetivo atualizado",
         description: "Seu objetivo foi salvo com sucesso."
       });
-      
-      // Atualizar dados
-      fetchData();
     } catch (error) {
       console.error("Erro ao salvar objetivo:", error);
       toast({
