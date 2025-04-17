@@ -21,7 +21,7 @@ const Header = () => {
       <div className="container max-w-5xl mx-auto px-4 flex justify-between items-center">
         <Link to="/" className="flex items-center gap-2 text-primary">
           <ChefHat className="h-8 w-8" />
-          <span className="font-bold text-xl hidden sm:block">{t("app_name", { default: "Chef Saudável Digital" })}</span>
+          <span className="font-bold text-xl hidden sm:block">MeuNutri.AI</span>
         </Link>
 
         <div className="flex items-center gap-3">

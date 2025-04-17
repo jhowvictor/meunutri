@@ -17,7 +17,7 @@ const Index = () => {
             <ChefHat className="h-16 w-16 text-primary" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-4 text-primary">
-            {t("app_name", { default: "Chef Saudável Digital" })}
+            MeuNutri.AI
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             {t("app_description", { default: "Receitas e dietas personalizadas para uma alimentação saudável, funcional e totalmente adaptada às suas necessidades." })}
@@ -172,7 +172,7 @@ const Index = () => {
         </div>
         
         <footer className="text-center mt-16 text-muted-foreground text-sm">
-          <p>{t("footer_text", { default: "© 2025 Chef Saudável Digital • Nutrição funcional & Receitas personalizadas" })}</p>
+          <p>© 2025 MeuNutri.AI • Nutrição funcional & Receitas personalizadas</p>
         </footer>
       </div>
     </div>

@@ -73,7 +73,7 @@ const Auth = () => {
         <div className="flex justify-center mb-6">
           <ChefHat className="h-16 w-16 text-primary" />
         </div>
-        <h1 className="text-3xl font-bold text-center mb-2 text-primary">Chef Saudável Digital</h1>
+        <h1 className="text-3xl font-bold text-center mb-2 text-primary">MeuNutri.AI</h1>
         <p className="text-center mb-8 text-muted-foreground">
           Faça login ou crie sua conta para acessar receitas personalizadas
         </p>
