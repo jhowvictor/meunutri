@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { format } from "date-fns";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { openAIService } from "@/services/openai";
-import { Loader2, Calendar, PlusCircle } from "lucide-react";
+import { Loader2, Calendar, PlusCircle, X, Upload, Image as ImageIcon } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,7 @@ interface BodyMeasurement {
   notes: string | null;
   measured_at: string;
   created_at: string;
+  photos: string[] | null;
 }
 
 // Definindo um tipo específico para goal_type
@@ -77,6 +78,12 @@ const EvolucaoCorporal = () => {
   const [feedback, setFeedback] = useState("");
   const [feedbackLoading, setFeedbackLoading] = useState(false);
   const [activeChart, setActiveChart] = useState("weight");
+  const [selectedPhotos, setSelectedPhotos] = useState<File[]>([]);
+  const [uploadingPhotos, setUploadingPhotos] = useState(false);
+  const [photoPreviewUrls, setPhotoPreviewUrls] = useState<string[]>([]);
+  const [viewPhotoDialogOpen, setViewPhotoDialogOpen] = useState(false);
+  const [currentPhotoUrls, setCurrentPhotoUrls] = useState<string[]>([]);
+  const [currentMeasurementId, setCurrentMeasurementId] = useState<string | null>(null);
 
   const form = useForm<MeasurementFormValues>({
     defaultValues: {
@@ -138,6 +145,93 @@ const EvolucaoCorporal = () => {
     fetchData();
   }, [user]);
 
+  // Lidar com seleção de fotos
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    const newFiles = Array.from(files);
+    setSelectedPhotos(prev => [...prev, ...newFiles]);
+    
+    // Criar URLs para preview das imagens
+    const newPreviewUrls = newFiles.map(file => URL.createObjectURL(file));
+    setPhotoPreviewUrls(prev => [...prev, ...newPreviewUrls]);
+  };
+
+  // Remover foto selecionada
+  const removeSelectedPhoto = (index: number) => {
+    setSelectedPhotos(prev => {
+      const updated = [...prev];
+      updated.splice(index, 1);
+      return updated;
+    });
+    
+    // Revogar URL do objeto para liberar memória
+    URL.revokeObjectURL(photoPreviewUrls[index]);
+    
+    setPhotoPreviewUrls(prev => {
+      const updated = [...prev];
+      updated.splice(index, 1);
+      return updated;
+    });
+  };
+
+  // Upload de fotos para o Supabase Storage
+  const uploadPhotos = async (measurementId: string): Promise<string[]> => {
+    if (selectedPhotos.length === 0) return [];
+    
+    setUploadingPhotos(true);
+    const photoUrls: string[] = [];
+    
+    try {
+      for (const photo of selectedPhotos) {
+        const fileExt = photo.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        const filePath = `${user!.id}/${measurementId}/${fileName}`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('body_progress_photos')
+          .upload(filePath, photo);
+          
+        if (uploadError) throw uploadError;
+        
+        // Construir URL pública para a imagem
+        const { data } = supabase.storage
+          .from('body_progress_photos')
+          .getPublicUrl(filePath);
+          
+        photoUrls.push(data.publicUrl);
+      }
+      
+      return photoUrls;
+    } catch (error) {
+      console.error("Erro ao fazer upload das fotos:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível fazer upload de algumas fotos.",
+        variant: "destructive"
+      });
+      return photoUrls; // Retorna as URLs que foram uploadadas com sucesso
+    } finally {
+      setUploadingPhotos(false);
+    }
+  };
+
+  // Visualizar fotos de uma medição
+  const viewPhotos = async (measurementId: string, photos: string[] | null) => {
+    if (!photos || photos.length === 0) {
+      toast({
+        title: "Sem fotos",
+        description: "Não há fotos para esta medição.",
+      });
+      return;
+    }
+    
+    setCurrentMeasurementId(measurementId);
+    setCurrentPhotoUrls(photos);
+    setViewPhotoDialogOpen(true);
+  };
+
   // Salvar nova medida
   const onSubmit = async (values: MeasurementFormValues) => {
     if (!user) return;
@@ -157,11 +251,29 @@ const EvolucaoCorporal = () => {
         measured_at: values.measured_at
       };
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('body_measurements')
-        .insert([measurement]);
+        .insert([measurement])
+        .select()
+        .single();
 
       if (error) throw new Error(error.message);
+
+      // Se tiver fotos selecionadas, faz o upload
+      let photoUrls: string[] = [];
+      if (selectedPhotos.length > 0) {
+        photoUrls = await uploadPhotos(data.id);
+        
+        // Atualiza o registro com as URLs das fotos
+        if (photoUrls.length > 0) {
+          const { error: updateError } = await supabase
+            .from('body_measurements')
+            .update({ photos: photoUrls })
+            .eq('id', data.id);
+            
+          if (updateError) console.error("Erro ao atualizar URLs das fotos:", updateError);
+        }
+      }
 
       toast({
         title: "Sucesso!",
@@ -178,6 +290,11 @@ const EvolucaoCorporal = () => {
         notes: "",
         measured_at: format(new Date(), 'yyyy-MM-dd')
       });
+
+      // Limpar fotos selecionadas e previews
+      setSelectedPhotos([]);
+      photoPreviewUrls.forEach(url => URL.revokeObjectURL(url));
+      setPhotoPreviewUrls([]);
 
       fetchData();
       setIsDialogOpen(false);
@@ -359,6 +476,7 @@ const EvolucaoCorporal = () => {
               <th className="py-2 px-3 text-right">Cintura</th>
               <th className="py-2 px-3 text-right">Quadril</th>
               <th className="py-2 px-3 text-right">Braço</th>
+              <th className="py-2 px-3 text-center">Fotos</th>
             </tr>
           </thead>
           <tbody>
@@ -370,6 +488,21 @@ const EvolucaoCorporal = () => {
                 <td className="py-2 px-3 text-right">{m.waist ? `${m.waist} cm` : '-'}</td>
                 <td className="py-2 px-3 text-right">{m.hip ? `${m.hip} cm` : '-'}</td>
                 <td className="py-2 px-3 text-right">{m.arm ? `${m.arm} cm` : '-'}</td>
+                <td className="py-2 px-3 text-center">
+                  {m.photos && m.photos.length > 0 ? (
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={() => viewPhotos(m.id, m.photos)}
+                      className="hover:bg-muted"
+                    >
+                      <ImageIcon className="h-4 w-4 mr-1" />
+                      {m.photos.length}
+                    </Button>
+                  ) : (
+                    '-'
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -437,7 +570,7 @@ const EvolucaoCorporal = () => {
                   Registrar Nova Medida
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
+              <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>Registrar Medidas Corporais</DialogTitle>
                   <DialogDescription>
@@ -561,15 +694,89 @@ const EvolucaoCorporal = () => {
                       )}
                     />
                     
-                    <Button type="submit" className="w-full" disabled={isSaving}>
-                      {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Salvar Medidas
+                    {/* Upload de fotos */}
+                    <div className="space-y-2">
+                      <FormLabel>Fotos (opcional)</FormLabel>
+                      <div className="flex items-center gap-2">
+                        <label htmlFor="photo-upload" className="cursor-pointer">
+                          <div className="flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm hover:bg-muted">
+                            <Upload className="h-4 w-4" />
+                            <span>Adicionar fotos</span>
+                          </div>
+                          <Input 
+                            id="photo-upload" 
+                            type="file" 
+                            accept="image/*" 
+                            multiple 
+                            className="hidden" 
+                            onChange={handleFileChange}
+                          />
+                        </label>
+                        <span className="text-xs text-muted-foreground">
+                          {selectedPhotos.length} foto(s) selecionada(s)
+                        </span>
+                      </div>
+                      
+                      {/* Preview de fotos */}
+                      {photoPreviewUrls.length > 0 && (
+                        <div className="grid grid-cols-3 gap-2 mt-2">
+                          {photoPreviewUrls.map((url, index) => (
+                            <div key={index} className="relative group">
+                              <img 
+                                src={url} 
+                                alt={`Preview ${index}`} 
+                                className="w-full h-24 object-cover rounded-md" 
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeSelectedPhoto(index)}
+                                className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <FormDescription>
+                        Adicione fotos para acompanhar visualmente seu progresso.
+                      </FormDescription>
+                    </div>
+                    
+                    <Button type="submit" className="w-full" disabled={isSaving || uploadingPhotos}>
+                      {(isSaving || uploadingPhotos) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {uploadingPhotos ? 'Enviando fotos...' : 'Salvar Medidas'}
                     </Button>
                   </form>
                 </Form>
               </DialogContent>
             </Dialog>
           </div>
+
+          {/* Modal para visualizar fotos */}
+          <Dialog open={viewPhotoDialogOpen} onOpenChange={setViewPhotoDialogOpen}>
+            <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>Fotos do Registro</DialogTitle>
+                <DialogDescription>
+                  Fotos registradas em {currentMeasurementId ? 
+                    format(new Date(measurements.find(m => m.id === currentMeasurementId)?.measured_at || ''), 'dd/MM/yyyy') : ''}
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                {currentPhotoUrls.map((url, index) => (
+                  <div key={index} className="relative">
+                    <img 
+                      src={url} 
+                      alt={`Foto ${index + 1}`} 
+                      className="w-full h-auto max-h-[400px] object-contain rounded-md" 
+                    />
+                  </div>
+                ))}
+              </div>
+            </DialogContent>
+          </Dialog>
 
           {/* Gráficos e tabela */}
           {measurements.length > 0 ? (

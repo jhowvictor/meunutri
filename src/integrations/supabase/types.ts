@@ -18,6 +18,7 @@ export type Database = {
           id: string
           measured_at: string
           notes: string | null
+          photos: string[] | null
           skin_fold: string | null
           user_id: string
           waist: number | null
@@ -31,6 +32,7 @@ export type Database = {
           id?: string
           measured_at?: string
           notes?: string | null
+          photos?: string[] | null
           skin_fold?: string | null
           user_id: string
           waist?: number | null
@@ -44,6 +46,7 @@ export type Database = {
           id?: string
           measured_at?: string
           notes?: string | null
+          photos?: string[] | null
           skin_fold?: string | null
           user_id?: string
           waist?: number | null
