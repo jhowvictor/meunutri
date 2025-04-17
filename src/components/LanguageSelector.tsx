@@ -39,6 +39,7 @@ const LanguageSelector = () => {
     
     try {
       setIsLoading(true);
+      // This now works correctly with the added column
       const { error } = await supabase
         .from('profiles')
         .update({ language_preference: langCode })

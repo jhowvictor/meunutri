@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
@@ -96,7 +95,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
           
         if (error) throw error;
         
-        if (data?.language_preference) {
+        if (data && data.language_preference) {
           setCurrentLanguage(data.language_preference);
         }
       } catch (error) {
