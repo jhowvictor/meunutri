@@ -1,3 +1,4 @@
+
 // Esta é uma classe para gerenciar as chamadas para a API do OpenAI (ChatGPT)
 import { toast } from "@/components/ui/sonner";
 
@@ -7,6 +8,7 @@ interface OpenAIRequestParams {
   model?: string;
   max_tokens?: number;
   temperature?: number;
+  language?: string;
 }
 
 interface OpenAIResponse {
@@ -29,7 +31,7 @@ export class OpenAIService {
   }
   
   // Método para gerar conteúdo
-  async generateContent({ prompt, model = "gpt-4o-mini", max_tokens = 1000, temperature = 0.7 }: OpenAIRequestParams): Promise<OpenAIResponse> {
+  async generateContent({ prompt, model = "gpt-4o-mini", max_tokens = 1000, temperature = 0.7, language = "pt" }: OpenAIRequestParams): Promise<OpenAIResponse> {
     const apiKey = this.getApiKey();
     
     if (!apiKey) {
@@ -41,6 +43,9 @@ export class OpenAIService {
     }
     
     try {
+      // Injeta o idioma no prompt do sistema para garantir que as respostas sejam no idioma escolhido
+      const systemMessage = `Você é um chef de cozinha e nutricionista especialista em receitas saudáveis e funcionais. Sua missão é criar receitas 100% personalizadas, com base nas preferências e necessidades da pessoa. IMPORTANTE: Responda sempre no seguinte idioma: ${language}.`;
+      
       const response = await fetch(this.apiUrl, {
         method: "POST",
         headers: {
@@ -52,7 +57,7 @@ export class OpenAIService {
           messages: [
             {
               role: "system",
-              content: "Você é um chef de cozinha e nutricionista especialista em receitas saudáveis e funcionais. Sua missão é criar receitas 100% personalizadas, com base nas preferências e necessidades da pessoa."
+              content: systemMessage
             },
             {
               role: "user",
