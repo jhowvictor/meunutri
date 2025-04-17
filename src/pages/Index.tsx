@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { ChefHat, Utensils, BookOpen, ShoppingCart, Star, Folder } from "lucide-react";
+import { ChefHat, Utensils, BookOpen, ShoppingCart, Star, Folder, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/hooks/use-language";
@@ -129,6 +129,24 @@ const Index = () => {
               <Link to="/minhas-pastas">
                 <Button className="w-full" size="lg">
                   Gerenciar Pastas
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Analisar Refeição */}
+          <Card className="border-2 hover:border-primary/80 hover:shadow-lg transition-all">
+            <CardHeader className="text-center">
+              <Camera className="h-12 w-12 mx-auto text-primary mb-2" />
+              <CardTitle className="text-xl">Analisar Refeição</CardTitle>
+              <CardDescription>
+                Envie foto ou vídeo da sua refeição para uma análise nutricional
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center pt-2">
+              <Link to="/analisar-refeicao">
+                <Button className="w-full" size="lg">
+                  Analisar minha refeição (foto ou vídeo)
                 </Button>
               </Link>
             </CardContent>

@@ -12,6 +12,7 @@ import ListaCompras from "./pages/ListaCompras";
 import ReceitasFavoritas from "./pages/ReceitasFavoritas";
 import MinhasPastas from "./pages/MinhasPastas";
 import ConteudoPasta from "./pages/ConteudoPasta";
+import AnalisarRefeicao from "./pages/AnalisarRefeicao";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ApiKeyConfig from "./components/ApiKeyConfig";
@@ -95,6 +96,14 @@ const App = () => (
                   <>
                     <Header />
                     <ConteudoPasta />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/analisar-refeicao" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <AnalisarRefeicao />
                   </>
                 </ProtectedRoute>
               } />
