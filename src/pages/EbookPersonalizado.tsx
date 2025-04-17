@@ -7,7 +7,7 @@ import {
   Check,
   Download,
   Loader2,
-  FileText  // Replace FilePdf with FileText
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,24 +47,36 @@ const EbookPersonalizado = () => {
     
     setIsLoading(true);
     
-    // Construir o prompt para a API
+    // Extrair números mencionados no texto (possível número de receitas)
+    const numbersInRequest = formData.detalhes.match(/\d+/g) || [];
+    const recipeCountMention = numbersInRequest.length > 0 
+      ? `Observe que o usuário pediu especificamente ${numbersInRequest.join(', ')} de algo (provavelmente receitas). Este número deve ser respeitado.` 
+      : '';
+    
+    // Construir o prompt para a API com ênfase no número exato de receitas
     const prompt = `
       Por favor, crie um e-book de receitas personalizado com base nas seguintes especificações:
       
       ${formData.detalhes}
       
+      ${recipeCountMention}
+      
+      IMPORTANTE: Se for mencionado um número específico de receitas (como 10, 15, 20, etc), você DEVE fornecer EXATAMENTE esse número de receitas completas.
+      
       Forneça:
       1. Um título atrativo para o e-book
       2. Uma breve introdução
-      3. Uma lista de receitas com ingredientes e modo de preparo
+      3. Uma lista completa com EXATAMENTE o número de receitas solicitadas, cada uma com ingredientes e modo de preparo
       4. Informação nutricional para cada receita
       5. Dicas e conclusão
     `;
     
     try {
+      // Passando isEbook: true para indicar que é uma solicitação de e-book
       const result = await openAIService.generateContent({
         prompt: prompt,
-        max_tokens: 2000  // E-books podem precisar de respostas mais longas
+        max_tokens: 4000,  // Aumentando os tokens para garantir que todas as receitas sejam geradas
+        isEbook: true      // Novo parâmetro para identificar que é um e-book
       });
       
       if (!result.isError && result.content) {
@@ -76,10 +88,20 @@ const EbookPersonalizado = () => {
                    formData.detalhes.toLowerCase().includes("low carb") ? "Receitas Low Carb" :
                    "Alimentação Saudável";
         
-        // Tenta extrair o título da resposta
-        const tituloMatch = result.content.match(/(?:Título|E-book):\s*([^\n]+)/i);
-        if (tituloMatch && tituloMatch[1]) {
-          titulo = tituloMatch[1].trim();
+        // Tenta extrair o título da resposta com diversos patterns possíveis
+        const titlePatterns = [
+          /(?:Título|E-book|Título do E-book|Nome do E-book):\s*([^\n]+)/i,
+          /^#\s*([^\n]+)/m,
+          /^\*\*([^*]+)\*\*/m,
+          /^(.+?)(?:\n|$)/
+        ];
+        
+        for (const pattern of titlePatterns) {
+          const match = result.content.match(pattern);
+          if (match && match[1]) {
+            titulo = match[1].trim();
+            break;
+          }
         }
         
         setEbookGerado({
@@ -180,11 +202,11 @@ const EbookPersonalizado = () => {
                   </Label>
                   <p className="text-sm text-muted-foreground mb-4">
                     Por exemplo: tipo de receitas, temas específicos, restrições alimentares, 
-                    quantidade de receitas, se quer incluir informações nutricionais, etc.
+                    <strong> quantidade de receitas</strong>, se quer incluir informações nutricionais, etc.
                   </p>
                   <Textarea
                     id="detalhes"
-                    placeholder="Ex: Gostaria de um e-book com 10 receitas vegetarianas para o café da manhã, com informações nutricionais e que sejam rápidas de preparar..."
+                    placeholder="Ex: Gostaria de um e-book com 20 receitas vegetarianas para o café da manhã, com informações nutricionais e que sejam rápidas de preparar..."
                     value={formData.detalhes}
                     onChange={(e) => handleChange(e.target.value)}
                     rows={8}
@@ -207,7 +229,7 @@ const EbookPersonalizado = () => {
                     ) : (
                       <>
                         <BookOpen className="mr-2 h-5 w-5" />
-                        Criar meu E-book
+                        Criar Meu E-book
                       </>
                     )}
                   </Button>

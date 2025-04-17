@@ -9,6 +9,7 @@ interface OpenAIRequestParams {
   max_tokens?: number;
   temperature?: number;
   language?: string;
+  isEbook?: boolean; // Novo parâmetro para identificar solicitações de e-book
 }
 
 interface OpenAIResponse {
@@ -31,7 +32,14 @@ export class OpenAIService {
   }
   
   // Método para gerar conteúdo
-  async generateContent({ prompt, model = "gpt-4o-mini", max_tokens = 1000, temperature = 0.7, language = "pt" }: OpenAIRequestParams): Promise<OpenAIResponse> {
+  async generateContent({ 
+    prompt, 
+    model = "gpt-4o-mini", 
+    max_tokens = 1000, 
+    temperature = 0.7, 
+    language = "pt",
+    isEbook = false 
+  }: OpenAIRequestParams): Promise<OpenAIResponse> {
     const apiKey = this.getApiKey();
     
     if (!apiKey) {
@@ -52,6 +60,20 @@ export class OpenAIService {
 1. SEMPRE começar com "Nome da Receita: [TÍTULO DA RECEITA]" em uma linha separada no início.
 2. Seguir com as seções: Ingredientes, Modo de Preparo, Informações Nutricionais, Dicas.
 3. O título da receita deve ser claro e refletir o prato principal.`;
+      }
+      
+      // Instruções específicas para e-books
+      if (isEbook) {
+        systemMessage += `\n\nIMPORTANTE PARA E-BOOK DE RECEITAS:
+1. Você DEVE cumprir TODAS as especificações do usuário (como número de receitas solicitadas).
+2. Se a pessoa pedir 20 receitas, você DEVE fornecer exatamente 20 receitas completas.
+3. Se o usuário mencionar temas ou tipos específicos de receitas, você deve segui-los rigorosamente.
+4. Cada receita deve ser completa com título, ingredientes, modo de preparo e informações nutricionais.
+5. Você deve aproveitar ao máximo o espaço disponível para gerar o conteúdo completo solicitado.`;
+        
+        // Para e-books, use o modelo mais avançado e mais tokens
+        model = "gpt-4o";
+        max_tokens = 4000; // Aumentar significativamente o limite de tokens para e-books
       }
       
       // Adiciona instrução de idioma
