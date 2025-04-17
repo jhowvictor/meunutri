@@ -201,7 +201,10 @@ const MontarTreino = () => {
                 <SelectTrigger id="frequencia">
                   <SelectValue placeholder="Selecione a frequência" />
                 </SelectTrigger>
-                <SelectContent position="popper" className="w-full bg-popover border border-border">
+                <SelectContent 
+                  position="popper" 
+                  className="w-full bg-popover border border-border z-50"
+                >
                   <SelectItem value="1">1 vez por semana</SelectItem>
                   <SelectItem value="2">2 vezes por semana</SelectItem>
                   <SelectItem value="3">3 vezes por semana</SelectItem>
@@ -243,7 +246,10 @@ const MontarTreino = () => {
                 <SelectTrigger id="foco">
                   <SelectValue placeholder="Selecione o foco principal" />
                 </SelectTrigger>
-                <SelectContent position="popper" className="w-full bg-popover border border-border">
+                <SelectContent 
+                  position="popper" 
+                  className="w-full bg-popover border border-border z-50"
+                >
                   <SelectItem value="corpo inteiro">Corpo inteiro</SelectItem>
                   <SelectItem value="pernas">Pernas</SelectItem>
                   <SelectItem value="abdômen">Abdômen</SelectItem>
