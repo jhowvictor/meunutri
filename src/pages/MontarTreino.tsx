@@ -198,12 +198,13 @@ const MontarTreino = () => {
               <Select 
                 onValueChange={(value) => handleChange("frequencia", value)}
               >
-                <SelectTrigger id="frequencia">
+                <SelectTrigger className="w-full" id="frequencia">
                   <SelectValue placeholder="Selecione a frequência" />
                 </SelectTrigger>
                 <SelectContent 
                   position="popper" 
-                  className="w-full bg-popover border border-border z-50"
+                  sideOffset={5}
+                  className="w-full bg-popover border border-border z-[100]"
                 >
                   <SelectItem value="1">1 vez por semana</SelectItem>
                   <SelectItem value="2">2 vezes por semana</SelectItem>
@@ -243,12 +244,13 @@ const MontarTreino = () => {
               <Select 
                 onValueChange={(value) => handleChange("foco", value)}
               >
-                <SelectTrigger id="foco">
+                <SelectTrigger className="w-full" id="foco">
                   <SelectValue placeholder="Selecione o foco principal" />
                 </SelectTrigger>
                 <SelectContent 
-                  position="popper" 
-                  className="w-full bg-popover border border-border z-50"
+                  position="popper"
+                  sideOffset={5}
+                  className="w-full min-w-[200px] bg-popover border border-border z-[100]"
                 >
                   <SelectItem value="corpo inteiro">Corpo inteiro</SelectItem>
                   <SelectItem value="pernas">Pernas</SelectItem>
