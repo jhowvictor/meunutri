@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -8,7 +7,8 @@ import {
   Check,
   Activity, 
   Scale,
-  Loader2
+  Loader2,
+  FileDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +18,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { openAIService } from "@/services/openai";
 import { toast } from "@/components/ui/sonner";
+import { jsPDF } from "jspdf";
 
 const DietaPersonalizada = () => {
   const [formData, setFormData] = useState({
@@ -44,7 +45,6 @@ const DietaPersonalizada = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Verificar se a chave da API está configurada
     if (!openAIService.getApiKey()) {
       toast.error("Por favor, configure sua chave da API OpenAI primeiro.");
       return;
@@ -52,7 +52,6 @@ const DietaPersonalizada = () => {
     
     setIsLoading(true);
     
-    // Construir o prompt para a API
     const prompt = `
       Por favor, crie um plano alimentar personalizado com as seguintes características:
       
@@ -87,8 +86,58 @@ const DietaPersonalizada = () => {
   };
 
   const isFormValid = () => {
-    // Verifica se todos os campos obrigatórios estão preenchidos
     return Object.values(formData).every(value => value !== "");
+  };
+
+  const handleDownloadPDF = () => {
+    try {
+      const pdf = new jsPDF();
+      
+      pdf.setFontSize(22);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("Plano Alimentar Personalizado", 20, 20);
+      
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("Informações do Perfil:", 20, 35);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Objetivo: ${formData.objetivo}`, 20, 45);
+      pdf.text(`Tipo de Alimentação: ${formData.tipoAlimentacao}`, 20, 52);
+      pdf.text(`Altura: ${formData.altura} cm | Peso: ${formData.peso} kg`, 20, 59);
+      pdf.text(`Gênero: ${formData.genero} | Nível de Atividade: ${formData.exercicios}`, 20, 66);
+      
+      pdf.setLineWidth(0.5);
+      pdf.line(20, 72, 190, 72);
+      
+      pdf.setFont('helvetica', 'bold');
+      pdf.text("Plano Alimentar:", 20, 82);
+      pdf.setFont('helvetica', 'normal');
+      
+      const splitText = pdf.splitTextToSize(dietaGerada, 170);
+      
+      let yPosition = 92;
+      const lineHeight = 7;
+      
+      for (let i = 0; i < splitText.length; i++) {
+        if (yPosition + lineHeight > pdf.internal.pageSize.height - 20) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+        
+        pdf.text(splitText[i], 20, yPosition);
+        yPosition += lineHeight;
+      }
+      
+      const fileName = `Dieta_Personalizada_${formData.objetivo.replace(/\s+/g, '_')}.pdf`;
+      pdf.save(fileName);
+      
+      toast.success("Dieta personalizada baixada com sucesso!");
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+      toast.error("Erro ao baixar a dieta. Por favor, tente novamente.");
+    }
   };
 
   return (
@@ -115,7 +164,6 @@ const DietaPersonalizada = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Tipo de Alimentação */}
                 <div>
                   <Label className="text-base font-medium block mb-3">1. Tipo de Alimentação</Label>
                   <RadioGroup 
@@ -132,7 +180,6 @@ const DietaPersonalizada = () => {
                   </RadioGroup>
                 </div>
 
-                {/* Altura */}
                 <div>
                   <Label htmlFor="altura" className="text-base font-medium block mb-3">
                     2. Altura (em centímetros)
@@ -146,7 +193,6 @@ const DietaPersonalizada = () => {
                   />
                 </div>
 
-                {/* Restrições Alimentares */}
                 <div>
                   <Label htmlFor="restricoes" className="text-base font-medium block mb-3">
                     3. Restrições Alimentares
@@ -159,7 +205,6 @@ const DietaPersonalizada = () => {
                   />
                 </div>
 
-                {/* Peso */}
                 <div>
                   <Label htmlFor="peso" className="text-base font-medium block mb-3">
                     4. Peso (em kg)
@@ -173,7 +218,6 @@ const DietaPersonalizada = () => {
                   />
                 </div>
 
-                {/* Gênero */}
                 <div>
                   <Label className="text-base font-medium block mb-3">5. Gênero</Label>
                   <RadioGroup 
@@ -190,7 +234,6 @@ const DietaPersonalizada = () => {
                   </RadioGroup>
                 </div>
 
-                {/* Objetivo */}
                 <div>
                   <Label className="text-base font-medium block mb-3">6. Objetivo</Label>
                   <RadioGroup 
@@ -212,7 +255,6 @@ const DietaPersonalizada = () => {
                   </RadioGroup>
                 </div>
 
-                {/* Exercícios */}
                 <div>
                   <Label htmlFor="exercicios" className="text-base font-medium block mb-3">
                     7. Exercícios
@@ -294,6 +336,10 @@ const DietaPersonalizada = () => {
                 <div className="flex gap-3 justify-center">
                   <Button onClick={() => setFormSubmitted(false)} variant="outline">
                     Modificar Dieta
+                  </Button>
+                  <Button onClick={handleDownloadPDF} className="bg-primary">
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Baixar Dieta (PDF)
                   </Button>
                   <Link to="/">
                     <Button>Voltar ao Início</Button>
