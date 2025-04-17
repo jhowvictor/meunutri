@@ -1,4 +1,3 @@
-
 import { 
   ChefHat, 
   Utensils, 
@@ -69,9 +68,7 @@ const Index = () => {
             <CardContent className="text-center pt-4">
               <Link to="/receita-personalizada">
                 <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
-                  {t("request_recipe", {
-                  default: "Solicitar Receita"
-                })}
+                  Criar Receita
                 </Button>
               </Link>
             </CardContent>
@@ -95,9 +92,7 @@ const Index = () => {
             <CardContent className="text-center pt-4">
               <Link to="/dieta-personalizada">
                 <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
-                  {t("request_diet", {
-                  default: "Solicitar Dieta"
-                })}
+                  Montar minha Dieta
                 </Button>
               </Link>
             </CardContent>
@@ -121,9 +116,7 @@ const Index = () => {
             <CardContent className="text-center pt-4">
               <Link to="/ebook-personalizado">
                 <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
-                  {t("create_ebook", {
-                  default: "Criar E-book"
-                })}
+                  Criar Meu E-book
                 </Button>
               </Link>
             </CardContent>
