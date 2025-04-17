@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -109,26 +108,33 @@ const ReceitaPersonalizada = () => {
       Objetivo Alimentar: ${formData.objetivoAlimentar}
       
       Forneça o nome da receita, ingredientes com medidas, modo de preparo passo a passo, valor calórico, macronutrientes, e dicas extras ou substituições.
+      IMPORTANTE: O nome da receita deve começar com "Nome da Receita: " para facilitar a extração.
     `;
     
     try {
       const result = await openAIService.generateContent({ prompt });
       
       if (!result.isError && result.content) {
-        // Extrai informações básicas da resposta
-        // Em um sistema real seria melhor estruturar melhor a resposta da API
-        let titulo = formData.tipoAlimentacao === "Vegana" ? "Bowl Vegano de Quinoa e Legumes" : 
-                     formData.tipoAlimentacao === "Vegetariana" ? "Risoto de Cogumelos Silvestres" :
-                     formData.tipoAlimentacao === "Sem Glúten" ? "Frango com Batata Doce e Legumes" :
-                     formData.tipoAlimentacao === "Sem Lactose" ? "Peixe Grelhado com Molho de Ervas" :
-                     formData.tipoAlimentacao === "Para Diabéticos" ? "Salada Proteica com Frango" :
-                     "Filé de Frango com Vegetais Low Carb";
-                     
-        // Tenta extrair o título da resposta
-        const tituloMatch = result.content.match(/(?:Nome da receita|Título):\s*([^\n]+)/i);
-        if (tituloMatch && tituloMatch[1]) {
-          titulo = tituloMatch[1].trim();
+        // Melhora a extração do título da receita
+        let titulo = "Nova Receita Personalizada";
+        
+        // Tenta extrair o título usando vários padrões possíveis
+        const padroesTitulo = [
+          /(?:Nome da [Rr]eceita|Título):\s*([^\n]+)/i,
+          /^\s*#\s*([^\n]+)/m,  // Para formato Markdown (# Título)
+          /^\s*([^\n:]+)(?:\n|$)/m,  // Pega a primeira linha como título se não encontrar outros padrões
+        ];
+        
+        for (const padrao of padroesTitulo) {
+          const match = result.content.match(padrao);
+          if (match && match[1]?.trim()) {
+            titulo = match[1].trim();
+            break;
+          }
         }
+        
+        console.log("Título extraído:", titulo);
+        console.log("Conteúdo completo:", result.content.substring(0, 100) + "...");
         
         // Se o usuário está logado, salve a receita no banco de dados
         let recipeId = "";
@@ -177,7 +183,6 @@ const ReceitaPersonalizada = () => {
     }
   };
 
-  // Salvar como favorita
   const handleSaveAsFavorite = async () => {
     if (!user) {
       toast.error("Você precisa estar logado para salvar receitas favoritas.");
@@ -242,7 +247,6 @@ const ReceitaPersonalizada = () => {
     }
   };
 
-  // Salvar em pasta
   const handleSaveToFolder = async () => {
     if (!user) {
       toast.error("Você precisa estar logado para salvar receitas em pastas.");
@@ -253,7 +257,6 @@ const ReceitaPersonalizada = () => {
     setShowFolderDialog(true);
   };
   
-  // Criar nova pasta ou salvar em pasta existente
   const handleSaveToFolderConfirm = async () => {
     try {
       setIsSaving(true);

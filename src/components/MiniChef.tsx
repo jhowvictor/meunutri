@@ -51,6 +51,8 @@ ${t("specialties")}:
 🥑 ${t("substitutions")}
 🏋️ ${t("health_goals")}
 
+IMPORTANTE: Sempre ao fornecer uma receita, comece com "Nome da Receita: [Título da Receita]" em uma linha separada no início.
+
 ${t("language_instructions")}`;
 
     // Adicionar mensagem do usuário

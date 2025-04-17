@@ -43,8 +43,19 @@ export class OpenAIService {
     }
     
     try {
-      // Injeta o idioma no prompt do sistema para garantir que as respostas sejam no idioma escolhido
-      const systemMessage = `Você é um chef de cozinha e nutricionista especialista em receitas saudáveis e funcionais. Sua missão é criar receitas 100% personalizadas, com base nas preferências e necessidades da pessoa. IMPORTANTE: Responda sempre no seguinte idioma: ${language}.`;
+      // Formato específico para receitas
+      let systemMessage = `Você é um chef de cozinha e nutricionista especialista em receitas saudáveis e funcionais. Sua missão é criar receitas 100% personalizadas, com base nas preferências e necessidades da pessoa.`;
+      
+      // Se o prompt menciona receita, adicione instruções de formatação
+      if (prompt.toLowerCase().includes('receita') || prompt.toLowerCase().includes('cozinhar') || prompt.toLowerCase().includes('preparar')) {
+        systemMessage += `\n\nQUANDO FORNECER UMA RECEITA:
+1. SEMPRE começar com "Nome da Receita: [TÍTULO DA RECEITA]" em uma linha separada no início.
+2. Seguir com as seções: Ingredientes, Modo de Preparo, Informações Nutricionais, Dicas.
+3. O título da receita deve ser claro e refletir o prato principal.`;
+      }
+      
+      // Adiciona instrução de idioma
+      systemMessage += `\n\nIMPORTANTE: Responda sempre no seguinte idioma: ${language}.`;
       
       const response = await fetch(this.apiUrl, {
         method: "POST",
