@@ -1,4 +1,18 @@
-import { ChefHat } from "lucide-react";
+
+import { 
+  ChefHat, 
+  Utensils, 
+  BookOpen, 
+  ShoppingCart, 
+  Star, 
+  Folder, 
+  Camera, 
+  LineChart, 
+  Dumbbell 
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 import { useLanguage } from "@/hooks/use-language";
 
 const Index = () => {
