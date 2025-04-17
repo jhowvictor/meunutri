@@ -14,6 +14,7 @@ import MinhasPastas from "./pages/MinhasPastas";
 import ConteudoPasta from "./pages/ConteudoPasta";
 import AnalisarRefeicao from "./pages/AnalisarRefeicao";
 import EvolucaoCorporal from "./pages/EvolucaoCorporal";
+import MontarTreino from "./pages/MontarTreino"; // Import the new page
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ApiKeyConfig from "./components/ApiKeyConfig";
@@ -113,6 +114,15 @@ const App = () => (
                   <>
                     <Header />
                     <EvolucaoCorporal />
+                  </>
+                </ProtectedRoute>
+              } />
+              {/* Add new route for Montar Treino */}
+              <Route path="/montar-treino" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <MontarTreino />
                   </>
                 </ProtectedRoute>
               } />

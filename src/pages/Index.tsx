@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { ChefHat, Utensils, BookOpen, ShoppingCart, Star, Folder, Camera, LineChart } from "lucide-react";
+import { ChefHat, Utensils, BookOpen, ShoppingCart, Star, Folder, Camera, LineChart, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/hooks/use-language";
@@ -152,7 +152,7 @@ const Index = () => {
             </CardContent>
           </Card>
 
-          {/* Minha Evolução Corporal - NOVO */}
+          {/* Minha Evolução Corporal */}
           <Card className="border-2 hover:border-primary/80 hover:shadow-lg transition-all">
             <CardHeader className="text-center">
               <LineChart className="h-12 w-12 mx-auto text-primary mb-2" />
@@ -165,6 +165,24 @@ const Index = () => {
               <Link to="/evolucao-corporal">
                 <Button className="w-full" size="lg">
                   Acompanhar Evolução
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Montar meu Treino - NOVO */}
+          <Card className="border-2 hover:border-primary/80 hover:shadow-lg transition-all">
+            <CardHeader className="text-center">
+              <Dumbbell className="h-12 w-12 mx-auto text-primary mb-2" />
+              <CardTitle className="text-xl">Montar meu Treino</CardTitle>
+              <CardDescription>
+                Crie um plano de treino personalizado baseado nos seus objetivos
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center pt-2">
+              <Link to="/montar-treino">
+                <Button className="w-full" size="lg">
+                  Criar Meu Plano de Treino
                 </Button>
               </Link>
             </CardContent>
