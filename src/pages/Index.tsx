@@ -1,12 +1,9 @@
-import { Link } from "react-router-dom";
-import { ChefHat, Utensils, BookOpen, ShoppingCart, Star, Folder, Camera, LineChart, Dumbbell } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChefHat } from "lucide-react";
 import { useLanguage } from "@/hooks/use-language";
+
 const Index = () => {
-  const {
-    t
-  } = useLanguage();
+  const { t } = useLanguage();
+  
   return <div className="min-h-screen flex flex-col bg-gradient-to-b from-secondary/20 to-background relative overflow-hidden">
       {/* Circular decorative elements */}
       <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
@@ -28,19 +25,6 @@ const Index = () => {
             <h1 className="text-5xl md:text-6xl font-bold tracking-tighter text-fruit-gradient">
               MeuNutri.AI
             </h1>
-            <p className="max-w-[700px] text-lg md:text-xl text-foreground/80 mt-3 section-fade-in">
-              {t("app_description", {
-              default: "Receitas e dietas personalizadas para uma alimentação saudável, funcional e totalmente adaptada às suas necessidades."
-            })}
-            </p>
-            <div className="flex flex-wrap justify-center gap-4 mt-4">
-              <Button variant="fruit" size="xl" className="rounded-full font-semibold" asChild>
-                <Link to="/receita-personalizada">Começar Agora</Link>
-              </Button>
-              <Button variant="outline" size="xl" className="rounded-full font-semibold">
-                Saiba Mais
-              </Button>
-            </div>
           </div>
         </div>
       </section>
