@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { ChefHat, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -32,6 +31,23 @@ const MiniChef = () => {
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
+    // Prompt de sistema otimizado para respostas curtas e empáticas
+    const systemPrompt = `🍳 Mini Chef - Assistente Culinário
+
+Diretrizes para respostas:
+✅ Máximo 1000 caracteres
+✅ Empático e amigável
+✅ Uso de emojis 
+✅ Tópicos e listas
+✅ Direto e objetivo
+✅ Dica prática no final
+
+Especialidades:
+🥗 Nutrição
+🍳 Receitas
+🥑 Substituições
+🏋️ Objetivos de saúde`;
+
     // Adicionar mensagem do usuário
     const userMessage: ChatMessage = {
       role: "user",
@@ -43,28 +59,6 @@ const MiniChef = () => {
     setInputMessage("");
     setIsLoading(true);
 
-    // Prompt de sistema melhorado para respostas mais completas e detalhadas
-    const systemPrompt = `Você é o Mini Chef, um chef de cozinha e nutricionista especialista. Forneça respostas:
-- Completas e detalhadas, sem limites de caracteres
-- Estruturadas com subtópicos quando necessário
-- Personalizadas para o contexto da pergunta
-- Com exemplos práticos e explicações claras
-- Abrangentes, cobrindo todos os aspectos da pergunta
-- Cientificamente precisas quando se trata de nutrição
-- Utilizando linguagem acessível e empática
-
-Áreas de especialidade:
-- Receitas e técnicas culinárias
-- Substituições de ingredientes e adaptações
-- Valor nutricional dos alimentos
-- Dietas especiais (low-carb, vegana, cetogênica, etc.)
-- Planejamento de refeições
-- Preparo, conservação e armazenamento de alimentos
-- Reaproveitamento de ingredientes
-- Alimentação para objetivos específicos (emagrecimento, ganho de massa, controle de doenças)
-
-Não abrevie suas respostas. Forneça explicações completas e detalhadas para qualquer pergunta.`;
-    
     // Construindo o prompt com o histórico da conversa
     const prompt = `${systemPrompt}\n\nHistórico da conversa:\n${messages
       .map((msg) => `${msg.role === "user" ? "Usuário" : "Mini Chef"}: ${msg.content}`)
