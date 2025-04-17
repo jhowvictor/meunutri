@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      body_measurements: {
+        Row: {
+          arm: number | null
+          created_at: string
+          height: number | null
+          hip: number | null
+          id: string
+          measured_at: string
+          notes: string | null
+          skin_fold: string | null
+          user_id: string
+          waist: number | null
+          weight: number | null
+        }
+        Insert: {
+          arm?: number | null
+          created_at?: string
+          height?: number | null
+          hip?: number | null
+          id?: string
+          measured_at?: string
+          notes?: string | null
+          skin_fold?: string | null
+          user_id: string
+          waist?: number | null
+          weight?: number | null
+        }
+        Update: {
+          arm?: number | null
+          created_at?: string
+          height?: number | null
+          hip?: number | null
+          id?: string
+          measured_at?: string
+          notes?: string | null
+          skin_fold?: string | null
+          user_id?: string
+          waist?: number | null
+          weight?: number | null
+        }
+        Relationships: []
+      }
       folder_recipes: {
         Row: {
           created_at: string
@@ -128,6 +170,30 @@ export type Database = {
           portions?: string | null
           time?: string | null
           title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_goals: {
+        Row: {
+          created_at: string
+          goal_type: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          goal_type: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          goal_type?: string
+          id?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []

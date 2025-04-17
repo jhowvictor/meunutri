@@ -13,6 +13,7 @@ import ReceitasFavoritas from "./pages/ReceitasFavoritas";
 import MinhasPastas from "./pages/MinhasPastas";
 import ConteudoPasta from "./pages/ConteudoPasta";
 import AnalisarRefeicao from "./pages/AnalisarRefeicao";
+import EvolucaoCorporal from "./pages/EvolucaoCorporal";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ApiKeyConfig from "./components/ApiKeyConfig";
@@ -104,6 +105,14 @@ const App = () => (
                   <>
                     <Header />
                     <AnalisarRefeicao />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/evolucao-corporal" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <EvolucaoCorporal />
                   </>
                 </ProtectedRoute>
               } />

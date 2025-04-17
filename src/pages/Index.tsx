@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { ChefHat, Utensils, BookOpen, ShoppingCart, Star, Folder, Camera } from "lucide-react";
+import { ChefHat, Utensils, BookOpen, ShoppingCart, Star, Folder, Camera, LineChart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useLanguage } from "@/hooks/use-language";
@@ -147,6 +147,24 @@ const Index = () => {
               <Link to="/analisar-refeicao">
                 <Button className="w-full" size="lg">
                   Analisar minha refeição (foto ou vídeo)
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Minha Evolução Corporal - NOVO */}
+          <Card className="border-2 hover:border-primary/80 hover:shadow-lg transition-all">
+            <CardHeader className="text-center">
+              <LineChart className="h-12 w-12 mx-auto text-primary mb-2" />
+              <CardTitle className="text-xl">Minha Evolução Corporal</CardTitle>
+              <CardDescription>
+                Registre e acompanhe suas medidas corporais com gráficos de evolução
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center pt-2">
+              <Link to="/evolucao-corporal">
+                <Button className="w-full" size="lg">
+                  Acompanhar Evolução
                 </Button>
               </Link>
             </CardContent>
