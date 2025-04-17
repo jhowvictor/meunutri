@@ -7,7 +7,8 @@ import {
   Check,
   Download,
   Loader2,
-  FileText
+  FileText,
+  AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { openAIService } from "@/services/openai";
 import { toast } from "@/components/ui/sonner";
 import { jsPDF } from "jspdf";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const EbookPersonalizado = () => {
   const [formData, setFormData] = useState({
@@ -24,6 +26,7 @@ const EbookPersonalizado = () => {
 
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [requestError, setRequestError] = useState<string | null>(null);
   const [ebookGerado, setEbookGerado] = useState({
     titulo: "",
     conteudo: ""
@@ -34,10 +37,15 @@ const EbookPersonalizado = () => {
       ...prev,
       detalhes: value
     }));
+    // Limpar mensagens de erro quando o usuário edita o campo
+    if (requestError) setRequestError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Resetar estados
+    setRequestError(null);
     
     // Verificar se a chave da API está configurada
     if (!openAIService.getApiKey()) {
@@ -72,21 +80,20 @@ const EbookPersonalizado = () => {
     `;
     
     try {
+      console.log("Iniciando geração de e-book com prompt de tamanho:", prompt.length);
+      
       // Passando isEbook: true para indicar que é uma solicitação de e-book
       const result = await openAIService.generateContent({
         prompt: prompt,
         max_tokens: 4000,  // Aumentando os tokens para garantir que todas as receitas sejam geradas
-        isEbook: true      // Novo parâmetro para identificar que é um e-book
+        isEbook: true      // Marcador para identificar que é um e-book
       });
       
       if (!result.isError && result.content) {
+        console.log("E-book gerado com sucesso, tamanho:", result.content.length);
+        
         // Tenta extrair o título do e-book da resposta
-        let titulo = formData.detalhes.toLowerCase().includes("vegetariana") ? "Delícias Vegetarianas" :
-                   formData.detalhes.toLowerCase().includes("vegana") ? "Cardápio Vegano" :
-                   formData.detalhes.toLowerCase().includes("café da manhã") ? "Café da Manhã Saudável" :
-                   formData.detalhes.toLowerCase().includes("jantar") ? "Jantares Nutritivos" :
-                   formData.detalhes.toLowerCase().includes("low carb") ? "Receitas Low Carb" :
-                   "Alimentação Saudável";
+        let titulo = "E-book Personalizado";
         
         // Tenta extrair o título da resposta com diversos patterns possíveis
         const titlePatterns = [
@@ -100,8 +107,27 @@ const EbookPersonalizado = () => {
           const match = result.content.match(pattern);
           if (match && match[1]) {
             titulo = match[1].trim();
+            console.log("Título extraído:", titulo);
             break;
           }
+        }
+        
+        // Se não conseguiu extrair um título, use um com base no conteúdo
+        if (!titulo || titulo === "E-book Personalizado") {
+          if (formData.detalhes.toLowerCase().includes("vegetariana")) {
+            titulo = "Delícias Vegetarianas";
+          } else if (formData.detalhes.toLowerCase().includes("vegana")) {
+            titulo = "Cardápio Vegano";
+          } else if (formData.detalhes.toLowerCase().includes("café da manhã")) {
+            titulo = "Café da Manhã Saudável";
+          } else if (formData.detalhes.toLowerCase().includes("jantar")) {
+            titulo = "Jantares Nutritivos";
+          } else if (formData.detalhes.toLowerCase().includes("low carb")) {
+            titulo = "Receitas Low Carb";
+          } else {
+            titulo = "Alimentação Saudável";
+          }
+          console.log("Usando título padrão:", titulo);
         }
         
         setEbookGerado({
@@ -111,10 +137,13 @@ const EbookPersonalizado = () => {
         
         setFormSubmitted(true);
       } else {
+        console.error("Erro ao gerar e-book, nenhum conteúdo retornado");
+        setRequestError("Não foi possível gerar o e-book. Por favor, tente novamente ou use uma descrição mais simples.");
         toast.error("Erro ao gerar o e-book. Por favor, tente novamente.");
       }
     } catch (error) {
       console.error("Erro ao gerar e-book:", error);
+      setRequestError("Ocorreu um erro técnico. Por favor, tente novamente mais tarde.");
       toast.error("Ocorreu um erro ao processar sua solicitação.");
     } finally {
       setIsLoading(false);
@@ -214,6 +243,16 @@ const EbookPersonalizado = () => {
                   />
                 </div>
 
+                {requestError && (
+                  <Alert variant="destructive" className="mt-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle>Erro</AlertTitle>
+                    <AlertDescription>
+                      {requestError}
+                    </AlertDescription>
+                  </Alert>
+                )}
+
                 <CardFooter className="px-0 pt-6">
                   <Button 
                     type="submit" 
@@ -274,10 +313,10 @@ const EbookPersonalizado = () => {
                   </div>
                 </div>
                 
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
+                <div className="bg-white p-6 rounded-lg shadow-sm border overflow-auto max-h-[500px]">
                   <h3 className="text-lg font-medium mb-3">Conteúdo do E-book</h3>
                   <div className="whitespace-pre-line text-sm">
-                    {ebookGerado.conteudo}
+                    {ebookGerado.conteudo || "Nenhum conteúdo disponível."}
                   </div>
                 </div>
                 

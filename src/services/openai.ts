@@ -9,7 +9,7 @@ interface OpenAIRequestParams {
   max_tokens?: number;
   temperature?: number;
   language?: string;
-  isEbook?: boolean; // Novo parâmetro para identificar solicitações de e-book
+  isEbook?: boolean;
 }
 
 interface OpenAIResponse {
@@ -64,20 +64,30 @@ export class OpenAIService {
       
       // Instruções específicas para e-books
       if (isEbook) {
-        systemMessage += `\n\nIMPORTANTE PARA E-BOOK DE RECEITAS:
+        systemMessage = `Você é um chef de cozinha e nutricionista especialista em receitas saudáveis e funcionais. Sua tarefa é criar um e-book de receitas completo.
+
+IMPORTANTE PARA E-BOOK DE RECEITAS:
 1. Você DEVE cumprir TODAS as especificações do usuário (como número de receitas solicitadas).
-2. Se a pessoa pedir 20 receitas, você DEVE fornecer exatamente 20 receitas completas.
-3. Se o usuário mencionar temas ou tipos específicos de receitas, você deve segui-los rigorosamente.
-4. Cada receita deve ser completa com título, ingredientes, modo de preparo e informações nutricionais.
-5. Você deve aproveitar ao máximo o espaço disponível para gerar o conteúdo completo solicitado.`;
+2. Se a pessoa pedir um número específico de receitas (como 10, 15, 20, etc), você DEVE fornecer EXATAMENTE esse número completo, sem exceções.
+3. Cada receita DEVE seguir o formato: Título da Receita, Ingredientes, Modo de Preparo, Informações Nutricionais.
+4. O e-book deve ter um título claramente identificado no início do texto.
+5. VERIFIQUE sua resposta antes de enviar e conte se o número de receitas está correto.`;
         
         // Para e-books, use o modelo mais avançado e mais tokens
         model = "gpt-4o";
         max_tokens = 4000; // Aumentar significativamente o limite de tokens para e-books
+        temperature = 0.7; // Definir temperatura para mais consistência
       }
       
       // Adiciona instrução de idioma
       systemMessage += `\n\nIMPORTANTE: Responda sempre no seguinte idioma: ${language}.`;
+      
+      console.log("Enviando solicitação para OpenAI com os parâmetros:", {
+        model,
+        max_tokens,
+        isEbook,
+        promptLength: prompt.length
+      });
       
       const response = await fetch(this.apiUrl, {
         method: "POST",
@@ -104,8 +114,17 @@ export class OpenAIService {
       
       if (!response.ok) {
         const errorData = await response.json();
-        console.error("Erro na API:", errorData);
-        toast.error("Erro ao gerar conteúdo. Por favor, tente novamente.");
+        console.error("Erro na API do OpenAI:", errorData);
+        
+        // Mensagens de erro mais detalhadas baseadas no código de erro
+        if (errorData.error?.code === 'context_length_exceeded') {
+          toast.error("O conteúdo solicitado é muito grande. Por favor, tente um pedido menor.");
+        } else if (errorData.error?.type === 'invalid_request_error') {
+          toast.error("Solicitação inválida: " + errorData.error.message);
+        } else {
+          toast.error("Erro ao gerar conteúdo. Por favor, tente novamente.");
+        }
+        
         return {
           content: "",
           isError: true
@@ -113,13 +132,15 @@ export class OpenAIService {
       }
       
       const data = await response.json();
+      console.log("Resposta recebida com sucesso, tamanho do conteúdo:", data.choices[0].message.content.length);
+      
       return {
         content: data.choices[0].message.content,
         isError: false
       };
     } catch (error) {
-      console.error("Erro na requisição:", error);
-      toast.error("Erro ao se comunicar com a API. Verifique sua conexão.");
+      console.error("Erro na requisição para OpenAI:", error);
+      toast.error("Erro ao se comunicar com a API. Verifique sua conexão e tente novamente.");
       return {
         content: "",
         isError: true
