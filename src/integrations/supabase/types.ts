@@ -201,6 +201,33 @@ export type Database = {
         }
         Relationships: []
       }
+      usuarios: {
+        Row: {
+          created_at: string[]
+          "E-mail": string
+          id: string
+          Nome: string
+          pagamento_ativo: boolean
+          plano: string
+        }
+        Insert: {
+          created_at: string[]
+          "E-mail": string
+          id?: string
+          Nome: string
+          pagamento_ativo: boolean
+          plano: string
+        }
+        Update: {
+          created_at?: string[]
+          "E-mail"?: string
+          id?: string
+          Nome?: string
+          pagamento_ativo?: boolean
+          plano?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

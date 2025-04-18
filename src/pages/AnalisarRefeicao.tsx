@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/sonner";
 import { openAIService } from "@/services/openai";
 import { useLanguage } from "@/hooks/use-language";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const AnalisarRefeicao = () => {
   const { t } = useLanguage();
@@ -15,6 +16,8 @@ const AnalisarRefeicao = () => {
   const [analysis, setAnalysis] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isVideo, setIsVideo] = useState<boolean>(false);
+  const [errorDialog, setErrorDialog] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -70,26 +73,42 @@ const AnalisarRefeicao = () => {
     setAnalysis("");
 
     try {
+      console.log("Iniciando análise de mídia...");
       // Convertendo a mídia para base64
       const base64 = await convertFileToBase64(mediaFile);
+      console.log("Mídia convertida para base64");
       
       // Preparando o prompt para a IA
       const prompt = `
         Você é um nutricionista e chef funcional com conhecimento técnico em análise visual de alimentos.
 
-        Analise a seguinte ${isVideo ? 'imagens do vídeo' : 'imagem'} de uma refeição e faça:
+        Analise a seguinte ${isVideo ? 'imagens do vídeo' : 'imagem'} de uma refeição e forneça as seguintes informações de forma ESTRUTURADA:
 
-        1. Identifique os ingredientes principais visíveis.
-        2. Estime os macronutrientes da refeição (carboidratos, proteínas e gorduras e calorias totais), com base na porção visível.
-        3. Classifique a refeição nas seguintes categorias (se aplicável): Vegana, Vegetariana, Sem glúten, Sem lactose, Apta para diabéticos.
+        1. Identifique os ingredientes principais visíveis na refeição.
+        
+        2. Estime os macronutrientes da refeição:
+           - Carboidratos (em gramas)
+           - Proteínas (em gramas)
+           - Gorduras (em gramas)
+           - Calorias totais (kcal)
+        
+        3. Classifique a refeição nas seguintes categorias com SIM ou NÃO:
+           - Vegana: (SIM/NÃO)
+           - Vegetariana: (SIM/NÃO)
+           - Sem glúten: (SIM/NÃO)
+           - Sem lactose: (SIM/NÃO)
+           - Apta para diabéticos: (SIM/NÃO)
+        
         4. Dê uma breve explicação da análise, de forma clara e acessível.
+        
         5. Sugira uma forma de melhorar a refeição para torná-la mais saudável, equilibrada ou funcional.
 
-        Se não conseguir identificar claramente os itens ou houver baixa qualidade de imagem, peça gentilmente uma nova imagem com mais nitidez e boa iluminação.
+        IMPORTANTE: Mantenha a formatação clara com títulos e listas. Se não conseguir identificar claramente os itens ou houver baixa qualidade de imagem, peça gentilmente uma nova imagem com mais nitidez e boa iluminação.
         
-        Imagem: ${base64}
+        MUITO IMPORTANTE: Você DEVE apresentar os macronutrientes (carboidratos, proteínas e gorduras) em gramas e as calorias totais em kcal, mesmo que seja uma estimativa.
       `;
 
+      console.log("Enviando prompt para o serviço OpenAI");
       // Enviando para o serviço da OpenAI
       const result = await openAIService.generateContent({
         prompt,
@@ -98,6 +117,8 @@ const AnalisarRefeicao = () => {
         max_tokens: 1000
       });
 
+      console.log("Resposta recebida do serviço OpenAI:", result);
+
       if (result.isError) {
         throw new Error("Erro ao analisar a imagem");
       }
@@ -105,7 +126,8 @@ const AnalisarRefeicao = () => {
       setAnalysis(result.content);
     } catch (error) {
       console.error("Erro na análise:", error);
-      toast.error("Ocorreu um erro ao analisar sua refeição. Por favor, tente novamente.");
+      setErrorMessage("Ocorreu um erro ao analisar sua refeição. Por favor, tente novamente.");
+      setErrorDialog(true);
     } finally {
       setIsLoading(false);
     }
@@ -229,6 +251,28 @@ const AnalisarRefeicao = () => {
           </Card>
         </div>
       </div>
+
+      {/* Dialog para mostrar erros */}
+      <Dialog open={errorDialog} onOpenChange={setErrorDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Erro na Análise</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p>{errorMessage}</p>
+            <p className="mt-2">Dicas para resolver:</p>
+            <ul className="list-disc pl-6 mt-2">
+              <li>Verifique se a imagem é clara e bem iluminada</li>
+              <li>Tente uma imagem de ângulo diferente</li>
+              <li>Certifique-se de que o alimento está visível</li>
+              <li>Verifique sua conexão com a internet</li>
+            </ul>
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={() => setErrorDialog(false)}>Fechar</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

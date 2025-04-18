@@ -10,6 +10,7 @@ interface OpenAIRequestParams {
   temperature?: number;
   language?: string;
   isEbook?: boolean;
+  isImageAnalysis?: boolean;
 }
 
 interface OpenAIResponse {
@@ -38,7 +39,8 @@ export class OpenAIService {
     max_tokens = 1000, 
     temperature = 0.7, 
     language = "pt",
-    isEbook = false 
+    isEbook = false,
+    isImageAnalysis = false
   }: OpenAIRequestParams): Promise<OpenAIResponse> {
     const apiKey = this.getApiKey();
     
@@ -78,6 +80,24 @@ IMPORTANTE PARA E-BOOK DE RECEITAS:
         max_tokens = 4000; // Aumentar significativamente o limite de tokens para e-books
         temperature = 0.7; // Definir temperatura para mais consistência
       }
+
+      // Instruções específicas para análise de alimentos
+      if (isImageAnalysis || prompt.toLowerCase().includes('analise') && (prompt.toLowerCase().includes('refeição') || prompt.toLowerCase().includes('comida') || prompt.toLowerCase().includes('alimento'))) {
+        systemMessage = `Você é um nutricionista especialista em análise visual de alimentos e refeições. 
+        
+PARA ANÁLISE DE REFEIÇÕES:
+1. Identifique os ingredientes principais visíveis.
+2. Forneça uma estimativa dos macronutrientes (carboidratos, proteínas, gorduras em gramas) e calorias totais (kcal).
+3. Classifique a refeição como: Vegana (SIM/NÃO), Vegetariana (SIM/NÃO), Sem Glúten (SIM/NÃO), Sem Lactose (SIM/NÃO), Apta para diabéticos (SIM/NÃO).
+4. Forneça uma análise nutricional breve e clara.
+5. Sugira melhorias para a refeição.
+
+IMPORTANTE: Mesmo que seja uma estimativa, você DEVE fornecer valores numéricos para carboidratos, proteínas, gorduras e calorias. Use seu conhecimento nutricional para fazer a melhor estimativa possível.`;
+
+        // Para análise de imagem, use sempre o modelo avançado
+        model = "gpt-4o";
+        max_tokens = 1500;
+      }
       
       // Adiciona instrução de idioma
       systemMessage += `\n\nIMPORTANTE: Responda sempre no seguinte idioma: ${language}.`;
@@ -86,6 +106,7 @@ IMPORTANTE PARA E-BOOK DE RECEITAS:
         model,
         max_tokens,
         isEbook,
+        isImageAnalysis,
         promptLength: prompt.length
       });
       
