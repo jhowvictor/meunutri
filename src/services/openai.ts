@@ -13,6 +13,15 @@ interface OpenAIRequestParams {
   isImageAnalysis?: boolean;
 }
 
+interface OpenAIVisionRequestParams {
+  base64Image: string;
+  prompt: string;
+  model?: string;
+  max_tokens?: number;
+  temperature?: number;
+  language?: string;
+}
+
 interface OpenAIResponse {
   content: string;
   isError: boolean;
@@ -30,6 +39,110 @@ export class OpenAIService {
   // Método para obter a chave da API
   getApiKey(): string | null {
     return this.apiKey;
+  }
+  
+  // Método para gerar conteúdo com análise de imagem/visão
+  async generateContentWithVision({
+    base64Image,
+    prompt,
+    model = "gpt-4o",
+    max_tokens = 1000,
+    temperature = 0.7,
+    language = "pt"
+  }: OpenAIVisionRequestParams): Promise<OpenAIResponse> {
+    const apiKey = this.getApiKey();
+    
+    if (!apiKey) {
+      toast.error("Chave da API não configurada. Por favor, configure-a nas configurações.");
+      return {
+        content: "",
+        isError: true
+      };
+    }
+    
+    try {
+      const systemMessage = `Você é um nutricionista especialista em análise visual de alimentos e refeições.
+      
+      IMPORTANTE: Responda sempre no seguinte idioma: ${language}.
+      
+      PARA ANÁLISE DE REFEIÇÕES:
+      1. Identifique os ingredientes principais visíveis.
+      2. Forneça uma estimativa dos macronutrientes (carboidratos, proteínas, gorduras em gramas) e calorias totais (kcal).
+      3. Classifique a refeição como: Vegana (SIM/NÃO), Vegetariana (SIM/NÃO), Sem Glúten (SIM/NÃO), Sem Lactose (SIM/NÃO), Apta para diabéticos (SIM/NÃO).
+      4. Forneça uma análise nutricional breve e clara.
+      5. Sugira melhorias para a refeição.
+      
+      IMPORTANTE: Mesmo que seja uma estimativa, você DEVE fornecer valores numéricos para carboidratos, proteínas, gorduras e calorias. Use seu conhecimento nutricional para fazer a melhor estimativa possível.`;
+      
+      console.log("Enviando solicitação de análise visual para OpenAI...");
+      
+      const response = await fetch(this.apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [
+            {
+              role: "system",
+              content: systemMessage
+            },
+            {
+              role: "user",
+              content: [
+                { type: "text", text: prompt },
+                {
+                  type: "image_url",
+                  image_url: {
+                    url: `data:image/jpeg;base64,${base64Image}`
+                  }
+                }
+              ]
+            }
+          ],
+          max_tokens: max_tokens,
+          temperature: temperature,
+        })
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Erro na API do OpenAI:", errorData);
+        
+        if (errorData.error?.code === 'context_length_exceeded') {
+          return {
+            content: "A imagem enviada é muito grande ou complexa para análise. Por favor, tente com uma imagem menor ou mais simples.",
+            isError: true
+          };
+        } else if (errorData.error?.type === 'invalid_request_error') {
+          return {
+            content: "Solicitação inválida: " + errorData.error.message,
+            isError: true
+          };
+        } else {
+          return {
+            content: "Erro ao gerar conteúdo. Por favor, tente novamente.",
+            isError: true
+          };
+        }
+      }
+      
+      const data = await response.json();
+      console.log("Resposta de análise visual recebida com sucesso, tamanho do conteúdo:", data.choices[0].message.content.length);
+      
+      return {
+        content: data.choices[0].message.content,
+        isError: false
+      };
+    } catch (error) {
+      console.error("Erro na requisição para OpenAI Vision:", error);
+      return {
+        content: "Erro ao se comunicar com a API. Verifique sua conexão e tente novamente.",
+        isError: true
+      };
+    }
   }
   
   // Método para gerar conteúdo

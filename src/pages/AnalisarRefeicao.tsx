@@ -88,8 +88,6 @@ const AnalisarRefeicao = () => {
       console.log("Mídia convertida para base64");
       
       const prompt = `
-        Você é um nutricionista e chef funcional com conhecimento técnico em análise visual de alimentos.
-
         Analise a seguinte ${isVideo ? 'imagens do vídeo' : 'imagem'} de uma refeição e forneça as seguintes informações de forma ESTRUTURADA:
 
         1. Identifique os ingredientes principais visíveis na refeição.
@@ -117,18 +115,18 @@ const AnalisarRefeicao = () => {
       `;
 
       console.log("Enviando prompt para o serviço OpenAI");
-      const result = await openAIService.generateContent({
-        prompt,
+      const result = await openAIService.generateContentWithVision({
+        base64Image: base64,
+        prompt: prompt,
         model: "gpt-4o",
         temperature: 0.7,
-        max_tokens: 1000,
-        isImageAnalysis: true
+        max_tokens: 1000
       });
 
       console.log("Resposta recebida do serviço OpenAI:", result);
 
       if (result.isError) {
-        throw new Error("Erro ao analisar a imagem");
+        throw new Error("Erro ao analisar a imagem: " + result.content);
       }
 
       setAnalysis(result.content);
@@ -145,7 +143,12 @@ const AnalisarRefeicao = () => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
+      reader.onload = () => {
+        const base64 = reader.result as string;
+        // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
+        const base64Data = base64.split(',')[1];
+        resolve(base64Data);
+      };
       reader.onerror = error => reject(error);
     });
   };
