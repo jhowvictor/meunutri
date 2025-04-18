@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
   ArrowLeft, 
@@ -24,6 +24,7 @@ import { openAIService } from "@/services/openai";
 import { toast } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
+import { useRecipeGenerator } from "@/hooks/use-recipe-generator";
 
 const ReceitaPersonalizada = () => {
   const { user } = useAuth();
@@ -36,7 +37,6 @@ const ReceitaPersonalizada = () => {
   });
 
   const [formSubmitted, setFormSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [receitaGerada, setReceitaGerada] = useState({
     id: "",
     titulo: "",
@@ -81,98 +81,29 @@ const ReceitaPersonalizada = () => {
     }));
   };
 
+  const { generateRecipe, isLoading: isGenerating } = useRecipeGenerator();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!openAIService.getApiKey()) {
-      toast.error("Por favor, configure sua chave da API OpenAI primeiro.");
-      return;
-    }
-    
     try {
-      setIsLoading(true);
+      const recipeResult = await generateRecipe({
+        tipoAlimentacao: formData.tipoAlimentacao,
+        refeicaoDesejada: formData.refeicaoDesejada,
+        restricoesAlimentares: formData.restricoesAlimentares,
+        ingredientesDisponiveis: formData.ingredientesDisponiveis,
+        objetivoAlimentar: formData.objetivoAlimentar
+      });
       
-      const prompt = `
-        Por favor, crie uma receita personalizada com base nas seguintes características:
-        
-        Tipo de Alimentação: ${formData.tipoAlimentacao}
-        Refeição: ${formData.refeicaoDesejada}
-        Restrições Alimentares: ${formData.restricoesAlimentares || "Nenhuma"}
-        Ingredientes Disponíveis: ${formData.ingredientesDisponiveis || "Sem preferência específica"}
-        Objetivo Alimentar: ${formData.objetivoAlimentar}
-        
-        Forneça o nome da receita, ingredientes com medidas, modo de preparo passo a passo, valor calórico, macronutrientes, e dicas extras ou substituições.
-        IMPORTANTE: O nome da receita deve começar com "Nome da Receita: " para facilitar a extração.
-      `;
-      
-      console.log("Enviando solicitação para gerar receita...");
-      const result = await openAIService.generateContent({ prompt });
-      console.log("Resposta recebida:", result.isError ? "Erro" : "Sucesso");
-      
-      if (!result.isError && result.content) {
-        let titulo = "Nova Receita Personalizada";
-        
-        const padroesTitulo = [
-          /(?:Nome da [Rr]eceita|Título):\s*([^\n]+)/i,
-          /^\s*#\s*([^\n]+)/m,
-          /^\s*([^\n:]+)(?:\n|$)/m,
-        ];
-        
-        for (const padrao of padroesTitulo) {
-          const match = result.content.match(padrao);
-          if (match && match[1]?.trim()) {
-            titulo = match[1].trim();
-            break;
-          }
-        }
-        
-        console.log("Título extraído:", titulo);
-        console.log("Conteúdo completo:", result.content.substring(0, 100) + "...");
-        
-        let recipeId = "";
-        if (user) {
-          const { data, error } = await supabase
-            .from('recipes')
-            .insert({
-              user_id: user.id,
-              title: titulo,
-              content: result.content,
-              time: "30 min",
-              calories: "320 kcal",
-              portions: "1",
-              diet_type: formData.tipoAlimentacao,
-              meal_type: formData.refeicaoDesejada,
-              dietary_restrictions: formData.restricoesAlimentares,
-            })
-            .select('id')
-            .single();
-            
-          if (error) {
-            console.error("Erro ao salvar receita:", error);
-          } else if (data) {
-            recipeId = data.id;
-          }
-        }
-        
-        setReceitaGerada({
-          id: recipeId,
-          titulo: titulo,
-          tempo: "30 min",
-          calorias: "320 kcal",
-          descricao: result.content,
-          isFavorite: false
-        });
-        
+      if (recipeResult) {
+        setReceitaGerada(prev => ({
+          ...prev,
+          ...recipeResult
+        }));
         setFormSubmitted(true);
-      } else {
-        console.error("Erro na resposta da API:", result);
-        toast.error("Erro ao gerar a receita. Por favor, tente novamente.");
       }
     } catch (error) {
-      console.error("Erro ao gerar receita:", error);
-      toast.error("Ocorreu um erro ao processar sua solicitação.");
-    } finally {
-      setIsLoading(false);
+      console.error("Erro ao processar receita:", error);
     }
   };
 
@@ -457,10 +388,10 @@ const ReceitaPersonalizada = () => {
                   <Button 
                     type="submit" 
                     size="lg" 
-                    disabled={!isFormValid() || isLoading} 
+                    disabled={!isFormValid() || isGenerating} 
                     className="w-full"
                   >
-                    {isLoading ? (
+                    {isGenerating ? (
                       <>
                         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                         Gerando Receita...
