@@ -32,7 +32,6 @@ const ReceitaPersonalizada = () => {
     refeicaoDesejada: "",
     restricoesAlimentares: "",
     ingredientesDisponiveis: "",
-    numeroPorcoes: "",
     objetivoAlimentar: ""
   });
 
@@ -93,13 +92,12 @@ const ReceitaPersonalizada = () => {
     setIsLoading(true);
     
     const prompt = `
-      Por favor, crie uma receita personalizada com as seguintes características:
+      Por favor, crie uma receita personalizada com base nas seguintes características:
       
       Tipo de Alimentação: ${formData.tipoAlimentacao}
       Refeição: ${formData.refeicaoDesejada}
       Restrições Alimentares: ${formData.restricoesAlimentares || "Nenhuma"}
       Ingredientes Disponíveis: ${formData.ingredientesDisponiveis || "Sem preferência específica"}
-      Número de Porções: ${formData.numeroPorcoes}
       Objetivo Alimentar: ${formData.objetivoAlimentar}
       
       Forneça o nome da receita, ingredientes com medidas, modo de preparo passo a passo, valor calórico, macronutrientes, e dicas extras ou substituições.
@@ -139,7 +137,7 @@ const ReceitaPersonalizada = () => {
               content: result.content,
               time: "30 min",
               calories: "320 kcal",
-              portions: formData.numeroPorcoes,
+              portions: "1",
               diet_type: formData.tipoAlimentacao,
               meal_type: formData.refeicaoDesejada,
               dietary_restrictions: formData.restricoesAlimentares,
@@ -209,7 +207,7 @@ const ReceitaPersonalizada = () => {
             content: receitaGerada.descricao,
             time: receitaGerada.tempo,
             calories: receitaGerada.calorias,
-            portions: formData.numeroPorcoes,
+            portions: "1",
             diet_type: formData.tipoAlimentacao,
             meal_type: formData.refeicaoDesejada,
             dietary_restrictions: formData.restricoesAlimentares,
@@ -261,7 +259,7 @@ const ReceitaPersonalizada = () => {
             content: receitaGerada.descricao,
             time: receitaGerada.tempo,
             calories: receitaGerada.calorias,
-            portions: formData.numeroPorcoes,
+            portions: "1",
             diet_type: formData.tipoAlimentacao,
             meal_type: formData.refeicaoDesejada,
             dietary_restrictions: formData.restricoesAlimentares
@@ -343,8 +341,8 @@ const ReceitaPersonalizada = () => {
   };
 
   const isFormValid = () => {
-    const { tipoAlimentacao, refeicaoDesejada, restricoesAlimentares, numeroPorcoes, objetivoAlimentar } = formData;
-    return tipoAlimentacao && refeicaoDesejada && numeroPorcoes && objetivoAlimentar;
+    const { tipoAlimentacao, refeicaoDesejada, objetivoAlimentar } = formData;
+    return tipoAlimentacao && refeicaoDesejada && objetivoAlimentar;
   };
 
   return (
@@ -432,29 +430,6 @@ const ReceitaPersonalizada = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="porcoes" className="text-base font-medium block mb-3">
-                    5. Número de Porções
-                  </Label>
-                  <div className="relative">
-                    <Select 
-                      value={formData.numeroPorcoes} 
-                      onValueChange={(value) => handleChange('numeroPorcoes', value)}
-                    >
-                      <SelectTrigger id="porcoes-select">
-                        <SelectValue placeholder="Selecione o número de porções" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {[1, 2, 3, 4, 5, 6, 8, 10].map((num) => (
-                          <SelectItem key={num} value={num.toString()}>
-                            {num} {num === 1 ? 'porção' : 'porções'}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div>
                   <Label className="text-base font-medium block mb-3">6. Objetivo Alimentar</Label>
                   <RadioGroup 
                     value={formData.objetivoAlimentar} 
@@ -528,9 +503,6 @@ const ReceitaPersonalizada = () => {
                       <div className="flex items-center">
                         <Flame className="mr-1 h-4 w-4 text-muted-foreground" />
                         <span>{receitaGerada.calorias}</span>
-                      </div>
-                      <div>
-                        {formData.numeroPorcoes} {parseInt(formData.numeroPorcoes) === 1 ? 'porção' : 'porções'}
                       </div>
                     </div>
                   </div>
