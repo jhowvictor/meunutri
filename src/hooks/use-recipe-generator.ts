@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useToast } from "@/components/ui/sonner";
+import { toast } from "@/components/ui/sonner";
 import { openAIService } from "@/services/openai";
 
 interface RecipePreferences {
@@ -20,14 +20,13 @@ interface GeneratedRecipe {
 
 export const useRecipeGenerator = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const toast = useToast();
 
   // Função principal para gerar receitas
   const generateRecipe = async (preferences: RecipePreferences): Promise<GeneratedRecipe | null> => {
     try {
       // Indica início do processo
       setIsLoading(true);
-      toast.info("Gerando sua receita personalizada...");
+      toast("Gerando sua receita personalizada...");
 
       // Monta o prompt para a IA com as preferências do usuário
       const prompt = `
