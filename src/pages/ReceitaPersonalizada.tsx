@@ -440,10 +440,10 @@ const ReceitaPersonalizada = () => {
                       value={formData.numeroPorcoes} 
                       onValueChange={(value) => handleChange('numeroPorcoes', value)}
                     >
-                      <SelectTrigger id="porcoes">
+                      <SelectTrigger id="porcoes-select">
                         <SelectValue placeholder="Selecione o número de porções" />
                       </SelectTrigger>
-                      <SelectContent position="item-aligned">
+                      <SelectContent>
                         {[1, 2, 3, 4, 5, 6, 8, 10].map((num) => (
                           <SelectItem key={num} value={num.toString()}>
                             {num} {num === 1 ? 'porção' : 'porções'}
