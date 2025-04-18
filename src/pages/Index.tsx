@@ -1,12 +1,10 @@
+
 import { ChefHat, Utensils, BookOpen, ShoppingCart, Star, Folder, Camera, LineChart, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { useLanguage } from "@/hooks/use-language";
+
 const Index = () => {
-  const {
-    t
-  } = useLanguage();
   return <div className="min-h-screen flex flex-col bg-gradient-to-b from-secondary/20 to-background relative overflow-hidden">
       {/* Circular decorative elements */}
       <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
@@ -46,13 +44,9 @@ const Index = () => {
               <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
                 <Utensils className="h-8 w-8 text-white" />
               </div>
-              <CardTitle className="text-xl">{t("recipe_title", {
-                default: "Receita Personalizada"
-              })}</CardTitle>
+              <CardTitle className="text-xl">Receita Personalizada</CardTitle>
               <CardDescription>
-                {t("recipe_description", {
-                default: "Crie receitas adaptadas às suas preferências e necessidades nutricionais"
-              })}
+                Crie receitas adaptadas às suas preferências e necessidades nutricionais
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center pt-4">
@@ -70,13 +64,9 @@ const Index = () => {
               <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
                 <ChefHat className="h-8 w-8 text-white" />
               </div>
-              <CardTitle className="text-xl">{t("diet_title", {
-                default: "Dieta Personalizada"
-              })}</CardTitle>
+              <CardTitle className="text-xl">Dieta Personalizada</CardTitle>
               <CardDescription>
-                {t("diet_description", {
-                default: "Obtenha um plano alimentar completo baseado nos seus dados e objetivos"
-              })}
+                Obtenha um plano alimentar completo baseado nos seus dados e objetivos
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center pt-4">
@@ -94,13 +84,9 @@ const Index = () => {
               <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
                 <BookOpen className="h-8 w-8 text-white" />
               </div>
-              <CardTitle className="text-xl">{t("ebook_title", {
-                default: "E-book Personalizado"
-              })}</CardTitle>
+              <CardTitle className="text-xl">E-book Personalizado</CardTitle>
               <CardDescription>
-                {t("ebook_description", {
-                default: "Crie coletâneas de receitas em formato de e-book para usar quando quiser"
-              })}
+                Crie coletâneas de receitas em formato de e-book para usar quando quiser
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center pt-4">
@@ -118,21 +104,15 @@ const Index = () => {
               <div className="mx-auto p-3 rounded-full citrus-gradient shadow-lg mb-2">
                 <ShoppingCart className="h-8 w-8 text-white" />
               </div>
-              <CardTitle className="text-xl">{t("shopping_list", {
-                default: "Lista de Compras"
-              })}</CardTitle>
+              <CardTitle className="text-xl">Lista de Compras</CardTitle>
               <CardDescription>
-                {t("shopping_list_description", {
-                default: "Gere uma lista de compras personalizada para suas necessidades culinárias"
-              })}
+                Gere uma lista de compras personalizada para suas necessidades culinárias
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center pt-4">
               <Link to="/lista-compras">
                 <Button variant="citrus" className="w-full btn-hover shadow-md rounded-full" size="lg">
-                  {t("create_shopping_list", {
-                  default: "Criar Lista"
-                })}
+                  Criar Lista
                 </Button>
               </Link>
             </CardContent>

@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { openAIService } from "@/services/openai";
-import { useLanguage } from "@/hooks/use-language";
+import { toast } from "@/components/ui/sonner";
 import jsPDF from "jspdf";
 
 // Define types for workout form
@@ -22,8 +22,7 @@ interface WorkoutFormData {
 }
 
 const MontarTreino = () => {
-  const { t } = useLanguage();
-  const { toast } = useToast();
+  const { toast: toastHook } = useToast();
   
   const [formData, setFormData] = useState<WorkoutFormData>({
     objetivo: "",
