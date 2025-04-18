@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -259,11 +260,12 @@ const DietaPersonalizada = () => {
                   <Label htmlFor="exercicios" className="text-base font-medium block mb-3">
                     7. Exercícios
                   </Label>
+                  {/* Correção: Removendo o stopPropagation aqui que estava causando problemas */}
                   <Select 
                     value={formData.exercicios} 
                     onValueChange={(value) => handleChange('exercicios', value)}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id="exercicios">
                       <SelectValue placeholder="Selecione seu nível de atividade física" />
                     </SelectTrigger>
                     <SelectContent>
