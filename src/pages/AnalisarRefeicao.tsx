@@ -1,4 +1,3 @@
-
 import { useState, useRef } from "react";
 import { Camera, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,13 +24,11 @@ const AnalisarRefeicao = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Verificar se é um arquivo de mídia válido
     if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
       toast.error("Por favor, selecione apenas arquivos de imagem ou vídeo.");
       return;
     }
 
-    // Verificar se é um vídeo e se está dentro do limite de 30 segundos
     if (file.type.startsWith('video/')) {
       const video = document.createElement('video');
       video.preload = 'metadata';
@@ -50,7 +47,6 @@ const AnalisarRefeicao = () => {
       
       video.src = URL.createObjectURL(file);
     } else {
-      // É uma imagem
       setMediaFile(file);
       setMediaPreview(URL.createObjectURL(file));
       setIsVideo(false);
@@ -74,11 +70,9 @@ const AnalisarRefeicao = () => {
 
     try {
       console.log("Iniciando análise de mídia...");
-      // Convertendo a mídia para base64
       const base64 = await convertFileToBase64(mediaFile);
       console.log("Mídia convertida para base64");
       
-      // Preparando o prompt para a IA
       const prompt = `
         Você é um nutricionista e chef funcional com conhecimento técnico em análise visual de alimentos.
 
@@ -109,10 +103,9 @@ const AnalisarRefeicao = () => {
       `;
 
       console.log("Enviando prompt para o serviço OpenAI");
-      // Enviando para o serviço da OpenAI
       const result = await openAIService.generateContent({
         prompt,
-        model: "gpt-4o", // Modelo com capacidade de visão
+        model: "gpt-4o",
         temperature: 0.7,
         max_tokens: 1000
       });
@@ -152,11 +145,81 @@ const AnalisarRefeicao = () => {
     }
   };
 
+  const capturePhoto = async () => {
+    try {
+      if (!('mediaDevices' in navigator)) {
+        toast.error("Seu dispositivo não suporta captura de imagens.");
+        return;
+      }
+
+      const video = document.createElement('video');
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment'
+        } 
+      });
+      
+      video.srcObject = stream;
+      await video.play();
+
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      }
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const file = new File([blob], "camera-photo.jpg", { type: "image/jpeg" });
+          setMediaFile(file);
+          setMediaPreview(URL.createObjectURL(file));
+          setIsVideo(false);
+        }
+      }, 'image/jpeg');
+
+      stream.getTracks().forEach(track => track.stop());
+    } catch (error) {
+      console.error("Error capturing photo:", error);
+      toast.error("Erro ao capturar foto. Por favor, tente novamente.");
+    }
+  };
+
+  const handleMediaCapture = () => {
+    const dialogContent = (
+      <div className="p-4 flex flex-col gap-4">
+        <Button 
+          onClick={capturePhoto}
+          className="flex items-center gap-2"
+        >
+          <Camera className="w-4 h-4" />
+          Tirar Foto
+        </Button>
+        <Button 
+          onClick={handleCaptureClick}
+          variant="outline" 
+          className="flex items-center gap-2"
+        >
+          <Upload className="w-4 h-4" />
+          Enviar da Galeria
+        </Button>
+      </div>
+    );
+
+    Dialog.show({
+      title: "Escolha uma opção",
+      content: dialogContent,
+      className: "sm:max-w-[425px]"
+    });
+  };
+
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6 text-primary text-center">Analisar Minha Refeição</h1>
       <p className="text-center text-muted-foreground mb-8">
-        Envie uma foto ou um vídeo curto (máx. 30 segundos) da sua refeição para receber uma análise nutricional.
+        Tire uma foto ou envie uma imagem da sua refeição para receber uma análise nutricional.
       </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -175,11 +238,11 @@ const AnalisarRefeicao = () => {
             {!mediaPreview ? (
               <div 
                 className="border-2 border-dashed border-primary/50 rounded-lg p-8 text-center cursor-pointer hover:bg-primary/10 transition-colors"
-                onClick={handleCaptureClick}
+                onClick={handleMediaCapture}
               >
                 <Camera className="h-12 w-12 mx-auto text-primary mb-2" />
                 <p>Clique para capturar ou fazer upload</p>
-                <p className="text-sm text-muted-foreground mt-2">Formatos suportados: JPG, PNG, GIF, MP4, MOV</p>
+                <p className="text-sm text-muted-foreground mt-2">Tire uma foto ou escolha da galeria</p>
               </div>
             ) : (
               <div className="relative">
@@ -252,7 +315,6 @@ const AnalisarRefeicao = () => {
         </div>
       </div>
 
-      {/* Dialog para mostrar erros */}
       <Dialog open={errorDialog} onOpenChange={setErrorDialog}>
         <DialogContent>
           <DialogHeader>
