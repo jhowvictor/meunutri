@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChefHat } from "lucide-react";
@@ -16,6 +15,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isResetMode, setIsResetMode] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,12 +56,34 @@ const Auth = () => {
       
       toast.success("Cadastro realizado com sucesso! Verifique seu e-mail para confirmar.");
       
-      // Automatically sign in after signup if no email confirmation is required
       if (data.session) {
         navigate("/");
       }
     } catch (error: any) {
       setError(error.message || "Erro ao criar conta. Verifique seus dados.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+
+      if (error) throw error;
+
+      toast.success(
+        "Se esse email estiver cadastrado, você receberá um link para redefinir sua senha."
+      );
+      setIsResetMode(false);
+    } catch (error: any) {
+      setError(error.message || "Erro ao enviar email de recuperação de senha.");
     } finally {
       setLoading(false);
     }
@@ -75,90 +97,138 @@ const Auth = () => {
         </div>
         <h1 className="text-3xl font-bold text-center mb-2 text-primary">MeuNutri.AI</h1>
         <p className="text-center mb-8 text-muted-foreground">
-          Faça login ou crie sua conta para acessar receitas personalizadas
+          {isResetMode
+            ? "Digite seu email para receber o link de recuperação de senha"
+            : "Faça login ou crie sua conta para acessar receitas personalizadas"}
         </p>
 
         <div className="bg-white rounded-lg shadow-md p-6">
-          <Tabs defaultValue="login">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="login">Fazer Login</TabsTrigger>
-              <TabsTrigger value="signup">Criar Conta</TabsTrigger>
-            </TabsList>
-
-            {error && (
-              <Alert variant="destructive" className="mb-6">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            <TabsContent value="login">
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">E-mail</Label>
-                  <Input
-                    id="email"
-                    type="email" 
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Senha</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Sua senha"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
+          {isResetMode ? (
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="reset-email">E-mail</Label>
+                <Input
+                  id="reset-email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-4">
                 <Button 
                   type="submit" 
                   className="w-full" 
                   disabled={loading}
                 >
-                  {loading ? "Entrando..." : "Entrar"}
+                  {loading ? "Enviando..." : "Enviar link de recuperação"}
                 </Button>
-              </form>
-            </TabsContent>
-
-            <TabsContent value="signup">
-              <form onSubmit={handleSignUp} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">E-mail</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">Senha</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="Crie uma senha"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full" 
-                  disabled={loading}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => setIsResetMode(false)}
                 >
-                  {loading ? "Criando conta..." : "Criar conta"}
+                  Voltar ao login
                 </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+              </div>
+            </form>
+          ) : (
+            <Tabs defaultValue="login">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="login">Fazer Login</TabsTrigger>
+                <TabsTrigger value="signup">Criar Conta</TabsTrigger>
+              </TabsList>
+
+              {error && (
+                <Alert variant="destructive" className="mb-6">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              <TabsContent value="login">
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">E-mail</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="seu@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Senha</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Sua senha"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={loading}
+                  >
+                    {loading ? "Entrando..." : "Entrar"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="w-full"
+                    onClick={() => setIsResetMode(true)}
+                  >
+                    Esqueceu sua senha?
+                  </Button>
+                </form>
+              </TabsContent>
+
+              <TabsContent value="signup">
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">E-mail</Label>
+                    <Input
+                      id="signup-email"
+                      type="email"
+                      placeholder="seu@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Senha</Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      placeholder="Crie uma senha"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full" 
+                    disabled={loading}
+                  >
+                    {loading ? "Criando conta..." : "Criar conta"}
+                  </Button>
+                </form>
+              </TabsContent>
+            </Tabs>
+          )}
         </div>
       </div>
     </div>
