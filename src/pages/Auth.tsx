@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChefHat } from "lucide-react";
@@ -8,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import LanguageSelector from "@/components/LanguageSelector";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -92,10 +94,13 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-secondary/30 p-4">
       <div className="w-full max-w-md">
-        <div className="flex justify-center mb-6">
-          <ChefHat className="h-16 w-16 text-primary" />
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-2">
+            <ChefHat className="h-16 w-16 text-primary" />
+            <h1 className="text-3xl font-bold text-primary">MeuNutri.AI</h1>
+          </div>
+          <LanguageSelector />
         </div>
-        <h1 className="text-3xl font-bold text-center mb-2 text-primary">MeuNutri.AI</h1>
         <p className="text-center mb-8 text-muted-foreground">
           {isResetMode
             ? "Digite seu email para receber o link de recuperação de senha"
