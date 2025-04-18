@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChefHat } from "lucide-react";
@@ -15,6 +14,8 @@ const Auth = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isResetMode, setIsResetMode] = useState(false);
@@ -48,10 +49,22 @@ const Auth = () => {
     setError(null);
     setLoading(true);
     
+    if (!fullName || !phoneNumber || !email || !password) {
+      setError("Todos os campos são obrigatórios");
+      setLoading(false);
+      return;
+    }
+    
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          data: {
+            full_name: fullName,
+            phone_number: phoneNumber
+          }
+        }
       });
       
       if (error) throw error;
@@ -108,132 +121,121 @@ const Auth = () => {
         </p>
 
         <div className="bg-white rounded-lg shadow-md p-6">
-          {isResetMode ? (
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-              <div className="space-y-2">
-                <Label htmlFor="reset-email">E-mail</Label>
-                <Input
-                  id="reset-email"
-                  type="email"
-                  placeholder="seu@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-4">
+          <Tabs defaultValue="login">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="login">Fazer Login</TabsTrigger>
+              <TabsTrigger value="signup">Criar Conta</TabsTrigger>
+            </TabsList>
+
+            {error && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <TabsContent value="login">
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">E-mail</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="password">Senha</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Sua senha"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
                 <Button 
                   type="submit" 
                   className="w-full" 
                   disabled={loading}
                 >
-                  {loading ? "Enviando..." : "Enviar link de recuperação"}
+                  {loading ? "Entrando..." : "Entrar"}
                 </Button>
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="link"
                   className="w-full"
-                  onClick={() => setIsResetMode(false)}
+                  onClick={() => setIsResetMode(true)}
                 >
-                  Voltar ao login
+                  Esqueceu sua senha?
                 </Button>
-              </div>
-            </form>
-          ) : (
-            <Tabs defaultValue="login">
-              <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="login">Fazer Login</TabsTrigger>
-                <TabsTrigger value="signup">Criar Conta</TabsTrigger>
-              </TabsList>
+              </form>
+            </TabsContent>
 
-              {error && (
-                <Alert variant="destructive" className="mb-6">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
-
-              <TabsContent value="login">
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">E-mail</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Senha</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="Sua senha"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={loading}
-                  >
-                    {loading ? "Entrando..." : "Entrar"}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="link"
-                    className="w-full"
-                    onClick={() => setIsResetMode(true)}
-                  >
-                    Esqueceu sua senha?
-                  </Button>
-                </form>
-              </TabsContent>
-
-              <TabsContent value="signup">
-                <form onSubmit={handleSignUp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">E-mail</Label>
-                    <Input
-                      id="signup-email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Senha</Label>
-                    <Input
-                      id="signup-password"
-                      type="password"
-                      placeholder="Crie uma senha"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button 
-                    type="submit" 
-                    className="w-full" 
-                    disabled={loading}
-                  >
-                    {loading ? "Criando conta..." : "Criar conta"}
-                  </Button>
-                </form>
-              </TabsContent>
-            </Tabs>
-          )}
+            <TabsContent value="signup">
+              <form onSubmit={handleSignUp} className="space-y-4">
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="signup-full-name">Nome Completo</Label>
+                  <Input
+                    id="signup-full-name"
+                    type="text"
+                    placeholder="Digite seu nome completo"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-phone">Número de Celular</Label>
+                  <Input
+                    id="signup-phone"
+                    type="tel"
+                    placeholder="(00) 00000-0000"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-email">E-mail</Label>
+                  <Input
+                    id="signup-email"
+                    type="email"
+                    placeholder="seu@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-password">Senha</Label>
+                  <Input
+                    id="signup-password"
+                    type="password"
+                    placeholder="Crie uma senha"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button 
+                  type="submit" 
+                  className="w-full" 
+                  disabled={loading}
+                >
+                  {loading ? "Criando conta..." : "Criar conta"}
+                </Button>
+              </form>
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
