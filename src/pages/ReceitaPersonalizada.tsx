@@ -47,21 +47,18 @@ const ReceitaPersonalizada = () => {
     isFavorite: false
   });
   
-  // Estados para os diálogos
   const [showFolderDialog, setShowFolderDialog] = useState(false);
   const [folderName, setFolderName] = useState("");
   const [userFolders, setUserFolders] = useState<{id: string, name: string}[]>([]);
   const [selectedFolder, setSelectedFolder] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
-  // Carregar pastas do usuário quando o diálogo é aberto
   useEffect(() => {
     if (showFolderDialog && user) {
       fetchUserFolders();
     }
   }, [showFolderDialog, user]);
 
-  // Função para buscar pastas do usuário
   const fetchUserFolders = async () => {
     try {
       const { data, error } = await supabase
@@ -88,7 +85,6 @@ const ReceitaPersonalizada = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Verificar se a chave da API está configurada
     if (!openAIService.getApiKey()) {
       toast.error("Por favor, configure sua chave da API OpenAI primeiro.");
       return;
@@ -96,7 +92,6 @@ const ReceitaPersonalizada = () => {
     
     setIsLoading(true);
     
-    // Construir o prompt para a API
     const prompt = `
       Por favor, crie uma receita personalizada com as seguintes características:
       
@@ -115,14 +110,12 @@ const ReceitaPersonalizada = () => {
       const result = await openAIService.generateContent({ prompt });
       
       if (!result.isError && result.content) {
-        // Melhora a extração do título da receita
         let titulo = "Nova Receita Personalizada";
         
-        // Tenta extrair o título usando vários padrões possíveis
         const padroesTitulo = [
           /(?:Nome da [Rr]eceita|Título):\s*([^\n]+)/i,
-          /^\s*#\s*([^\n]+)/m,  // Para formato Markdown (# Título)
-          /^\s*([^\n:]+)(?:\n|$)/m,  // Pega a primeira linha como título se não encontrar outros padrões
+          /^\s*#\s*([^\n]+)/m,
+          /^\s*([^\n:]+)(?:\n|$)/m,
         ];
         
         for (const padrao of padroesTitulo) {
@@ -136,7 +129,6 @@ const ReceitaPersonalizada = () => {
         console.log("Título extraído:", titulo);
         console.log("Conteúdo completo:", result.content.substring(0, 100) + "...");
         
-        // Se o usuário está logado, salve a receita no banco de dados
         let recipeId = "";
         if (user) {
           const { data, error } = await supabase
@@ -145,8 +137,8 @@ const ReceitaPersonalizada = () => {
               user_id: user.id,
               title: titulo,
               content: result.content,
-              time: "30 min", // Exemplo - idealmente seria extraído da resposta
-              calories: "320 kcal", // Exemplo - idealmente seria extraído da resposta
+              time: "30 min",
+              calories: "320 kcal",
               portions: formData.numeroPorcoes,
               diet_type: formData.tipoAlimentacao,
               meal_type: formData.refeicaoDesejada,
@@ -165,8 +157,8 @@ const ReceitaPersonalizada = () => {
         setReceitaGerada({
           id: recipeId,
           titulo: titulo,
-          tempo: "30 min", // Exemplo - idealmente seria extraído da resposta
-          calorias: "320 kcal", // Exemplo - idealmente seria extraído da resposta
+          tempo: "30 min",
+          calorias: "320 kcal",
           descricao: result.content,
           isFavorite: false
         });
@@ -192,7 +184,6 @@ const ReceitaPersonalizada = () => {
     try {
       setIsSaving(true);
       
-      // Se a receita já está salva (tem ID)
       if (receitaGerada.id) {
         const { error } = await supabase
           .from('recipes')
@@ -210,7 +201,6 @@ const ReceitaPersonalizada = () => {
           ? "Receita removida dos favoritos" 
           : "Receita adicionada aos favoritos");
       } else {
-        // Se a receita não estava salva ainda
         const { data, error } = await supabase
           .from('recipes')
           .insert({
@@ -253,19 +243,16 @@ const ReceitaPersonalizada = () => {
       return;
     }
 
-    // Abrir diálogo para seleção de pasta
     setShowFolderDialog(true);
   };
-  
+
   const handleSaveToFolderConfirm = async () => {
     try {
       setIsSaving(true);
       
-      // Primeiro, garantir que a receita exista
       let recipeId = receitaGerada.id;
       
       if (!recipeId) {
-        // Se a receita não estava salva ainda, salve-a primeiro
         const { data, error } = await supabase
           .from('recipes')
           .insert({
@@ -290,12 +277,9 @@ const ReceitaPersonalizada = () => {
         }
       }
       
-      // Verificar se é necessário criar uma nova pasta ou usar existente
       let folderId = selectedFolder;
       
-      // Se o usuário informou um nome para nova pasta
       if (!selectedFolder && folderName.trim()) {
-        // Verificar se a pasta já existe
         const { data: existingFolder, error: checkError } = await supabase
           .from('folders')
           .select('id')
@@ -305,11 +289,9 @@ const ReceitaPersonalizada = () => {
           
         if (checkError) throw checkError;
         
-        // Se a pasta já existe, use-a
         if (existingFolder) {
           folderId = existingFolder.id;
         } else {
-          // Caso contrário, crie uma nova pasta
           const { data: newFolder, error: createError } = await supabase
             .from('folders')
             .insert({
@@ -327,12 +309,10 @@ const ReceitaPersonalizada = () => {
         }
       }
       
-      // Verificar se temos tanto a receita quanto a pasta
       if (!recipeId || !folderId) {
         throw new Error("Falha ao identificar receita ou pasta");
       }
       
-      // Adicionar a receita à pasta
       const { error } = await supabase
         .from('folder_recipes')
         .insert({
@@ -341,8 +321,7 @@ const ReceitaPersonalizada = () => {
         });
         
       if (error) {
-        // Se for erro de receita duplicada na pasta, não é um problema crítico
-        if (error.code === '23505') { // código para violação de constraint unique
+        if (error.code === '23505') {
           toast.info("Esta receita já está na pasta selecionada");
         } else {
           throw error;
@@ -351,7 +330,6 @@ const ReceitaPersonalizada = () => {
         toast.success("Receita salva na pasta com sucesso!");
       }
       
-      // Fechar o diálogo
       setShowFolderDialog(false);
       setFolderName("");
       setSelectedFolder("");
@@ -393,7 +371,6 @@ const ReceitaPersonalizada = () => {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Tipo de Alimentação */}
                 <div>
                   <Label className="text-base font-medium block mb-3">1. Tipo de Alimentação</Label>
                   <RadioGroup 
@@ -410,7 +387,6 @@ const ReceitaPersonalizada = () => {
                   </RadioGroup>
                 </div>
 
-                {/* Refeição Desejada */}
                 <div>
                   <Label className="text-base font-medium block mb-3">2. Refeição Desejada</Label>
                   <RadioGroup 
@@ -427,7 +403,6 @@ const ReceitaPersonalizada = () => {
                   </RadioGroup>
                 </div>
 
-                {/* Restrições Alimentares */}
                 <div>
                   <Label htmlFor="restricoes" className="text-base font-medium block mb-3">
                     3. Restrições Alimentares
@@ -440,7 +415,6 @@ const ReceitaPersonalizada = () => {
                   />
                 </div>
 
-                {/* Ingredientes Disponíveis */}
                 <div>
                   <Label htmlFor="ingredientes" className="text-base font-medium block mb-1">
                     4. Ingredientes Disponíveis (opcional)
@@ -457,12 +431,11 @@ const ReceitaPersonalizada = () => {
                   />
                 </div>
 
-                {/* Número de Porções */}
                 <div>
                   <Label htmlFor="porcoes" className="text-base font-medium block mb-3">
                     5. Número de Porções
                   </Label>
-                  <div onClick={(e) => e.stopPropagation()}>
+                  <div className="relative">
                     <Select 
                       value={formData.numeroPorcoes} 
                       onValueChange={(value) => handleChange('numeroPorcoes', value)}
@@ -470,7 +443,7 @@ const ReceitaPersonalizada = () => {
                       <SelectTrigger id="porcoes">
                         <SelectValue placeholder="Selecione o número de porções" />
                       </SelectTrigger>
-                      <SelectContent position="popper">
+                      <SelectContent position="item-aligned">
                         {[1, 2, 3, 4, 5, 6, 8, 10].map((num) => (
                           <SelectItem key={num} value={num.toString()}>
                             {num} {num === 1 ? 'porção' : 'porções'}
@@ -481,7 +454,6 @@ const ReceitaPersonalizada = () => {
                   </div>
                 </div>
 
-                {/* Objetivo Alimentar */}
                 <div>
                   <Label className="text-base font-medium block mb-3">6. Objetivo Alimentar</Label>
                   <RadioGroup 
@@ -571,7 +543,6 @@ const ReceitaPersonalizada = () => {
                   </div>
                 </div>
                 
-                {/* Botões para salvar receita */}
                 <div className="flex flex-col sm:flex-row gap-3 pt-2">
                   <Button
                     onClick={handleSaveAsFavorite}
@@ -608,7 +579,6 @@ const ReceitaPersonalizada = () => {
         )}
       </div>
 
-      {/* Diálogo para salvar em pasta */}
       <Dialog open={showFolderDialog} onOpenChange={setShowFolderDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
