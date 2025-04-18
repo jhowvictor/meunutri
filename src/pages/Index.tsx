@@ -1,22 +1,12 @@
-import { 
-  ChefHat, 
-  Utensils, 
-  BookOpen, 
-  ShoppingCart, 
-  Star, 
-  Folder, 
-  Camera, 
-  LineChart, 
-  Dumbbell 
-} from "lucide-react";
+import { ChefHat, Utensils, BookOpen, ShoppingCart, Star, Folder, Camera, LineChart, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/hooks/use-language";
-
 const Index = () => {
-  const { t } = useLanguage();
-  
+  const {
+    t
+  } = useLanguage();
   return <div className="min-h-screen flex flex-col bg-gradient-to-b from-secondary/20 to-background relative overflow-hidden">
       {/* Circular decorative elements */}
       <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
