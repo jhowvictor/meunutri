@@ -1,3 +1,4 @@
+
 import { useState, useRef } from "react";
 import { Camera, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ const AnalisarRefeicao = () => {
   const [isVideo, setIsVideo] = useState<boolean>(false);
   const [errorDialog, setErrorDialog] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
+  const [showMediaDialog, setShowMediaDialog] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -181,6 +183,7 @@ const AnalisarRefeicao = () => {
       }, 'image/jpeg');
 
       stream.getTracks().forEach(track => track.stop());
+      setShowMediaDialog(false);
     } catch (error) {
       console.error("Error capturing photo:", error);
       toast.error("Erro ao capturar foto. Por favor, tente novamente.");
@@ -188,31 +191,8 @@ const AnalisarRefeicao = () => {
   };
 
   const handleMediaCapture = () => {
-    const dialogContent = (
-      <div className="p-4 flex flex-col gap-4">
-        <Button 
-          onClick={capturePhoto}
-          className="flex items-center gap-2"
-        >
-          <Camera className="w-4 h-4" />
-          Tirar Foto
-        </Button>
-        <Button 
-          onClick={handleCaptureClick}
-          variant="outline" 
-          className="flex items-center gap-2"
-        >
-          <Upload className="w-4 h-4" />
-          Enviar da Galeria
-        </Button>
-      </div>
-    );
-
-    Dialog.show({
-      title: "Escolha uma opção",
-      content: dialogContent,
-      className: "sm:max-w-[425px]"
-    });
+    // Instead of using Dialog.show, we'll use the state to control the Dialog
+    setShowMediaDialog(true);
   };
 
   return (
@@ -314,6 +294,32 @@ const AnalisarRefeicao = () => {
           </Card>
         </div>
       </div>
+
+      {/* Use the standard Dialog component with state */}
+      <Dialog open={showMediaDialog} onOpenChange={setShowMediaDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Escolha uma opção</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 flex flex-col gap-4">
+            <Button 
+              onClick={capturePhoto}
+              className="flex items-center gap-2"
+            >
+              <Camera className="w-4 h-4" />
+              Tirar Foto
+            </Button>
+            <Button 
+              onClick={handleCaptureClick}
+              variant="outline" 
+              className="flex items-center gap-2"
+            >
+              <Upload className="w-4 h-4" />
+              Enviar da Galeria
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={errorDialog} onOpenChange={setErrorDialog}>
         <DialogContent>
