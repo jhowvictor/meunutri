@@ -1,5 +1,5 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Camera, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -19,8 +19,20 @@ const AnalisarRefeicao = () => {
   const [errorDialog, setErrorDialog] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [showMediaDialog, setShowMediaDialog] = useState<boolean>(false);
+  const [showCameraPreview, setShowCameraPreview] = useState<boolean>(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
+  const cameraPreviewRef = useRef<HTMLVideoElement>(null);
+
+  // Clean up camera stream when component unmounts
+  useEffect(() => {
+    return () => {
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, []);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -109,7 +121,8 @@ const AnalisarRefeicao = () => {
         prompt,
         model: "gpt-4o",
         temperature: 0.7,
-        max_tokens: 1000
+        max_tokens: 1000,
+        isImageAnalysis: true
       });
 
       console.log("Resposta recebida do serviço OpenAI:", result);
@@ -147,30 +160,50 @@ const AnalisarRefeicao = () => {
     }
   };
 
-  const capturePhoto = async () => {
+  // Start camera preview for user to choose the angle
+  const startCameraPreview = async () => {
     try {
       if (!('mediaDevices' in navigator)) {
         toast.error("Seu dispositivo não suporta captura de imagens.");
         return;
       }
 
-      const video = document.createElement('video');
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { 
-          facingMode: 'environment'
-        } 
+        video: { facingMode: 'environment' } 
       });
       
-      video.srcObject = stream;
-      await video.play();
+      cameraStreamRef.current = stream;
+      
+      // Show camera preview dialog
+      setShowCameraPreview(true);
+      
+      // Wait for the dialog to render and the video element to be available
+      setTimeout(() => {
+        if (cameraPreviewRef.current) {
+          cameraPreviewRef.current.srcObject = stream;
+          cameraPreviewRef.current.play().catch(err => {
+            console.error("Error playing camera preview:", err);
+          });
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Error starting camera preview:", error);
+      toast.error("Erro ao iniciar a câmera. Por favor, tente novamente.");
+    }
+  };
 
+  // Capture photo from preview
+  const capturePhotoFromPreview = () => {
+    try {
+      if (!cameraPreviewRef.current) return;
+      
       const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      canvas.width = cameraPreviewRef.current.videoWidth;
+      canvas.height = cameraPreviewRef.current.videoHeight;
       
       const context = canvas.getContext('2d');
       if (context) {
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        context.drawImage(cameraPreviewRef.current, 0, 0, canvas.width, canvas.height);
       }
 
       canvas.toBlob((blob) => {
@@ -180,18 +213,38 @@ const AnalisarRefeicao = () => {
           setMediaPreview(URL.createObjectURL(file));
           setIsVideo(false);
         }
-      }, 'image/jpeg');
-
-      stream.getTracks().forEach(track => track.stop());
-      setShowMediaDialog(false);
+        
+        // Stop camera and close dialog
+        if (cameraStreamRef.current) {
+          cameraStreamRef.current.getTracks().forEach(track => track.stop());
+          cameraStreamRef.current = null;
+        }
+        setShowCameraPreview(false);
+        setShowMediaDialog(false);
+      }, 'image/jpeg', 0.9);
     } catch (error) {
       console.error("Error capturing photo:", error);
       toast.error("Erro ao capturar foto. Por favor, tente novamente.");
+      
+      // Ensure camera is stopped even on error
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach(track => track.stop());
+        cameraStreamRef.current = null;
+      }
+      setShowCameraPreview(false);
     }
   };
 
+  // Close camera preview
+  const closeCameraPreview = () => {
+    if (cameraStreamRef.current) {
+      cameraStreamRef.current.getTracks().forEach(track => track.stop());
+      cameraStreamRef.current = null;
+    }
+    setShowCameraPreview(false);
+  };
+
   const handleMediaCapture = () => {
-    // Instead of using Dialog.show, we'll use the state to control the Dialog
     setShowMediaDialog(true);
   };
 
@@ -295,7 +348,7 @@ const AnalisarRefeicao = () => {
         </div>
       </div>
 
-      {/* Use the standard Dialog component with state */}
+      {/* Media Selection Dialog */}
       <Dialog open={showMediaDialog} onOpenChange={setShowMediaDialog}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
@@ -303,7 +356,7 @@ const AnalisarRefeicao = () => {
           </DialogHeader>
           <div className="p-4 flex flex-col gap-4">
             <Button 
-              onClick={capturePhoto}
+              onClick={startCameraPreview}
               className="flex items-center gap-2"
             >
               <Camera className="w-4 h-4" />
@@ -321,6 +374,44 @@ const AnalisarRefeicao = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Camera Preview Dialog */}
+      <Dialog 
+        open={showCameraPreview} 
+        onOpenChange={(open) => {
+          if (!open) closeCameraPreview();
+        }}
+      >
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Posicione a câmera</DialogTitle>
+          </DialogHeader>
+          <div className="p-4 flex flex-col gap-4">
+            <div className="relative bg-black rounded-lg overflow-hidden">
+              <video 
+                ref={cameraPreviewRef}
+                autoPlay 
+                playsInline
+                className="w-full h-auto" 
+              />
+            </div>
+            <div className="flex justify-between mt-4">
+              <Button 
+                variant="outline"
+                onClick={closeCameraPreview}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                onClick={capturePhotoFromPreview}
+              >
+                Capturar Foto
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error Dialog */}
       <Dialog open={errorDialog} onOpenChange={setErrorDialog}>
         <DialogContent>
           <DialogHeader>
