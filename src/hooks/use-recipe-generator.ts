@@ -28,29 +28,52 @@ export const useRecipeGenerator = () => {
       setIsLoading(true);
       toast("Gerando sua receita personalizada...");
 
-      // Monta o prompt para a IA com as preferências do usuário
-      const prompt = `
-        Por favor, crie uma receita personalizada com base nas seguintes características:
-        
-        Tipo de Alimentação: ${preferences.tipoAlimentacao}
-        Refeição: ${preferences.refeicaoDesejada}
-        Restrições Alimentares: ${preferences.restricoesAlimentares || "Nenhuma"}
-        Ingredientes Disponíveis: ${preferences.ingredientesDisponiveis || "Sem preferência específica"}
-        Objetivo Alimentar: ${preferences.objetivoAlimentar}
-        
-        Forneça o nome da receita, ingredientes com medidas, modo de preparo passo a passo, valor calórico, macronutrientes, e dicas extras ou substituições.
-        IMPORTANTE: O nome da receita deve começar com "Nome da Receita: " para facilitar a extração.
-      `;
+      // Monta o prompt para a IA com as preferências do usuário com formato estruturado
+      const prompt = `Como nutricionista especializado em alimentação saudável, funcional e vegana, crie uma receita personalizada com base nas seguintes preferências:
+
+Tipo de Refeição: ${preferences.refeicaoDesejada}
+Tipo de Alimentação/Restrições: ${preferences.tipoAlimentacao}
+Restrições Adicionais: ${preferences.restricoesAlimentares || "Nenhuma"}
+Ingredientes Disponíveis: ${preferences.ingredientesDisponiveis || "Sem preferência específica"}
+Objetivo Alimentar: ${preferences.objetivoAlimentar}
+
+Por favor, forneça a receita no seguinte formato:
+
+🍽 Nome da Receita: [TÍTULO]
+
+📝 Ingredientes:
+- Liste todos com quantidades exatas
+
+👨‍🍳 Modo de preparo:
+1. Passo a passo detalhado
+2. Inclua tempos de preparo
+3. Mencione rendimento
+
+📊 Informações nutricionais por porção:
+- Calorias (kcal)
+- Proteínas (g)
+- Carboidratos (g)
+- Gorduras boas (g)
+
+💡 Finalize com uma dica de consumo ou variação da receita.
+
+IMPORTANTE: Mantenha a resposta clara, objetiva e com no máximo 250 palavras.
+IMPORTANTE: O nome da receita deve começar com "Nome da Receita: " para facilitar a extração.`;
 
       // Chama o serviço de IA para gerar a receita
-      const result = await openAIService.generateContent({ prompt });
+      const result = await openAIService.generateContent({ 
+        prompt,
+        model: "gpt-4o",
+        max_tokens: 1000,
+        temperature: 0.7
+      });
 
       if (!result.isError && result.content) {
         // Extrai o título da receita do conteúdo gerado
         let titulo = "Nova Receita Personalizada";
         const padroesTitulo = [
           /(?:Nome da [Rr]eceita|Título):\s*([^\n]+)/i,
-          /^\s*#\s*([^\n]+)/m,
+          /^\s*🍽\s*([^\n]+)/m,
           /^\s*([^\n:]+)(?:\n|$)/m,
         ];
         
@@ -62,11 +85,19 @@ export const useRecipeGenerator = () => {
           }
         }
 
+        // Extrai informações nutricionais básicas
+        const caloriasMatch = result.content.match(/(\d+)\s*kcal/i);
+        const calorias = caloriasMatch ? `${caloriasMatch[1]} kcal` : "320 kcal";
+
+        // Extrai tempo de preparo
+        const tempoMatch = result.content.match(/(?:tempo|preparo|leva):\s*(\d+[^\n]*)/i);
+        const tempo = tempoMatch ? tempoMatch[1].trim() : "30 min";
+
         // Monta o objeto com a receita gerada
         const generatedRecipe: GeneratedRecipe = {
           titulo,
-          tempo: "30 min", // Valor padrão
-          calorias: "320 kcal", // Valor padrão
+          tempo,
+          calorias,
           descricao: result.content,
         };
 
@@ -92,3 +123,4 @@ export const useRecipeGenerator = () => {
     isLoading
   };
 };
+
