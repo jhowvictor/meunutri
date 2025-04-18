@@ -76,6 +76,16 @@ export class OpenAIService {
       
       console.log("Enviando solicitação de análise visual para OpenAI...");
       
+      if (!base64Image || base64Image.length < 100) {
+        console.error("Imagem inválida ou muito pequena:", base64Image ? base64Image.substring(0, 100) + "..." : "vazia");
+        return {
+          content: "Erro: A imagem é inválida ou está corrompida. Por favor, tente novamente com outra imagem.",
+          isError: true
+        };
+      }
+      
+      console.log("Tamanho da imagem base64:", base64Image.length);
+      
       const response = await fetch(this.apiUrl, {
         method: "POST",
         headers: {

@@ -81,11 +81,16 @@ const AnalisarRefeicao = () => {
 
     setIsLoading(true);
     setAnalysis("");
+    setErrorMessage("");
 
     try {
       console.log("Iniciando análise de mídia...");
       const base64 = await convertFileToBase64(mediaFile);
-      console.log("Mídia convertida para base64");
+      console.log("Mídia convertida para base64, tamanho:", base64.length);
+      
+      if (!base64 || base64.length < 100) {
+        throw new Error("A imagem não pôde ser processada corretamente. Tente novamente com outra imagem.");
+      }
       
       const prompt = `
         Analise a seguinte ${isVideo ? 'imagens do vídeo' : 'imagem'} de uma refeição e forneça as seguintes informações de forma ESTRUTURADA:
@@ -123,17 +128,23 @@ const AnalisarRefeicao = () => {
         max_tokens: 1000
       });
 
-      console.log("Resposta recebida do serviço OpenAI:", result);
+      console.log("Resposta recebida do serviço OpenAI:", !result.isError ? "Sucesso" : "Erro");
 
       if (result.isError) {
-        throw new Error("Erro ao analisar a imagem: " + result.content);
+        throw new Error(result.content || "Erro ao analisar a imagem.");
+      }
+
+      if (!result.content) {
+        throw new Error("A API retornou uma resposta vazia. Por favor, tente novamente.");
       }
 
       setAnalysis(result.content);
     } catch (error) {
       console.error("Erro na análise:", error);
-      setErrorMessage("Ocorreu um erro ao analisar sua refeição. Por favor, tente novamente.");
+      const errorMsg = error instanceof Error ? error.message : "Ocorreu um erro ao analisar sua refeição.";
+      setErrorMessage(errorMsg);
       setErrorDialog(true);
+      toast.error(errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -144,12 +155,20 @@ const AnalisarRefeicao = () => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => {
-        const base64 = reader.result as string;
-        // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
-        const base64Data = base64.split(',')[1];
-        resolve(base64Data);
+        try {
+          const base64 = reader.result as string;
+          // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
+          const base64Data = base64.split(',')[1];
+          resolve(base64Data);
+        } catch (error) {
+          console.error("Erro ao converter arquivo para base64:", error);
+          reject("Falha ao processar a imagem. Por favor, tente novamente.");
+        }
       };
-      reader.onerror = error => reject(error);
+      reader.onerror = error => {
+        console.error("Erro na leitura do arquivo:", error);
+        reject(error);
+      };
     });
   };
 
@@ -186,12 +205,13 @@ const AnalisarRefeicao = () => {
           cameraPreviewRef.current.srcObject = stream;
           cameraPreviewRef.current.play().catch(err => {
             console.error("Error playing camera preview:", err);
+            toast.error("Erro ao iniciar a câmera. Por favor, tente novamente.");
           });
         }
       }, 100);
     } catch (error) {
       console.error("Error starting camera preview:", error);
-      toast.error("Erro ao iniciar a câmera. Por favor, tente novamente.");
+      toast.error("Erro ao iniciar a câmera. Por favor, verifique as permissões e tente novamente.");
     }
   };
 
@@ -305,6 +325,7 @@ const AnalisarRefeicao = () => {
                   <Button 
                     onClick={analyzeMedia} 
                     disabled={isLoading}
+                    variant="default"
                   >
                     {isLoading ? (
                       <>
@@ -337,7 +358,7 @@ const AnalisarRefeicao = () => {
             ) : analysis ? (
               <div className="prose prose-sm max-w-none">
                 <Textarea 
-                  className="h-[350px] font-normal text-base" 
+                  className="h-[350px] font-normal text-base overflow-y-auto whitespace-pre-wrap" 
                   value={analysis}
                   readOnly
                 />
