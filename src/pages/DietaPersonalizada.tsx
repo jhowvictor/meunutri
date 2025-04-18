@@ -260,21 +260,22 @@ const DietaPersonalizada = () => {
                   <Label htmlFor="exercicios" className="text-base font-medium block mb-3">
                     7. Exercícios
                   </Label>
-                  {/* Correção: Removendo o stopPropagation aqui que estava causando problemas */}
-                  <Select 
-                    value={formData.exercicios} 
-                    onValueChange={(value) => handleChange('exercicios', value)}
-                  >
-                    <SelectTrigger id="exercicios">
-                      <SelectValue placeholder="Selecione seu nível de atividade física" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Sedentário">Sedentário</SelectItem>
-                      <SelectItem value="Treino Leve">Treino Leve</SelectItem>
-                      <SelectItem value="Exercícios 3-5x semana">Exercícios de 3 a 5 vezes na semana</SelectItem>
-                      <SelectItem value="Treino todo dia">Treino todo dia</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="relative"> {/* Added wrapper div for isolation */}
+                    <Select 
+                      value={formData.exercicios} 
+                      onValueChange={(value) => handleChange('exercicios', value)}
+                    >
+                      <SelectTrigger id="exercicios">
+                        <SelectValue placeholder="Selecione seu nível de atividade física" />
+                      </SelectTrigger>
+                      <SelectContent position="item-aligned"> {/* Changed to item-aligned */}
+                        <SelectItem value="Sedentário">Sedentário</SelectItem>
+                        <SelectItem value="Treino Leve">Treino Leve</SelectItem>
+                        <SelectItem value="Exercícios 3-5x semana">Exercícios de 3 a 5 vezes na semana</SelectItem>
+                        <SelectItem value="Treino todo dia">Treino todo dia</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
 
                 <CardFooter className="px-0 pt-6">
