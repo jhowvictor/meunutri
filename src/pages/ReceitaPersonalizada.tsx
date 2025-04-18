@@ -89,23 +89,25 @@ const ReceitaPersonalizada = () => {
       return;
     }
     
-    setIsLoading(true);
-    
-    const prompt = `
-      Por favor, crie uma receita personalizada com base nas seguintes características:
-      
-      Tipo de Alimentação: ${formData.tipoAlimentacao}
-      Refeição: ${formData.refeicaoDesejada}
-      Restrições Alimentares: ${formData.restricoesAlimentares || "Nenhuma"}
-      Ingredientes Disponíveis: ${formData.ingredientesDisponiveis || "Sem preferência específica"}
-      Objetivo Alimentar: ${formData.objetivoAlimentar}
-      
-      Forneça o nome da receita, ingredientes com medidas, modo de preparo passo a passo, valor calórico, macronutrientes, e dicas extras ou substituições.
-      IMPORTANTE: O nome da receita deve começar com "Nome da Receita: " para facilitar a extração.
-    `;
-    
     try {
+      setIsLoading(true);
+      
+      const prompt = `
+        Por favor, crie uma receita personalizada com base nas seguintes características:
+        
+        Tipo de Alimentação: ${formData.tipoAlimentacao}
+        Refeição: ${formData.refeicaoDesejada}
+        Restrições Alimentares: ${formData.restricoesAlimentares || "Nenhuma"}
+        Ingredientes Disponíveis: ${formData.ingredientesDisponiveis || "Sem preferência específica"}
+        Objetivo Alimentar: ${formData.objetivoAlimentar}
+        
+        Forneça o nome da receita, ingredientes com medidas, modo de preparo passo a passo, valor calórico, macronutrientes, e dicas extras ou substituições.
+        IMPORTANTE: O nome da receita deve começar com "Nome da Receita: " para facilitar a extração.
+      `;
+      
+      console.log("Enviando solicitação para gerar receita...");
       const result = await openAIService.generateContent({ prompt });
+      console.log("Resposta recebida:", result.isError ? "Erro" : "Sucesso");
       
       if (!result.isError && result.content) {
         let titulo = "Nova Receita Personalizada";
@@ -163,6 +165,7 @@ const ReceitaPersonalizada = () => {
         
         setFormSubmitted(true);
       } else {
+        console.error("Erro na resposta da API:", result);
         toast.error("Erro ao gerar a receita. Por favor, tente novamente.");
       }
     } catch (error) {

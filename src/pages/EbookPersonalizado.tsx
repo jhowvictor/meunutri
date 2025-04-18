@@ -53,33 +53,33 @@ const EbookPersonalizado = () => {
       return;
     }
     
-    setIsLoading(true);
-    
-    // Extrair números mencionados no texto (possível número de receitas)
-    const numbersInRequest = formData.detalhes.match(/\d+/g) || [];
-    const recipeCountMention = numbersInRequest.length > 0 
-      ? `Observe que o usuário pediu especificamente ${numbersInRequest.join(', ')} de algo (provavelmente receitas). Este número deve ser respeitado.` 
-      : '';
-    
-    // Construir o prompt para a API com ênfase no número exato de receitas
-    const prompt = `
-      Por favor, crie um e-book de receitas personalizado com base nas seguintes especificações:
-      
-      ${formData.detalhes}
-      
-      ${recipeCountMention}
-      
-      IMPORTANTE: Se for mencionado um número específico de receitas (como 10, 15, 20, etc), você DEVE fornecer EXATAMENTE esse número de receitas completas.
-      
-      Forneça:
-      1. Um título atrativo para o e-book
-      2. Uma breve introdução
-      3. Uma lista completa com EXATAMENTE o número de receitas solicitadas, cada uma com ingredientes e modo de preparo
-      4. Informação nutricional para cada receita
-      5. Dicas e conclusão
-    `;
-    
     try {
+      setIsLoading(true);
+      
+      // Extrair números mencionados no texto (possível número de receitas)
+      const numbersInRequest = formData.detalhes.match(/\d+/g) || [];
+      const recipeCountMention = numbersInRequest.length > 0 
+        ? `Observe que o usuário pediu especificamente ${numbersInRequest.join(', ')} de algo (provavelmente receitas). Este número deve ser respeitado.` 
+        : '';
+      
+      // Construir o prompt para a API com ênfase no número exato de receitas
+      const prompt = `
+        Por favor, crie um e-book de receitas personalizado com base nas seguintes especificações:
+        
+        ${formData.detalhes}
+        
+        ${recipeCountMention}
+        
+        IMPORTANTE: Se for mencionado um número específico de receitas (como 10, 15, 20, etc), você DEVE fornecer EXATAMENTE esse número de receitas completas.
+        
+        Forneça:
+        1. Um título atrativo para o e-book
+        2. Uma breve introdução
+        3. Uma lista completa com EXATAMENTE o número de receitas solicitadas, cada uma com ingredientes e modo de preparo
+        4. Informação nutricional para cada receita
+        5. Dicas e conclusão
+      `;
+      
       console.log("Iniciando geração de e-book com prompt de tamanho:", prompt.length);
       
       // Passando isEbook: true para indicar que é uma solicitação de e-book
