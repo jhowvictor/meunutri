@@ -13,7 +13,7 @@ import { AuthProvider } from "./components/AuthProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
 import MiniChef from "./components/MiniChef";
-import { LanguageProvider } from "./hooks/use-language";
+// Removed LanguageProvider import
 
 const queryClient = new QueryClient();
 
@@ -25,29 +25,27 @@ const App = () => (
       <ApiKeyConfig />
       <BrowserRouter>
         <AuthProvider>
-          <LanguageProvider>
-            <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={
-                <ProtectedRoute>
-                  <>
-                    <Header />
-                    <Index />
-                  </>
-                </ProtectedRoute>
-              } />
-              <Route path="/receita-personalizada" element={
-                <ProtectedRoute>
-                  <>
-                    <Header />
-                    <ReceitaPersonalizada />
-                  </>
-                </ProtectedRoute>
-              } />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <MiniChef />
-          </LanguageProvider>
+          <Routes>
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <>
+                  <Header />
+                  <Index />
+                </>
+              </ProtectedRoute>
+            } />
+            <Route path="/receita-personalizada" element={
+              <ProtectedRoute>
+                <>
+                  <Header />
+                  <ReceitaPersonalizada />
+                </>
+              </ProtectedRoute>
+            } />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <MiniChef />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

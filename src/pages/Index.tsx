@@ -3,11 +3,8 @@ import { ChefHat, Utensils } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
-import { useLanguage } from "@/hooks/use-language";
 
 const Index = () => {
-  const { t } = useLanguage();
-  
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-secondary/20 to-background relative overflow-hidden">
       {/* Circular decorative elements */}
