@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Camera, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -6,11 +5,9 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/sonner";
 import { openAIService } from "@/services/openai";
-import { useLanguage } from "@/hooks/use-language";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const AnalisarRefeicao = () => {
-  const { t } = useLanguage();
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<string>("");
