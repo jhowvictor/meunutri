@@ -9,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { openAIService } from "@/services/openai";
-import { useLanguage } from "@/hooks/use-language";
 import jsPDF from "jspdf";
 
 // Define types for workout form
@@ -22,7 +21,6 @@ interface WorkoutFormData {
 }
 
 const MontarTreino = () => {
-  const { t } = useLanguage();
   const { toast } = useToast();
   
   const [formData, setFormData] = useState<WorkoutFormData>({
@@ -81,22 +79,19 @@ const MontarTreino = () => {
         setWorkoutPlan(response.content);
         setEditedWorkoutPlan(response.content);
         toast({
-          title: "Plano de treino criado com sucesso!",
           description: "Seu plano de treino personalizado está pronto.",
         });
       } else {
         toast({
-          title: "Erro ao gerar plano de treino",
-          description: "Por favor, tente novamente.",
           variant: "destructive",
+          description: "Por favor, tente novamente.",
         });
       }
     } catch (error) {
       console.error("Erro ao gerar plano de treino:", error);
       toast({
-        title: "Erro ao gerar plano de treino",
-        description: "Por favor, tente novamente.",
         variant: "destructive",
+        description: "Por favor, tente novamente.",
       });
     } finally {
       setIsLoading(false);
@@ -128,15 +123,13 @@ const MontarTreino = () => {
       doc.save("MeuNutri_Plano_Treino.pdf");
       
       toast({
-        title: "PDF baixado com sucesso!",
         description: "Seu plano de treino foi salvo como PDF.",
       });
     } catch (error) {
       console.error("Erro ao gerar PDF:", error);
       toast({
-        title: "Erro ao baixar PDF",
-        description: "Por favor, tente novamente.",
         variant: "destructive",
+        description: "Por favor, tente novamente.",
       });
     }
   };
@@ -145,7 +138,6 @@ const MontarTreino = () => {
     setWorkoutPlan(editedWorkoutPlan);
     setIsEditing(false);
     toast({
-      title: "Plano de treino atualizado!",
       description: "Suas alterações foram salvas.",
     });
   };

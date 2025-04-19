@@ -123,4 +123,3 @@ IMPORTANTE: O nome da receita deve começar com "Nome da Receita: " para facilit
     isLoading
   };
 };
-

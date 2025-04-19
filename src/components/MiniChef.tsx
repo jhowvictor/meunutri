@@ -1,13 +1,12 @@
 
 import { useState } from "react";
-import { ChefHat, Send, X } from "lucide-react";
+import { ChefHat, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { openAIService } from "@/services/openai";
-import { useLanguage } from "@/hooks/use-language";
 
 // Definindo tipos para as mensagens
 type MessageRole = "assistant" | "user";
@@ -19,7 +18,6 @@ interface ChatMessage {
 }
 
 const MiniChef = () => {
-  const { t, currentLanguage } = useLanguage();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: "assistant",
@@ -35,25 +33,23 @@ const MiniChef = () => {
     if (!inputMessage.trim()) return;
 
     // Prompt de sistema otimizado para respostas curtas e empáticas
-    const systemPrompt = `🍳 Mini Chef - ${t("chef_assistant")}
+    const systemPrompt = `🍳 Mini Chef - Assistente Culinário
 
-${t("response_guidelines")}:
-✅ ${t("max_chars", { chars: "1000" })}
-✅ ${t("empathetic_friendly")}
-✅ ${t("use_emojis")}
-✅ ${t("topics_lists")}
-✅ ${t("direct_objective")}
-✅ ${t("practical_tip_end")}
+Diretrizes para respostas:
+✅ Máximo de 1000 caracteres
+✅ Tom empático e amigável
+✅ Use emojis quando apropriado
+✅ Use tópicos e listas
+✅ Seja direto e objetivo
+✅ Termine com uma dica prática
 
-${t("specialties")}:
-🥗 ${t("nutrition")}
-🍳 ${t("recipes")}
-🥑 ${t("substitutions")}
-🏋️ ${t("health_goals")}
+Especialidades:
+🥗 Nutrição
+🍳 Receitas
+🥑 Substituições
+🏋️ Objetivos de saúde
 
-IMPORTANTE: Sempre ao fornecer uma receita, comece com "Nome da Receita: [Título da Receita]" em uma linha separada no início.
-
-${t("language_instructions")}`;
+IMPORTANTE: Sempre ao fornecer uma receita, comece com "Nome da Receita: [Título da Receita]" em uma linha separada no início.`;
 
     // Adicionar mensagem do usuário
     const userMessage: ChatMessage = {
@@ -67,9 +63,9 @@ ${t("language_instructions")}`;
     setIsLoading(true);
 
     // Construindo o prompt com o histórico da conversa
-    const prompt = `${systemPrompt}\n\n${t("conversation_history")}:\n${messages
-      .map((msg) => `${msg.role === "user" ? t("user") : "Mini Chef"}: ${msg.content}`)
-      .join("\n")}\n\n${t("user")}: ${inputMessage}\n\nMini Chef:`;
+    const prompt = `${systemPrompt}\n\nHistórico da conversa:\n${messages
+      .map((msg) => `${msg.role === "user" ? "Usuário" : "Mini Chef"}: ${msg.content}`)
+      .join("\n")}\n\nUsuário: ${inputMessage}\n\nMini Chef:`;
 
     try {
       // Usar o modelo gpt-4o com mais tokens máximos para respostas mais completas
@@ -77,11 +73,10 @@ ${t("language_instructions")}`;
         prompt,
         model: "gpt-4o",  // Modelo mais avançado
         max_tokens: 2000, // Aumentar o limite de tokens
-        temperature: 0.7, // Manter criatividade equilibrada
-        language: currentLanguage // Passar o idioma atual para o serviço
+        temperature: 0.7  // Manter criatividade equilibrada
       });
 
-      if (!response.isError) {
+      if (!response.isError && response.content) {
         // Adicionar resposta do assistente
         const assistantMessage: ChatMessage = {
           role: "assistant",
@@ -91,7 +86,7 @@ ${t("language_instructions")}`;
         setMessages((prev) => [...prev, assistantMessage]);
       }
     } catch (error) {
-      console.error(t("error_processing"), error);
+      console.error("Erro ao processar mensagem:", error);
     } finally {
       setIsLoading(false);
     }
@@ -175,7 +170,7 @@ ${t("language_instructions")}`;
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={t("type_message")}
+                placeholder="Digite uma mensagem..."
                 className="resize-none"
                 disabled={isLoading}
                 rows={1}
