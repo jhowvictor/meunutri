@@ -4,13 +4,16 @@ import { ChefHat, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "./AuthProvider";
 import { toast } from "@/components/ui/sonner";
+import LanguageSelector from "./LanguageSelector";
+import { useLanguage } from "@/hooks/use-language";
 
 const Header = () => {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
 
   const handleSignOut = async () => {
     await signOut();
-    toast.success("Logout realizado com sucesso!");
+    toast.success(t("logout_success"));
   };
 
   return (
@@ -24,6 +27,8 @@ const Header = () => {
         </Link>
 
         <div className="flex items-center gap-3">
+          <LanguageSelector />
+          
           {user && (
             <div className="flex items-center gap-4">
               <div className="flex items-center text-sm text-muted-foreground bg-white/80 backdrop-blur-md py-1 px-3 rounded-full shadow-sm">
@@ -32,7 +37,7 @@ const Header = () => {
               </div>
               <Button variant="outline" size="sm" onClick={handleSignOut} className="rounded-full">
                 <LogOut className="h-4 w-4 mr-2 text-primary" />
-                <span className="hidden sm:block">Sair</span>
+                <span className="hidden sm:block">{t("logout")}</span>
               </Button>
             </div>
           )}
