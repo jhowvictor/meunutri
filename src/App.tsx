@@ -6,16 +6,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ReceitaPersonalizada from "./pages/ReceitaPersonalizada";
-import DietaPersonalizada from "./pages/DietaPersonalizada";
-import ReceitaGerada from "./pages/ReceitaPersonalizada";
-import EbookPersonalizado from "./pages/EbookPersonalizado";
-import ListaCompras from "./pages/ListaCompras";
-import ReceitasFavoritas from "./pages/ReceitasFavoritas";
-import MinhasPastas from "./pages/MinhasPastas";
-import ConteudoPasta from "./pages/ConteudoPasta";
-import AnalisarRefeicao from "./pages/AnalisarRefeicao";
-import EvolucaoCorporal from "./pages/EvolucaoCorporal";
-import MontarTreino from "./pages/MontarTreino";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ApiKeyConfig from "./components/ApiKeyConfig";
@@ -38,14 +28,6 @@ const App = () => (
           <LanguageProvider>
             <Routes>
               <Route path="/auth" element={<Auth />} />
-              <Route path="/receita-personalizada" element={
-                <ProtectedRoute>
-                  <>
-                    <Header />
-                    <ReceitaPersonalizada />
-                  </>
-                </ProtectedRoute>
-              } />
               <Route path="/" element={
                 <ProtectedRoute>
                   <>
@@ -59,78 +41,6 @@ const App = () => (
                   <>
                     <Header />
                     <ReceitaPersonalizada />
-                  </>
-                </ProtectedRoute>
-              } />
-              <Route path="/dieta-personalizada" element={
-                <ProtectedRoute>
-                  <>
-                    <Header />
-                    <DietaPersonalizada />
-                  </>
-                </ProtectedRoute>
-              } />
-              <Route path="/ebook-personalizado" element={
-                <ProtectedRoute>
-                  <>
-                    <Header />
-                    <EbookPersonalizado />
-                  </>
-                </ProtectedRoute>
-              } />
-              <Route path="/lista-compras" element={
-                <ProtectedRoute>
-                  <>
-                    <Header />
-                    <ListaCompras />
-                  </>
-                </ProtectedRoute>
-              } />
-              <Route path="/receitas-favoritas" element={
-                <ProtectedRoute>
-                  <>
-                    <Header />
-                    <ReceitasFavoritas />
-                  </>
-                </ProtectedRoute>
-              } />
-              <Route path="/minhas-pastas" element={
-                <ProtectedRoute>
-                  <>
-                    <Header />
-                    <MinhasPastas />
-                  </>
-                </ProtectedRoute>
-              } />
-              <Route path="/pasta/:folderId" element={
-                <ProtectedRoute>
-                  <>
-                    <Header />
-                    <ConteudoPasta />
-                  </>
-                </ProtectedRoute>
-              } />
-              <Route path="/analisar-refeicao" element={
-                <ProtectedRoute>
-                  <>
-                    <Header />
-                    <AnalisarRefeicao />
-                  </>
-                </ProtectedRoute>
-              } />
-              <Route path="/evolucao-corporal" element={
-                <ProtectedRoute>
-                  <>
-                    <Header />
-                    <EvolucaoCorporal />
-                  </>
-                </ProtectedRoute>
-              } />
-              <Route path="/montar-treino" element={
-                <ProtectedRoute>
-                  <>
-                    <Header />
-                    <MontarTreino />
                   </>
                 </ProtectedRoute>
               } />
