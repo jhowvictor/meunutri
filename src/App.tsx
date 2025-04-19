@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ReceitaPersonalizada from "./pages/ReceitaPersonalizada";
 import DietaPersonalizada from "./pages/DietaPersonalizada";
+import ReceitaGerada from "./pages/ReceitaPersonalizada";
 import EbookPersonalizado from "./pages/EbookPersonalizado";
 import ListaCompras from "./pages/ListaCompras";
 import ReceitasFavoritas from "./pages/ReceitasFavoritas";
@@ -37,6 +38,14 @@ const App = () => (
           <LanguageProvider>
             <Routes>
               <Route path="/auth" element={<Auth />} />
+              <Route path="/receita-personalizada" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <ReceitaPersonalizada />
+                  </>
+                </ProtectedRoute>
+              } />
               <Route path="/" element={
                 <ProtectedRoute>
                   <>
