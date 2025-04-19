@@ -22,6 +22,7 @@ import { AuthProvider } from "./components/AuthProvider";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Header from "./components/Header";
 import MiniChef from "./components/MiniChef";
+import { LanguageProvider } from "./hooks/use-language";
 
 const queryClient = new QueryClient();
 
@@ -33,99 +34,101 @@ const App = () => (
       <ApiKeyConfig />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/" element={
-              <ProtectedRoute>
-                <>
-                  <Header />
-                  <Index />
-                </>
-              </ProtectedRoute>
-            } />
-            <Route path="/receita-personalizada" element={
-              <ProtectedRoute>
-                <>
-                  <Header />
-                  <ReceitaPersonalizada />
-                </>
-              </ProtectedRoute>
-            } />
-            <Route path="/dieta-personalizada" element={
-              <ProtectedRoute>
-                <>
-                  <Header />
-                  <DietaPersonalizada />
-                </>
-              </ProtectedRoute>
-            } />
-            <Route path="/ebook-personalizado" element={
-              <ProtectedRoute>
-                <>
-                  <Header />
-                  <EbookPersonalizado />
-                </>
-              </ProtectedRoute>
-            } />
-            <Route path="/lista-compras" element={
-              <ProtectedRoute>
-                <>
-                  <Header />
-                  <ListaCompras />
-                </>
-              </ProtectedRoute>
-            } />
-            <Route path="/receitas-favoritas" element={
-              <ProtectedRoute>
-                <>
-                  <Header />
-                  <ReceitasFavoritas />
-                </>
-              </ProtectedRoute>
-            } />
-            <Route path="/minhas-pastas" element={
-              <ProtectedRoute>
-                <>
-                  <Header />
-                  <MinhasPastas />
-                </>
-              </ProtectedRoute>
-            } />
-            <Route path="/pasta/:folderId" element={
-              <ProtectedRoute>
-                <>
-                  <Header />
-                  <ConteudoPasta />
-                </>
-              </ProtectedRoute>
-            } />
-            <Route path="/analisar-refeicao" element={
-              <ProtectedRoute>
-                <>
-                  <Header />
-                  <AnalisarRefeicao />
-                </>
-              </ProtectedRoute>
-            } />
-            <Route path="/evolucao-corporal" element={
-              <ProtectedRoute>
-                <>
-                  <Header />
-                  <EvolucaoCorporal />
-                </>
-              </ProtectedRoute>
-            } />
-            <Route path="/montar-treino" element={
-              <ProtectedRoute>
-                <>
-                  <Header />
-                  <MontarTreino />
-                </>
-              </ProtectedRoute>
-            } />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <MiniChef />
+          <LanguageProvider>
+            <Routes>
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <Index />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/receita-personalizada" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <ReceitaPersonalizada />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/dieta-personalizada" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <DietaPersonalizada />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/ebook-personalizado" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <EbookPersonalizado />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/lista-compras" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <ListaCompras />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/receitas-favoritas" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <ReceitasFavoritas />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/minhas-pastas" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <MinhasPastas />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/pasta/:folderId" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <ConteudoPasta />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/analisar-refeicao" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <AnalisarRefeicao />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/evolucao-corporal" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <EvolucaoCorporal />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="/montar-treino" element={
+                <ProtectedRoute>
+                  <>
+                    <Header />
+                    <MontarTreino />
+                  </>
+                </ProtectedRoute>
+              } />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <MiniChef />
+          </LanguageProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
