@@ -1,5 +1,5 @@
 
-import { ChefHat, Utensils } from "lucide-react";
+import { ChefHat, Utensils, Camera, Calendar, BookOpen, TrendingUp, ShoppingCart, Dumbbell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -34,11 +34,12 @@ const Index = () => {
       {/* Feature Card Section */}
       <section className="container max-w-6xl px-4 py-8 mx-auto mb-20 bg-pink-50">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-2 text-fruit-gradient">Gerador de Receitas Saudáveis</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">Crie receitas personalizadas com base nas suas preferências e objetivos</p>
+          <h2 className="text-3xl font-bold mb-2 text-fruit-gradient">Suas Ferramentas de Nutrição</h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">Crie receitas, dietas e muito mais com base nas suas preferências e objetivos</p>
         </div>
         
-        <div className="max-w-md mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Receita Personalizada */}
           <Card className="border-white/30 bg-white/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
             <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
               <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
@@ -46,13 +47,133 @@ const Index = () => {
               </div>
               <CardTitle className="text-xl">Receita Personalizada</CardTitle>
               <CardDescription>
-                Crie receitas adaptadas às suas preferências e necessidades nutricionais
+                Crie receitas adaptadas às suas preferências
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center pt-4">
               <Link to="/receita-personalizada">
                 <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
                   Criar Receita
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Analisar Refeição */}
+          <Card className="border-white/30 bg-white/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
+            <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
+              <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
+                <Camera className="h-8 w-8 text-white" />
+              </div>
+              <CardTitle className="text-xl">Analisar Refeição</CardTitle>
+              <CardDescription>
+                Analise suas refeições por foto
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center pt-4">
+              <Link to="/analisar-refeicao">
+                <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
+                  Analisar
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Dieta Personalizada */}
+          <Card className="border-white/30 bg-white/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
+            <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
+              <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
+                <Calendar className="h-8 w-8 text-white" />
+              </div>
+              <CardTitle className="text-xl">Dieta Personalizada</CardTitle>
+              <CardDescription>
+                Receba um plano alimentar sob medida
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center pt-4">
+              <Link to="/dieta-personalizada">
+                <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
+                  Criar Dieta
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* E-book Personalizado */}
+          <Card className="border-white/30 bg-white/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
+            <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
+              <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
+                <BookOpen className="h-8 w-8 text-white" />
+              </div>
+              <CardTitle className="text-xl">E-book Personalizado</CardTitle>
+              <CardDescription>
+                Crie seu e-book de receitas
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center pt-4">
+              <Link to="/ebook-personalizado">
+                <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
+                  Criar E-book
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Evolução Corporal */}
+          <Card className="border-white/30 bg-white/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
+            <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
+              <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
+                <TrendingUp className="h-8 w-8 text-white" />
+              </div>
+              <CardTitle className="text-xl">Evolução Corporal</CardTitle>
+              <CardDescription>
+                Acompanhe seu progresso
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center pt-4">
+              <Link to="/evolucao-corporal">
+                <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
+                  Ver Evolução
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Lista de Compras */}
+          <Card className="border-white/30 bg-white/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
+            <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
+              <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
+                <ShoppingCart className="h-8 w-8 text-white" />
+              </div>
+              <CardTitle className="text-xl">Lista de Compras</CardTitle>
+              <CardDescription>
+                Monte sua lista inteligente
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center pt-4">
+              <Link to="/lista-compras">
+                <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
+                  Criar Lista
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Montar Treino */}
+          <Card className="border-white/30 bg-white/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
+            <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
+              <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
+                <Dumbbell className="h-8 w-8 text-white" />
+              </div>
+              <CardTitle className="text-xl">Montar Treino</CardTitle>
+              <CardDescription>
+                Crie seu plano de treino personalizado
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center pt-4">
+              <Link to="/montar-treino">
+                <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
+                  Criar Treino
                 </Button>
               </Link>
             </CardContent>
