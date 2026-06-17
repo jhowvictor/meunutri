@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/sonner";
 import { openAIService } from "@/services/openai";
+import SaveToLibrary from "@/components/SaveToLibrary";
 
 const ReceitaPersonalizada = () => {
   const [formData, setFormData] = useState({
@@ -168,7 +169,15 @@ const ReceitaPersonalizada = () => {
 
           {receitaGerada && (
             <div className="mt-8">
-              <h2 className="text-2xl font-bold mb-4">Sua Receita Personalizada</h2>
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+                <h2 className="text-2xl font-bold">Sua Receita Personalizada</h2>
+                <SaveToLibrary
+                  contentType="receita"
+                  title={`Receita ${formData.tipoAlimentacao || ""}`.trim()}
+                  content={receitaGerada}
+                  metadata={formData}
+                />
+              </div>
               <div className="bg-white text-black p-6 rounded-lg shadow-sm border">
                 <pre className="whitespace-pre-wrap font-sans text-black">{receitaGerada}</pre>
               </div>

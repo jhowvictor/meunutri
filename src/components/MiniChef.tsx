@@ -1,12 +1,15 @@
 
 import { useState } from "react";
-import { ChefHat, Send } from "lucide-react";
+import { ChefHat, Send, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { openAIService } from "@/services/openai";
+import { toast } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "./AuthProvider";
 import miniChefImg from "@/assets/mini-chef.png";
 
 type MessageRole = "assistant" | "user";
@@ -28,6 +31,32 @@ const MiniChef = () => {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+
+  const saveConversation = async () => {
+    if (!user) {
+      toast.error("Faça login para salvar.");
+      return;
+    }
+    const convo = messages
+      .map((m) => `${m.role === "user" ? "Você" : "Mini Chef"}: ${m.content}`)
+      .join("\n\n");
+    const firstUser = messages.find((m) => m.role === "user");
+    const title = firstUser
+      ? firstUser.content.slice(0, 60)
+      : "Conversa com Mini Chef";
+    const { error } = await supabase.from("library_items").insert({
+      user_id: user.id,
+      content_type: "mini_chef",
+      title,
+      content: convo,
+    });
+    if (error) {
+      toast.error("Erro ao salvar conversa.");
+    } else {
+      toast.success("Conteúdo salvo com sucesso na sua Biblioteca.");
+    }
+  };
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
@@ -106,14 +135,26 @@ IMPORTANTE: Sempre ao fornecer uma receita, comece com "Nome da Receita: [Títul
         </SheetTrigger>
         <SheetContent className="sm:max-w-md w-[90vw] p-0 h-[80vh] sm:h-[600px] flex flex-col">
           <SheetHeader className="px-4 py-3 border-b bg-primary/5">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-12 w-12 border-2 border-primary bg-white">
-                <AvatarImage src={miniChefImg} alt="Mini Chef" className="object-contain" />
-                <AvatarFallback className="bg-primary/20">
-                  <ChefHat className="h-5 w-5 text-primary" />
-                </AvatarFallback>
-              </Avatar>
-              <SheetTitle>Mini Chef</SheetTitle>
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <Avatar className="h-12 w-12 border-2 border-primary bg-white">
+                  <AvatarImage src={miniChefImg} alt="Mini Chef" className="object-contain" />
+                  <AvatarFallback className="bg-primary/20">
+                    <ChefHat className="h-5 w-5 text-primary" />
+                  </AvatarFallback>
+                </Avatar>
+                <SheetTitle>Mini Chef</SheetTitle>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={saveConversation}
+                disabled={messages.length < 2}
+                title="Salvar conversa na Biblioteca"
+              >
+                <Save className="h-4 w-4 sm:mr-1" />
+                <span className="hidden sm:inline">Salvar</span>
+              </Button>
             </div>
           </SheetHeader>
 

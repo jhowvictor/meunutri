@@ -1,6 +1,6 @@
 
 import { Link } from "react-router-dom";
-import { ChefHat, LogOut, User } from "lucide-react";
+import { ChefHat, LogOut, User, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "./AuthProvider";
 import { toast } from "@/components/ui/sonner";
@@ -25,13 +25,19 @@ const Header = () => {
 
         <div className="flex items-center gap-3">
           {user && (
-            <div className="flex items-center gap-4">
-              <div className="flex items-center text-sm text-muted-foreground bg-card/80 backdrop-blur-md py-1 px-3 rounded-full shadow-sm">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Link to="/minha-biblioteca">
+                <Button variant="outline" size="sm" className="rounded-full">
+                  <Library className="h-4 w-4 sm:mr-2 text-primary" />
+                  <span className="hidden sm:block">Minha Biblioteca</span>
+                </Button>
+              </Link>
+              <div className="hidden md:flex items-center text-sm text-muted-foreground bg-card/80 backdrop-blur-md py-1 px-3 rounded-full shadow-sm">
                 <User className="h-4 w-4 mr-2 text-primary" />
-                <span className="hidden sm:block">{user.email}</span>
+                <span>{user.email}</span>
               </div>
               <Button variant="outline" size="sm" onClick={handleSignOut} className="rounded-full">
-                <LogOut className="h-4 w-4 mr-2 text-primary" />
+                <LogOut className="h-4 w-4 sm:mr-2 text-primary" />
                 <span className="hidden sm:block">Sair</span>
               </Button>
             </div>

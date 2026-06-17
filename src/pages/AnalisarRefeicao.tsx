@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/sonner";
 import { openAIService } from "@/services/openai";
+import SaveToLibrary from "@/components/SaveToLibrary";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const AnalisarRefeicao = () => {
@@ -361,11 +362,16 @@ const AnalisarRefeicao = () => {
                 <p className="text-sm text-muted-foreground mt-2">Isso pode levar alguns segundos.</p>
               </div>
             ) : analysis ? (
-              <div className="prose prose-sm max-w-none">
+              <div className="prose prose-sm max-w-none space-y-3">
                 <Textarea 
-                  className="h-[350px] font-normal text-base overflow-y-auto whitespace-pre-wrap" 
+                  className="h-[300px] font-normal text-base overflow-y-auto whitespace-pre-wrap" 
                   value={analysis}
                   readOnly
+                />
+                <SaveToLibrary
+                  contentType="analise_refeicao"
+                  title="Análise de Refeição"
+                  content={analysis}
                 />
               </div>
             ) : (

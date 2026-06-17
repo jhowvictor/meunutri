@@ -12,6 +12,7 @@ import EbookPersonalizado from "./pages/EbookPersonalizado";
 import EvolucaoCorporal from "./pages/EvolucaoCorporal";
 import ListaCompras from "./pages/ListaCompras";
 import MontarTreino from "./pages/MontarTreino";
+import MinhaBiblioteca from "./pages/MinhaBiblioteca";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ApiKeyConfig from "./components/ApiKeyConfig";
@@ -94,6 +95,14 @@ const App = () => (
                 <>
                   <Header />
                   <MontarTreino />
+                </>
+              </ProtectedRoute>
+            } />
+            <Route path="/minha-biblioteca" element={
+              <ProtectedRoute>
+                <>
+                  <Header />
+                  <MinhaBiblioteca />
                 </>
               </ProtectedRoute>
             } />

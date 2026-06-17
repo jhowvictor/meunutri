@@ -15,6 +15,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { openAIService } from "@/services/openai";
+import SaveToLibrary from "@/components/SaveToLibrary";
 import { toast } from "@/components/ui/sonner";
 import { jsPDF } from "jspdf";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -320,7 +321,13 @@ const EbookPersonalizado = () => {
                   </div>
                 </div>
                 
-                <div className="flex gap-3 justify-center">
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <SaveToLibrary
+                    contentType="ebook"
+                    title={ebookGerado.titulo || "E-book"}
+                    content={ebookGerado.conteudo || ""}
+                    metadata={{ formData }}
+                  />
                   <Button onClick={() => setFormSubmitted(false)} variant="outline">
                     Modificar E-book
                   </Button>

@@ -1,5 +1,5 @@
 
-import { ChefHat, Utensils, Camera, Calendar, BookOpen, TrendingUp, ShoppingCart, Dumbbell } from "lucide-react";
+import { ChefHat, Utensils, Camera, Calendar, BookOpen, TrendingUp, ShoppingCart, Dumbbell, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -174,6 +174,26 @@ const Index = () => {
               <Link to="/montar-treino">
                 <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
                   Criar Treino
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Minha Biblioteca */}
+          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
+            <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
+              <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
+                <Library className="h-8 w-8 text-white" />
+              </div>
+              <CardTitle className="text-xl">Minha Biblioteca</CardTitle>
+              <CardDescription>
+                Acesse seus conteúdos salvos
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center pt-4">
+              <Link to="/minha-biblioteca">
+                <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
+                  Abrir Biblioteca
                 </Button>
               </Link>
             </CardContent>

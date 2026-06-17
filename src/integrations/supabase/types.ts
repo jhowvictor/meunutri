@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      library_items: {
+        Row: {
+          content: string
+          content_type: string
+          created_at: string
+          id: string
+          is_favorite: boolean
+          metadata: Json | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          content_type: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          metadata?: Json | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          content_type?: string
+          created_at?: string
+          id?: string
+          is_favorite?: boolean
+          metadata?: Json | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       recipes: {
         Row: {
           calories: string | null
