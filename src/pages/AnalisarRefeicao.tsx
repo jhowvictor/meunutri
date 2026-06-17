@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Camera, Upload, Loader2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Camera, Upload, Loader2, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -270,7 +271,14 @@ const AnalisarRefeicao = () => {
 
   return (
     <div className="container max-w-4xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 text-primary text-center">Analisar Minha Refeição</h1>
+      <div className="flex items-center mb-6">
+        <Link to="/">
+          <Button variant="ghost" size="icon" className="mr-2">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        </Link>
+        <h1 className="text-3xl font-bold text-primary">Analisar Minha Refeição</h1>
+      </div>
       <p className="text-center text-muted-foreground mb-8">
         Tire uma foto ou envie uma imagem da sua refeição para receber uma análise nutricional.
       </p>
