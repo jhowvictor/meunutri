@@ -105,12 +105,16 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-secondary/30 p-4">
-      <div className="w-full max-w-md">
-        <div className="flex items-center mb-6">
-          <div className="flex items-center gap-2">
-            <ChefHat className="h-16 w-16 text-primary" />
-            <h1 className="text-3xl font-bold text-primary">MeuNutri.AI</h1>
+    <div className="relative min-h-screen flex flex-col items-center justify-center bg-background p-4 overflow-hidden">
+      {/* Green ambient glow */}
+      <div className="pointer-events-none absolute -left-40 top-1/3 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[120px]" />
+      <div className="pointer-events-none absolute -right-40 bottom-0 h-[500px] w-[500px] rounded-full bg-primary/20 blur-[120px]" />
+
+      <div className="relative w-full max-w-md">
+        <div className="flex items-center justify-center mb-6">
+          <div className="flex items-center gap-3">
+            <ChefHat className="h-14 w-14 text-primary" strokeWidth={2.2} />
+            <h1 className="text-4xl font-bold text-primary tracking-tight">MeuNutri.AI</h1>
           </div>
         </div>
         <p className="text-center mb-8 text-muted-foreground">
@@ -119,7 +123,7 @@ const Auth = () => {
             : "Faça login ou crie sua conta para acessar receitas personalizadas"}
         </p>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-card border border-border/60 rounded-2xl shadow-2xl p-6 backdrop-blur-sm">
           <Tabs defaultValue="login">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="login">Fazer Login</TabsTrigger>
