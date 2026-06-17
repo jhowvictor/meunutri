@@ -60,6 +60,7 @@ const Auth = () => {
         email,
         password,
         options: {
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: fullName,
             phone_number: phoneNumber
@@ -68,11 +69,18 @@ const Auth = () => {
       });
       
       if (error) throw error;
-      
-      toast.success("Cadastro realizado com sucesso! Verifique seu e-mail para confirmar.");
-      
+
       if (data.session) {
+        toast.success("Cadastro realizado com sucesso!");
         navigate("/");
+      } else {
+        // Caso confirmação esteja exigida, faz login imediato
+        const { data: signIn, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) throw signInError;
+        if (signIn.session) {
+          toast.success("Cadastro realizado com sucesso!");
+          navigate("/");
+        }
       }
     } catch (error: any) {
       setError(error.message || "Erro ao criar conta. Verifique seus dados.");
