@@ -18,6 +18,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { openAIService } from "@/services/openai";
+import SaveToLibrary from "@/components/SaveToLibrary";
 import { toast } from "@/components/ui/sonner";
 import { jsPDF } from "jspdf";
 
@@ -336,7 +337,13 @@ const DietaPersonalizada = () => {
                   </div>
                 </div>
                 
-                <div className="flex gap-3 justify-center">
+                <div className="flex flex-wrap gap-3 justify-center">
+                  <SaveToLibrary
+                    contentType="dieta"
+                    title={`Dieta - ${formData.objetivo || "Personalizada"}`}
+                    content={dietaGerada}
+                    metadata={formData}
+                  />
                   <Button onClick={() => setFormSubmitted(false)} variant="outline">
                     Modificar Dieta
                   </Button>

@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { openAIService } from "@/services/openai";
+import SaveToLibrary from "@/components/SaveToLibrary";
 import jsPDF from "jspdf";
 
 // Define types for workout form
@@ -300,7 +301,12 @@ const MontarTreino = () => {
                   Plano personalizado baseado nas suas informações
                 </CardDescription>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <SaveToLibrary
+                  contentType="treino"
+                  title="Plano de Treino"
+                  content={workoutPlan}
+                />
                 {isEditing ? (
                   <Button size="sm" variant="outline" onClick={saveEditedPlan}>
                     <Check className="h-4 w-4 mr-1" />
