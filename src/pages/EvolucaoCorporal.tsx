@@ -28,6 +28,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import SaveToLibrary from "@/components/SaveToLibrary";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/components/ui/sonner";
 import {
@@ -191,7 +192,12 @@ const EvolucaoCorporal = () => {
                 : "Seu peso está estável. Continue monitorando para identificar tendências."}
             </p>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <SaveToLibrary
+              contentType="evolucao"
+              title={`Análise de Progresso - ${latest.date}`}
+              content={`Total de medições: ${measurements.length}\nPeso inicial: ${first.weight} kg (${first.date})\nPeso atual: ${latest.weight} kg (${latest.date})\nVariação total: ${weightDiff} kg`}
+            />
             <Button onClick={() => setAnalyzeOpen(false)}>Fechar</Button>
           </DialogFooter>
         </DialogContent>
