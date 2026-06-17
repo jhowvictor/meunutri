@@ -311,27 +311,27 @@ const DietaPersonalizada = () => {
             </CardHeader>
             <CardContent className="pt-6">
               <div className="space-y-6">
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
+                <div className="bg-white text-black p-6 rounded-lg shadow-sm border">
                   <div className="flex justify-between mb-4">
                     <div>
-                      <h3 className="font-bold text-xl">Plano Alimentar Personalizado</h3>
-                      <p className="text-muted-foreground">
+                      <h3 className="font-bold text-xl text-black">Plano Alimentar Personalizado</h3>
+                      <p className="text-gray-600">
                         {formData.objetivo} | {formData.tipoAlimentacao}
                       </p>
                     </div>
                     <div className="flex gap-2">
-                      <div className="px-3 py-1 bg-accent rounded text-sm flex items-center">
+                      <div className="px-3 py-1 bg-accent text-accent-foreground rounded text-sm flex items-center">
                         <Scale className="h-4 w-4 mr-1" />
                         {formData.peso}kg
                       </div>
-                      <div className="px-3 py-1 bg-accent rounded text-sm flex items-center">
+                      <div className="px-3 py-1 bg-accent text-accent-foreground rounded text-sm flex items-center">
                         <Activity className="h-4 w-4 mr-1" />
                         {formData.exercicios.includes("Exercícios") ? "Moderado" : formData.exercicios}
                       </div>
                     </div>
                   </div>
                   
-                  <div className="whitespace-pre-line text-sm mt-4">
+                  <div className="whitespace-pre-line text-sm mt-4 text-black">
                     {dietaGerada}
                   </div>
                 </div>

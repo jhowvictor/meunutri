@@ -1,6 +1,7 @@
 
 import { useState } from "react";
-import { Dumbbell, FileDown, Edit, Check } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Dumbbell, FileDown, Edit, Check, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -146,6 +147,11 @@ const MontarTreino = () => {
     <div className="container max-w-5xl mx-auto px-4 py-8">
       <div className="mb-8">
         <div className="flex items-center gap-2 mb-2">
+          <Link to="/">
+            <Button variant="ghost" size="icon" className="mr-1">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
           <Dumbbell className="h-8 w-8 text-primary" />
           <h1 className="text-3xl font-bold">Montar meu Treino</h1>
         </div>

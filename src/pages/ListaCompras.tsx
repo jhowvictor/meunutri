@@ -244,9 +244,9 @@ const ListaCompras = () => {
                   </div>
                 </div>
                 
-                <div className="bg-white p-6 rounded-lg shadow-sm border">
-                  <h3 className="text-lg font-medium mb-3">Conteúdo da Lista</h3>
-                  <div className="whitespace-pre-line text-sm">
+                <div className="bg-white text-black p-6 rounded-lg shadow-sm border">
+                  <h3 className="text-lg font-medium mb-3 text-black">Conteúdo da Lista</h3>
+                  <div className="whitespace-pre-line text-sm text-black">
                     {listaGerada.conteudo}
                   </div>
                 </div>

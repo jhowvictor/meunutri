@@ -169,8 +169,8 @@ const ReceitaPersonalizada = () => {
           {receitaGerada && (
             <div className="mt-8">
               <h2 className="text-2xl font-bold mb-4">Sua Receita Personalizada</h2>
-              <div className="bg-white p-6 rounded-lg shadow-sm border">
-                <pre className="whitespace-pre-wrap font-sans">{receitaGerada}</pre>
+              <div className="bg-white text-black p-6 rounded-lg shadow-sm border">
+                <pre className="whitespace-pre-wrap font-sans text-black">{receitaGerada}</pre>
               </div>
             </div>
           )}
