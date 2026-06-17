@@ -9,7 +9,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import heroFood from "@/assets/hero-food.jpg";
-import miniChefImg from "@/assets/mini-chef.png";
+
 
 const tools = [
   { to: "/receita-personalizada", label: "Receitas", desc: "Personalizadas", icon: Utensils, accent: "from-rose-500/20 to-rose-500/5", iconColor: "text-rose-400" },
