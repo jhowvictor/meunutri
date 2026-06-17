@@ -261,7 +261,6 @@ const Auth = () => {
                     </button>
                   </div>
                 </div>
-                </div>
                 <Button 
                   type="submit" 
                   className="w-full" 
