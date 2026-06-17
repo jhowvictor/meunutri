@@ -313,9 +313,9 @@ const EbookPersonalizado = () => {
                   </div>
                 </div>
                 
-                <div className="bg-white p-6 rounded-lg shadow-sm border overflow-auto max-h-[500px]">
-                  <h3 className="text-lg font-medium mb-3">Conteúdo do E-book</h3>
-                  <div className="whitespace-pre-line text-sm">
+                <div className="bg-white text-black p-6 rounded-lg shadow-sm border overflow-auto max-h-[500px]">
+                  <h3 className="text-lg font-medium mb-3 text-black">Conteúdo do E-book</h3>
+                  <div className="whitespace-pre-line text-sm text-black">
                     {ebookGerado.conteudo || "Nenhum conteúdo disponível."}
                   </div>
                 </div>
