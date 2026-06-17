@@ -31,6 +31,32 @@ const MiniChef = () => {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+
+  const saveConversation = async () => {
+    if (!user) {
+      toast.error("Faça login para salvar.");
+      return;
+    }
+    const convo = messages
+      .map((m) => `${m.role === "user" ? "Você" : "Mini Chef"}: ${m.content}`)
+      .join("\n\n");
+    const firstUser = messages.find((m) => m.role === "user");
+    const title = firstUser
+      ? firstUser.content.slice(0, 60)
+      : "Conversa com Mini Chef";
+    const { error } = await supabase.from("library_items").insert({
+      user_id: user.id,
+      content_type: "mini_chef",
+      title,
+      content: convo,
+    });
+    if (error) {
+      toast.error("Erro ao salvar conversa.");
+    } else {
+      toast.success("Conteúdo salvo com sucesso na sua Biblioteca.");
+    }
+  };
 
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
