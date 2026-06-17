@@ -7,8 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { openAIService } from "@/services/openai";
+import miniChefImg from "@/assets/mini-chef.png";
 
-// Definindo tipos para as mensagens
 type MessageRole = "assistant" | "user";
 
 interface ChatMessage {
@@ -32,7 +32,6 @@ const MiniChef = () => {
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
-    // Prompt de sistema otimizado para respostas curtas e empáticas
     const systemPrompt = `🍳 Mini Chef - Assistente Culinário
 
 Diretrizes para respostas:
@@ -51,7 +50,6 @@ Especialidades:
 
 IMPORTANTE: Sempre ao fornecer uma receita, comece com "Nome da Receita: [Título da Receita]" em uma linha separada no início.`;
 
-    // Adicionar mensagem do usuário
     const userMessage: ChatMessage = {
       role: "user",
       content: inputMessage,
@@ -62,28 +60,23 @@ IMPORTANTE: Sempre ao fornecer uma receita, comece com "Nome da Receita: [Títul
     setInputMessage("");
     setIsLoading(true);
 
-    // Construindo o prompt com o histórico da conversa
     const prompt = `${systemPrompt}\n\nHistórico da conversa:\n${messages
       .map((msg) => `${msg.role === "user" ? "Usuário" : "Mini Chef"}: ${msg.content}`)
       .join("\n")}\n\nUsuário: ${inputMessage}\n\nMini Chef:`;
 
     try {
-      // Usar o modelo gpt-4o com mais tokens máximos para respostas mais completas
-      const response = await openAIService.generateContent({ 
+      const response = await openAIService.generateContent({
         prompt,
-        model: "gpt-4o",  // Modelo mais avançado
-        max_tokens: 2000, // Aumentar o limite de tokens
-        temperature: 0.7  // Manter criatividade equilibrada
+        model: "gpt-4o",
+        max_tokens: 2000,
+        temperature: 0.7,
       });
 
       if (!response.isError && response.content) {
-        // Adicionar resposta do assistente
-        const assistantMessage: ChatMessage = {
-          role: "assistant",
-          content: response.content,
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: response.content, timestamp: new Date() },
+        ]);
       }
     } catch (error) {
       console.error("Erro ao processar mensagem:", error);
@@ -103,8 +96,8 @@ IMPORTANTE: Sempre ao fornecer uma receita, comece com "Nome da Receita: [Títul
     <div className="fixed bottom-6 right-6 z-50">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          <Button 
-            size="lg" 
+          <Button
+            size="lg"
             className="rounded-full shadow-lg flex items-center gap-2 px-4 py-6"
           >
             <ChefHat size={24} />
@@ -114,8 +107,8 @@ IMPORTANTE: Sempre ao fornecer uma receita, comece com "Nome da Receita: [Títul
         <SheetContent className="sm:max-w-md w-[90vw] p-0 h-[80vh] sm:h-[600px] flex flex-col">
           <SheetHeader className="px-4 py-3 border-b bg-primary/5">
             <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 border-2 border-primary">
-                <AvatarImage src="/placeholder.svg" alt="Mini Chef" />
+              <Avatar className="h-12 w-12 border-2 border-primary bg-white">
+                <AvatarImage src={miniChefImg} alt="Mini Chef" className="object-contain" />
                 <AvatarFallback className="bg-primary/20">
                   <ChefHat className="h-5 w-5 text-primary" />
                 </AvatarFallback>
@@ -129,19 +122,31 @@ IMPORTANTE: Sempre ao fornecer uma receita, comece com "Nome da Receita: [Títul
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className={`flex ${
+                  className={`flex items-end gap-2 ${
                     message.role === "user" ? "justify-end" : "justify-start"
                   }`}
                 >
+                  {message.role === "assistant" && (
+                    <Avatar className="h-8 w-8 border border-primary bg-white shrink-0">
+                      <AvatarImage src={miniChefImg} alt="Mini Chef" className="object-contain" />
+                      <AvatarFallback className="bg-primary/20">
+                        <ChefHat className="h-4 w-4 text-primary" />
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
                   <div
                     className={`max-w-[80%] rounded-lg p-3 ${
                       message.role === "user"
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-white text-black border border-border"
                         : "bg-muted"
                     }`}
                   >
                     <p className="whitespace-pre-wrap">{message.content}</p>
-                    <div className="text-xs opacity-70 mt-1 text-right">
+                    <div
+                      className={`text-xs mt-1 text-right ${
+                        message.role === "user" ? "text-gray-500" : "opacity-70"
+                      }`}
+                    >
                       {message.timestamp.toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
@@ -151,7 +156,13 @@ IMPORTANTE: Sempre ao fornecer uma receita, comece com "Nome da Receita: [Títul
                 </div>
               ))}
               {isLoading && (
-                <div className="flex justify-start">
+                <div className="flex items-end gap-2 justify-start">
+                  <Avatar className="h-8 w-8 border border-primary bg-white shrink-0">
+                    <AvatarImage src={miniChefImg} alt="Mini Chef" className="object-contain" />
+                    <AvatarFallback className="bg-primary/20">
+                      <ChefHat className="h-4 w-4 text-primary" />
+                    </AvatarFallback>
+                  </Avatar>
                   <div className="max-w-[80%] rounded-lg p-3 bg-muted">
                     <div className="flex items-center gap-2">
                       <div className="h-2 w-2 rounded-full bg-primary/60 animate-ping"></div>
@@ -171,13 +182,13 @@ IMPORTANTE: Sempre ao fornecer uma receita, comece com "Nome da Receita: [Títul
                 onChange={(e) => setInputMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Digite uma mensagem..."
-                className="resize-none"
+                className="resize-none bg-white text-black placeholder:text-gray-500 border-primary/40 shadow-[0_0_12px_hsl(var(--primary)/0.45)] focus-visible:ring-primary focus-visible:ring-2"
                 disabled={isLoading}
                 rows={1}
               />
-              <Button 
+              <Button
                 size="icon"
-                disabled={isLoading || !inputMessage.trim()} 
+                disabled={isLoading || !inputMessage.trim()}
                 onClick={handleSendMessage}
               >
                 <Send className="h-4 w-4" />
