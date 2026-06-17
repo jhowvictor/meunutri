@@ -121,17 +121,28 @@ IMPORTANTE: Sempre ao fornecer uma receita, comece com "Nome da Receita: [Títul
     }
   };
 
+  const quickSuggestions = [
+    "Posso melhorar minha dieta?",
+    "Adaptar uma receita",
+    "Ajuda com meu treino",
+  ];
+
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-24 right-4 z-50">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        {!isOpen && (
+          <div className="absolute -top-12 right-14 glass-strong border border-primary/40 rounded-2xl px-3 py-1.5 text-xs font-medium whitespace-nowrap neon-glow-sm animate-[fadeIn_0.6s]">
+            Posso te ajudar? <span className="text-primary">Fale comigo!</span>
+            <div className="absolute -bottom-1 right-4 w-2 h-2 rotate-45 bg-card border-r border-b border-primary/40" />
+          </div>
+        )}
         <SheetTrigger asChild>
-          <Button
-            size="lg"
-            className="rounded-full shadow-lg flex items-center gap-2 px-4 py-6"
+          <button
+            aria-label="Abrir Mini Chef"
+            className="relative h-16 w-16 rounded-full bg-primary flex items-center justify-center pulse-glow hover:scale-105 transition"
           >
-            <ChefHat size={24} />
-            <span>Mini Chef</span>
-          </Button>
+            <img src={miniChefImg} alt="Mini Chef" className="h-12 w-12 object-contain" />
+          </button>
         </SheetTrigger>
         <SheetContent className="sm:max-w-md w-[90vw] p-0 h-[80vh] sm:h-[600px] flex flex-col">
           <SheetHeader className="px-4 py-3 border-b bg-primary/5">
@@ -215,6 +226,20 @@ IMPORTANTE: Sempre ao fornecer uma receita, comece com "Nome da Receita: [Títul
               )}
             </div>
           </ScrollArea>
+
+          {messages.length === 1 && (
+            <div className="px-4 pb-2 flex flex-wrap gap-2">
+              {quickSuggestions.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setInputMessage(s)}
+                  className="text-xs px-3 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="p-4 border-t">
             <div className="flex gap-2">

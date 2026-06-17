@@ -50,6 +50,63 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          activity_level: string | null
+          age: number | null
+          avatar_url: string | null
+          created_at: string
+          dietary_restrictions: string[] | null
+          food_preferences: string[] | null
+          full_name: string | null
+          height_cm: number | null
+          id: string
+          main_goal: string | null
+          onboarding_completed: boolean
+          sex: string | null
+          streak_days: number
+          target_weight_kg: number | null
+          updated_at: string
+          weight_kg: number | null
+        }
+        Insert: {
+          activity_level?: string | null
+          age?: number | null
+          avatar_url?: string | null
+          created_at?: string
+          dietary_restrictions?: string[] | null
+          food_preferences?: string[] | null
+          full_name?: string | null
+          height_cm?: number | null
+          id: string
+          main_goal?: string | null
+          onboarding_completed?: boolean
+          sex?: string | null
+          streak_days?: number
+          target_weight_kg?: number | null
+          updated_at?: string
+          weight_kg?: number | null
+        }
+        Update: {
+          activity_level?: string | null
+          age?: number | null
+          avatar_url?: string | null
+          created_at?: string
+          dietary_restrictions?: string[] | null
+          food_preferences?: string[] | null
+          full_name?: string | null
+          height_cm?: number | null
+          id?: string
+          main_goal?: string | null
+          onboarding_completed?: boolean
+          sex?: string | null
+          streak_days?: number
+          target_weight_kg?: number | null
+          updated_at?: string
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
       recipes: {
         Row: {
           calories: string | null
