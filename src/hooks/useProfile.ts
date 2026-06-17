@@ -35,8 +35,7 @@ export function useProfile() {
       if (!user) return { error: new Error("Sem usuário") };
       const { data, error } = await supabase
         .from("profiles")
-        .update(patch)
-        .eq("id", user.id)
+        .upsert({ id: user.id, ...patch }, { onConflict: "id" })
         .select()
         .single();
       if (!error && data) setProfile(data);
