@@ -1,212 +1,237 @@
-
-import { ChefHat, Utensils, Camera, Calendar, BookOpen, TrendingUp, ShoppingCart, Dumbbell, Library } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  Utensils, Camera, Calendar, BookOpen, TrendingUp, ShoppingCart, Dumbbell,
+  Library, Sparkles, ArrowRight, Clock, Heart, ChefHat, Target, Flame
+} from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
+import { useProfile } from "@/hooks/useProfile";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import heroFood from "@/assets/hero-food.jpg";
+import miniChefImg from "@/assets/mini-chef.png";
 
-const Index = () => {
+const tools = [
+  { to: "/receita-personalizada", label: "Receitas", desc: "Personalizadas", icon: Utensils, accent: "from-rose-500/20 to-rose-500/5", iconColor: "text-rose-400" },
+  { to: "/dieta-personalizada", label: "Dietas", desc: "Sob medida", icon: Calendar, accent: "from-emerald-500/25 to-emerald-500/5", iconColor: "text-emerald-400" },
+  { to: "/montar-treino", label: "Treinos", desc: "Personalizados", icon: Dumbbell, accent: "from-amber-500/25 to-amber-500/5", iconColor: "text-amber-400" },
+  { to: "/ebook-personalizado", label: "E-books", desc: "Nutricionais", icon: BookOpen, accent: "from-indigo-500/25 to-indigo-500/5", iconColor: "text-indigo-400" },
+  { to: "/evolucao-corporal", label: "Evolução", desc: "Corporal", icon: TrendingUp, accent: "from-cyan-500/25 to-cyan-500/5", iconColor: "text-cyan-400" },
+  { to: "/analisar-refeicao", label: "Analisar", desc: "Refeição", icon: Camera, accent: "from-fuchsia-500/25 to-fuchsia-500/5", iconColor: "text-fuchsia-400" },
+  { to: "/lista-compras", label: "Compras", desc: "Inteligente", icon: ShoppingCart, accent: "from-orange-500/25 to-orange-500/5", iconColor: "text-orange-400" },
+  { to: "/minha-biblioteca", label: "Biblioteca", desc: "Seus salvos", icon: Library, accent: "from-primary/30 to-primary/5", iconColor: "text-primary" },
+];
+
+const typeLabel: Record<string, string> = {
+  receita: "Receita",
+  dieta: "Dieta",
+  treino: "Treino",
+  ebook: "E-book",
+  lista_compras: "Lista",
+  analise_refeicao: "Análise",
+  evolucao: "Evolução",
+  mini_chef: "Mini Chef",
+};
+
+const typeColor: Record<string, string> = {
+  receita: "bg-rose-500/90",
+  dieta: "bg-emerald-500/90",
+  treino: "bg-amber-500/90",
+  ebook: "bg-indigo-500/90",
+  lista_compras: "bg-orange-500/90",
+  analise_refeicao: "bg-fuchsia-500/90",
+  evolucao: "bg-cyan-500/90",
+  mini_chef: "bg-primary",
+};
+
+const timeAgo = (iso: string) => {
+  const d = new Date(iso);
+  const diff = (Date.now() - d.getTime()) / 1000;
+  if (diff < 60) return "agora";
+  if (diff < 3600) return `há ${Math.floor(diff / 60)}min`;
+  if (diff < 86400) return `há ${Math.floor(diff / 3600)}h`;
+  if (diff < 604800) return `há ${Math.floor(diff / 86400)}d`;
+  return d.toLocaleDateString("pt-BR");
+};
+
+interface LibItem {
+  id: string;
+  title: string;
+  content_type: string;
+  created_at: string;
+  is_favorite: boolean;
+}
+
+const PremiumIndex = () => {
+  const { user } = useAuth();
+  const { profile } = useProfile();
+  const [recent, setRecent] = useState<LibItem[]>([]);
+  const [favorites, setFavorites] = useState<LibItem[]>([]);
+  const [streak, setStreak] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const [{ data: r }, { data: f }] = await Promise.all([
+        supabase.from("library_items").select("id,title,content_type,created_at,is_favorite").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
+        supabase.from("library_items").select("id,title,content_type,created_at,is_favorite").eq("user_id", user.id).eq("is_favorite", true).order("updated_at", { ascending: false }).limit(6),
+      ]);
+      setRecent(r || []);
+      setFavorites(f || []);
+      setStreak(profile?.streak_days ?? Math.max(1, Math.min(7, (r || []).length)));
+    })();
+  }, [user, profile]);
+
+  const firstName = profile?.full_name?.split(" ")[0] || "você";
+  const goalText = profile?.target_weight_kg && profile?.weight_kg
+    ? `Vamos continuar sua jornada${profile.target_weight_kg < profile.weight_kg ? ` para perder ${(profile.weight_kg - profile.target_weight_kg).toFixed(0)} kg` : profile.target_weight_kg > profile.weight_kg ? ` de ganho de massa` : ""}`
+    : "Sua melhor versão começa com escolhas inteligentes";
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-secondary/20 to-background relative overflow-hidden">
-      {/* Circular decorative elements */}
-      <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl"></div>
-      <div className="absolute bottom-10 -right-20 w-80 h-80 rounded-full bg-accent/10 blur-3xl"></div>
-      <div className="absolute top-1/4 right-0 w-40 h-40 rounded-full bg-secondary/20 blur-2xl"></div>
-
-      {/* Hero Section */}
-      <section className="w-full py-12 md:py-24 lg:py-28 xl:py-32 relative ">
-        <div className="container px-4 md:px-6 mx-auto">
-          <div className="flex flex-col items-center space-y-4 text-center relative z-10">
-            <div className="relative mb-8">
-              <div className="absolute inset-0 blur-3xl bg-primary/20 rounded-full -z-10 animate-pulse-soft"></div>
-              <div className="animate-float">
-                <div className="rounded-full bg-gradient-to-br from-primary to-accent p-5 shadow-lg shadow-primary/20">
-                  <ChefHat className="h-16 w-16 text-white" />
-                </div>
-              </div>
+    <div className="space-y-8 animate-[fadeIn_0.5s_ease-out]">
+      {/* HERO */}
+      <section className="relative overflow-hidden rounded-3xl glass border border-white/10 px-5 py-6 mt-3">
+        <div className="absolute -top-20 -right-20 h-60 w-60 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
+        <div className="relative grid grid-cols-[1fr_auto] gap-4 items-center">
+          <div>
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/30 px-3 py-1 mb-3">
+              <Sparkles className="h-3 w-3 text-primary" />
+              <span className="text-[11px] font-medium text-primary">Inteligência que transforma</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tighter text-fruit-gradient">
-              MeuNutri.AI
+            <h1 className="text-2xl font-extrabold leading-tight tracking-tight">
+              Olá, <span className="text-primary">{firstName}</span> 👋
             </h1>
+            <p className="text-sm text-muted-foreground mt-1.5 leading-snug">{goalText}</p>
+          </div>
+          <div className="relative h-24 w-24 shrink-0">
+            <div className="absolute inset-0 rounded-full bg-primary/20 blur-2xl" />
+            <div className="absolute inset-0 rounded-full border border-primary/30 orbit-slow" />
+            <img src={heroFood} alt="" className="relative h-24 w-24 rounded-full object-cover border-2 border-primary/40 neon-glow-sm" />
           </div>
         </div>
+
+        <div className="mt-5 flex gap-2">
+          <Link to="/receita-personalizada" className="flex-1">
+            <Button className="w-full rounded-full bg-primary text-primary-foreground hover:bg-primary/90 neon-glow-sm font-semibold">
+              <Sparkles className="h-4 w-4 mr-1.5" /> Criar agora
+            </Button>
+          </Link>
+          <Link to="/perfil">
+            <Button variant="outline" className="rounded-full border-white/10 bg-white/5">
+              <Target className="h-4 w-4 mr-1.5" /> Meta
+            </Button>
+          </Link>
+        </div>
       </section>
 
-      {/* Feature Card Section */}
-      <section className="container max-w-6xl px-4 py-8 mx-auto mb-20 ">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-2 text-fruit-gradient">Suas Ferramentas de Nutrição</h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">Crie receitas, dietas e muito mais com base nas suas preferências e objetivos</p>
+      {/* DASHBOARD MINI */}
+      <section className="grid grid-cols-3 gap-2.5">
+        <div className="glass rounded-2xl p-3 border border-white/5">
+          <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] mb-1">
+            <Flame className="h-3 w-3 text-orange-400" /> Sequência
+          </div>
+          <div className="text-xl font-bold">{streak}<span className="text-xs text-muted-foreground ml-1">dias</span></div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {/* Receita Personalizada */}
-          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
-            <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
-              <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
-                <Utensils className="h-8 w-8 text-white" />
-              </div>
-              <CardTitle className="text-xl">Receita Personalizada</CardTitle>
-              <CardDescription>
-                Crie receitas adaptadas às suas preferências
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center pt-4">
-              <Link to="/receita-personalizada">
-                <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
-                  Criar Receita
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          {/* Analisar Refeição */}
-          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
-            <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
-              <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
-                <Camera className="h-8 w-8 text-white" />
-              </div>
-              <CardTitle className="text-xl">Analisar Refeição</CardTitle>
-              <CardDescription>
-                Analise suas refeições por foto
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center pt-4">
-              <Link to="/analisar-refeicao">
-                <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
-                  Analisar
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          {/* Dieta Personalizada */}
-          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
-            <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
-              <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
-                <Calendar className="h-8 w-8 text-white" />
-              </div>
-              <CardTitle className="text-xl">Dieta Personalizada</CardTitle>
-              <CardDescription>
-                Receba um plano alimentar sob medida
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center pt-4">
-              <Link to="/dieta-personalizada">
-                <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
-                  Criar Dieta
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          {/* E-book Personalizado */}
-          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
-            <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
-              <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
-                <BookOpen className="h-8 w-8 text-white" />
-              </div>
-              <CardTitle className="text-xl">E-book Personalizado</CardTitle>
-              <CardDescription>
-                Crie seu e-book de receitas
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center pt-4">
-              <Link to="/ebook-personalizado">
-                <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
-                  Criar E-book
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          {/* Evolução Corporal */}
-          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
-            <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
-              <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
-                <TrendingUp className="h-8 w-8 text-white" />
-              </div>
-              <CardTitle className="text-xl">Evolução Corporal</CardTitle>
-              <CardDescription>
-                Acompanhe seu progresso
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center pt-4">
-              <Link to="/evolucao-corporal">
-                <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
-                  Ver Evolução
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          {/* Lista de Compras */}
-          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
-            <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
-              <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
-                <ShoppingCart className="h-8 w-8 text-white" />
-              </div>
-              <CardTitle className="text-xl">Lista de Compras</CardTitle>
-              <CardDescription>
-                Monte sua lista inteligente
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center pt-4">
-              <Link to="/lista-compras">
-                <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
-                  Criar Lista
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          {/* Montar Treino */}
-          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
-            <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
-              <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
-                <Dumbbell className="h-8 w-8 text-white" />
-              </div>
-              <CardTitle className="text-xl">Montar Treino</CardTitle>
-              <CardDescription>
-                Crie seu plano de treino personalizado
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center pt-4">
-              <Link to="/montar-treino">
-                <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
-                  Criar Treino
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-
-          {/* Minha Biblioteca */}
-          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
-            <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
-              <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
-                <Library className="h-8 w-8 text-white" />
-              </div>
-              <CardTitle className="text-xl">Minha Biblioteca</CardTitle>
-              <CardDescription>
-                Acesse seus conteúdos salvos
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center pt-4">
-              <Link to="/minha-biblioteca">
-                <Button variant="fruit" className="w-full btn-hover shadow-md rounded-full" size="lg">
-                  Abrir Biblioteca
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+        <div className="glass rounded-2xl p-3 border border-white/5">
+          <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] mb-1">
+            <TrendingUp className="h-3 w-3 text-primary" /> Peso
+          </div>
+          <div className="text-xl font-bold">{profile?.weight_kg ?? "--"}<span className="text-xs text-muted-foreground ml-1">kg</span></div>
         </div>
-
-        <footer className="mt-20 mb-8 text-center">
-          <div className="mx-auto h-px w-1/2 bg-gradient-to-r from-transparent via-muted-foreground/30 to-transparent mb-6"></div>
-          <p className="text-muted-foreground text-sm">© 2025 MeuNutri.AI • Nutrição funcional & Receitas personalizadas</p>
-        </footer>
+        <div className="glass rounded-2xl p-3 border border-white/5">
+          <div className="flex items-center gap-1.5 text-muted-foreground text-[10px] mb-1">
+            <Target className="h-3 w-3 text-emerald-400" /> Meta
+          </div>
+          <div className="text-xl font-bold">{profile?.target_weight_kg ?? "--"}<span className="text-xs text-muted-foreground ml-1">kg</span></div>
+        </div>
       </section>
+
+      {/* TOOLS */}
+      <section>
+        <div className="flex items-baseline justify-between mb-3 px-1">
+          <h2 className="text-lg font-bold">O que você deseja <span className="text-primary">criar</span> hoje?</h2>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          {tools.map((t) => (
+            <Link key={t.to} to={t.to} className="group">
+              <div className={`relative glass rounded-2xl p-4 border border-white/5 card-hover overflow-hidden h-full`}>
+                <div className={`absolute inset-0 bg-gradient-to-br ${t.accent} opacity-60 pointer-events-none`} />
+                <div className="relative">
+                  <div className="inline-flex p-2 rounded-xl bg-background/40 border border-white/10 mb-3">
+                    <t.icon className={`h-5 w-5 ${t.iconColor}`} />
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-semibold text-sm">{t.label}</div>
+                      <div className="text-[11px] text-muted-foreground">{t.desc}</div>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition" />
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* CONTINUE */}
+      {recent.length > 0 && (
+        <section>
+          <div className="flex items-baseline justify-between mb-3 px-1">
+            <h2 className="text-lg font-bold">Continue de onde parou</h2>
+            <Link to="/minha-biblioteca" className="text-xs font-medium text-primary">Ver todos</Link>
+          </div>
+          <div className="flex gap-3 overflow-x-auto scrollbar-hidden -mx-4 px-4 snap-x">
+            {recent.map((item) => (
+              <Link to="/minha-biblioteca" key={item.id} className="shrink-0 w-44 snap-start">
+                <div className="glass rounded-2xl p-3 border border-white/5 card-hover h-full">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full text-white ${typeColor[item.content_type] || "bg-primary"}`}>
+                      {typeLabel[item.content_type] || item.content_type}
+                    </span>
+                    {item.is_favorite && <Heart className="h-3 w-3 fill-rose-500 text-rose-500" />}
+                  </div>
+                  <div className="h-20 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 mb-2 flex items-center justify-center border border-white/5">
+                    <ChefHat className="h-8 w-8 text-primary/60" />
+                  </div>
+                  <div className="font-semibold text-xs leading-snug line-clamp-2 min-h-[2.2rem]">{item.title}</div>
+                  <div className="flex items-center gap-1 mt-2 text-[10px] text-muted-foreground">
+                    <Clock className="h-2.5 w-2.5" /> {timeAgo(item.created_at)}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* FAVORITES */}
+      {favorites.length > 0 && (
+        <section>
+          <div className="flex items-baseline justify-between mb-3 px-1">
+            <h2 className="text-lg font-bold">Seus favoritos</h2>
+            <Link to="/favoritos" className="text-xs font-medium text-primary">Ver todos</Link>
+          </div>
+          <div className="space-y-2">
+            {favorites.slice(0, 4).map((item) => (
+              <Link to="/favoritos" key={item.id}>
+                <div className="glass rounded-2xl p-3 border border-white/5 card-hover flex items-center gap-3">
+                  <div className={`h-10 w-10 rounded-xl flex items-center justify-center text-white text-xs font-bold shrink-0 ${typeColor[item.content_type] || "bg-primary"}`}>
+                    {(typeLabel[item.content_type] || "X").charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-sm truncate">{item.title}</div>
+                    <div className="text-[11px] text-muted-foreground">{typeLabel[item.content_type]}</div>
+                  </div>
+                  <Heart className="h-4 w-4 fill-rose-500 text-rose-500" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };
 
-export default Index;
+export default PremiumIndex;
