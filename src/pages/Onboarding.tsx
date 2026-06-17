@@ -55,7 +55,7 @@ const Onboarding = () => {
 
   const finish = async () => {
     setSaving(true);
-    await update({
+    const { error } = await update({
       full_name: data.full_name || null,
       age: data.age ? parseInt(data.age) : null,
       sex: data.sex || null,
@@ -70,8 +70,12 @@ const Onboarding = () => {
       onboarding_completed: true,
     });
     setSaving(false);
+    if (error) {
+      toast.error("Erro ao salvar perfil: " + error.message);
+      return;
+    }
     toast.success("Tudo pronto! Bem-vindo ao MeuNutri.AI");
-    navigate("/");
+    window.location.href = "/";
   };
 
   const initial = (data.full_name || "U").charAt(0).toUpperCase();
