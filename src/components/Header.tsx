@@ -14,7 +14,7 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white/80 backdrop-blur-md shadow-sm py-4 sticky top-0 z-50 border-b border-primary/10">
+    <header className="bg-card/80 backdrop-blur-md shadow-sm py-4 sticky top-0 z-50 border-b border-primary/10">
       <div className="container max-w-5xl mx-auto px-4 flex justify-between items-center">
         <Link to="/" className="flex items-center gap-2 text-gradient font-bold">
           <div className="rounded-full bg-gradient-to-br from-primary to-accent p-2 shadow-md">
@@ -26,7 +26,7 @@ const Header = () => {
         <div className="flex items-center gap-3">
           {user && (
             <div className="flex items-center gap-4">
-              <div className="flex items-center text-sm text-muted-foreground bg-white/80 backdrop-blur-md py-1 px-3 rounded-full shadow-sm">
+              <div className="flex items-center text-sm text-muted-foreground bg-card/80 backdrop-blur-md py-1 px-3 rounded-full shadow-sm">
                 <User className="h-4 w-4 mr-2 text-primary" />
                 <span className="hidden sm:block">{user.email}</span>
               </div>

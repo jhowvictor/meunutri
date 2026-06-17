@@ -13,7 +13,7 @@ const Index = () => {
       <div className="absolute top-1/4 right-0 w-40 h-40 rounded-full bg-secondary/20 blur-2xl"></div>
 
       {/* Hero Section */}
-      <section className="w-full py-12 md:py-24 lg:py-28 xl:py-32 relative bg-pink-50">
+      <section className="w-full py-12 md:py-24 lg:py-28 xl:py-32 relative ">
         <div className="container px-4 md:px-6 mx-auto">
           <div className="flex flex-col items-center space-y-4 text-center relative z-10">
             <div className="relative mb-8">
@@ -32,7 +32,7 @@ const Index = () => {
       </section>
 
       {/* Feature Card Section */}
-      <section className="container max-w-6xl px-4 py-8 mx-auto mb-20 bg-pink-50">
+      <section className="container max-w-6xl px-4 py-8 mx-auto mb-20 ">
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-2 text-fruit-gradient">Suas Ferramentas de Nutrição</h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">Crie receitas, dietas e muito mais com base nas suas preferências e objetivos</p>
@@ -40,7 +40,7 @@ const Index = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Receita Personalizada */}
-          <Card className="border-white/30 bg-white/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
+          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
             <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
               <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
                 <Utensils className="h-8 w-8 text-white" />
@@ -60,7 +60,7 @@ const Index = () => {
           </Card>
 
           {/* Analisar Refeição */}
-          <Card className="border-white/30 bg-white/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
+          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
             <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
               <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
                 <Camera className="h-8 w-8 text-white" />
@@ -80,7 +80,7 @@ const Index = () => {
           </Card>
 
           {/* Dieta Personalizada */}
-          <Card className="border-white/30 bg-white/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
+          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
             <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
               <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
                 <Calendar className="h-8 w-8 text-white" />
@@ -100,7 +100,7 @@ const Index = () => {
           </Card>
 
           {/* E-book Personalizado */}
-          <Card className="border-white/30 bg-white/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
+          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
             <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
               <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
                 <BookOpen className="h-8 w-8 text-white" />
@@ -120,7 +120,7 @@ const Index = () => {
           </Card>
 
           {/* Evolução Corporal */}
-          <Card className="border-white/30 bg-white/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
+          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
             <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
               <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
                 <TrendingUp className="h-8 w-8 text-white" />
@@ -140,7 +140,7 @@ const Index = () => {
           </Card>
 
           {/* Lista de Compras */}
-          <Card className="border-white/30 bg-white/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
+          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
             <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
               <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
                 <ShoppingCart className="h-8 w-8 text-white" />
@@ -160,7 +160,7 @@ const Index = () => {
           </Card>
 
           {/* Montar Treino */}
-          <Card className="border-white/30 bg-white/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
+          <Card className="border-border/30 bg-card/70 backdrop-blur-sm rounded-xl overflow-hidden card-hover fruit-card">
             <CardHeader className="text-center pb-2 bg-gradient-to-br from-primary/10 to-primary/5">
               <div className="mx-auto p-3 rounded-full fruit-gradient shadow-lg mb-2">
                 <Dumbbell className="h-8 w-8 text-white" />
