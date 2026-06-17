@@ -7,45 +7,46 @@
 
 @layer base {
   :root {
-    --background: 60 30% 98%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 0 0% 4%;
+    --foreground: 0 0% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 0 0% 7%;
+    --card-foreground: 0 0% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 98%;
 
-    --primary: 332 80% 58%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 142 76% 50%;
+    --primary-foreground: 0 0% 4%;
 
-    --secondary: 45 97% 65%;
-    --secondary-foreground: 26 83% 14%;
+    --secondary: 142 50% 25%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 220 14% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 65%;
 
-    --accent: 130 55% 55%;
-    --accent-foreground: 130 64% 15%;
+    --accent: 142 76% 50%;
+    --accent-foreground: 0 0% 4%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 142 76% 50%;
 
     --radius: 1rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 0 0% 6%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 142 76% 50%;
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 0 0% 12%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 142 76% 50%;
   }
+
 
   .dark {
     --background: 222.2 84% 4.9%;
@@ -149,7 +150,7 @@
   }
   
   .fruit-card {
-    @apply overflow-hidden rounded-2xl border border-white/50 bg-white/60 backdrop-blur-sm shadow-lg;
+    @apply overflow-hidden rounded-2xl border border-border/50 bg-card/60 backdrop-blur-sm shadow-lg;
   }
   
   .fruit-gradient {
@@ -171,12 +172,13 @@
 
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
   }
   
   .text-fruit-gradient {
-    @apply bg-gradient-to-br from-primary via-[#ff9190] to-accent/90 bg-clip-text text-transparent;
+    @apply bg-gradient-to-br from-primary via-primary to-accent bg-clip-text text-transparent;
   }
+
 }
 
 /* Remover os estilos antigos que não são mais necessários */
