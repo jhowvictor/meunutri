@@ -227,6 +227,20 @@ IMPORTANTE: Sempre ao fornecer uma receita, comece com "Nome da Receita: [Títul
             </div>
           </ScrollArea>
 
+          {messages.length === 1 && (
+            <div className="px-4 pb-2 flex flex-wrap gap-2">
+              {quickSuggestions.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => setInputMessage(s)}
+                  className="text-xs px-3 py-1.5 rounded-full bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20 transition"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="p-4 border-t">
             <div className="flex gap-2">
               <Textarea
