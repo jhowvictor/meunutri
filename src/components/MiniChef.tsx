@@ -1,12 +1,15 @@
 
 import { useState } from "react";
-import { ChefHat, Send } from "lucide-react";
+import { ChefHat, Send, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { openAIService } from "@/services/openai";
+import { toast } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "./AuthProvider";
 import miniChefImg from "@/assets/mini-chef.png";
 
 type MessageRole = "assistant" | "user";
