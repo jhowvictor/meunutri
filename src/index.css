@@ -172,12 +172,13 @@
 
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
   }
   
   .text-fruit-gradient {
-    @apply bg-gradient-to-br from-primary via-[#ff9190] to-accent/90 bg-clip-text text-transparent;
+    @apply bg-gradient-to-br from-primary via-primary to-accent bg-clip-text text-transparent;
   }
+
 }
 
 /* Remover os estilos antigos que não são mais necessários */
