@@ -57,6 +57,7 @@ const App = () => (
             <Route path="/minha-biblioteca" element={protect(<MinhaBiblioteca />)} />
             <Route path="/perfil" element={protect(<Perfil />)} />
             <Route path="/favoritos" element={protect(<Favoritos />)} />
+            <Route path="/glicemia" element={protect(<Glicemia />)} />
             <Route path="/profissional" element={protect(<ProDashboard />)} />
             <Route path="/profissional/pacientes" element={protect(<Pacientes />)} />
             <Route path="/profissional/pacientes/novo" element={protect(<NovoPaciente />)} />
