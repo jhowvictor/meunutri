@@ -19,6 +19,7 @@ import ProDashboard from "./pages/profissional/ProDashboard";
 import Pacientes from "./pages/profissional/Pacientes";
 import NovoPaciente from "./pages/profissional/NovoPaciente";
 import PacienteDetalhe from "./pages/profissional/PacienteDetalhe";
+import Glicemia from "./pages/Glicemia";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ApiKeyConfig from "./components/ApiKeyConfig";
