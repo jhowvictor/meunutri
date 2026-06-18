@@ -50,8 +50,152 @@ export type Database = {
         }
         Relationships: []
       }
+      patient_assignments: {
+        Row: {
+          assignment_type: string
+          content: Json
+          created_at: string
+          id: string
+          patient_id: string
+          professional_id: string
+          sent_via: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignment_type: string
+          content?: Json
+          created_at?: string
+          id?: string
+          patient_id: string
+          professional_id: string
+          sent_via?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignment_type?: string
+          content?: Json
+          created_at?: string
+          id?: string
+          patient_id?: string
+          professional_id?: string
+          sent_via?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_assignments_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patients: {
+        Row: {
+          adherence_status: string | null
+          city: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          goal: string | null
+          id: string
+          invite_status: string
+          invite_token: string | null
+          last_activity_at: string | null
+          notes: string | null
+          patient_user_id: string | null
+          phone: string | null
+          professional_id: string
+          updated_at: string
+        }
+        Insert: {
+          adherence_status?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          full_name: string
+          goal?: string | null
+          id?: string
+          invite_status?: string
+          invite_token?: string | null
+          last_activity_at?: string | null
+          notes?: string | null
+          patient_user_id?: string | null
+          phone?: string | null
+          professional_id: string
+          updated_at?: string
+        }
+        Update: {
+          adherence_status?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          goal?: string | null
+          id?: string
+          invite_status?: string
+          invite_token?: string | null
+          last_activity_at?: string | null
+          notes?: string | null
+          patient_user_id?: string | null
+          phone?: string | null
+          professional_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      professional_profiles: {
+        Row: {
+          bio: string | null
+          brand_color: string | null
+          created_at: string
+          display_name: string | null
+          email_contact: string | null
+          id: string
+          logo_url: string | null
+          registration_number: string | null
+          specialty: string | null
+          updated_at: string
+          whatsapp: string | null
+        }
+        Insert: {
+          bio?: string | null
+          brand_color?: string | null
+          created_at?: string
+          display_name?: string | null
+          email_contact?: string | null
+          id: string
+          logo_url?: string | null
+          registration_number?: string | null
+          specialty?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          bio?: string | null
+          brand_color?: string | null
+          created_at?: string
+          display_name?: string | null
+          email_contact?: string | null
+          id?: string
+          logo_url?: string | null
+          registration_number?: string | null
+          specialty?: string | null
+          updated_at?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          account_type: string
           activity_level: string | null
           age: number | null
           avatar_url: string | null
@@ -70,6 +214,7 @@ export type Database = {
           weight_kg: number | null
         }
         Insert: {
+          account_type?: string
           activity_level?: string | null
           age?: number | null
           avatar_url?: string | null
@@ -88,6 +233,7 @@ export type Database = {
           weight_kg?: number | null
         }
         Update: {
+          account_type?: string
           activity_level?: string | null
           age?: number | null
           avatar_url?: string | null
