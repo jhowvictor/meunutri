@@ -105,11 +105,17 @@ const PacienteDetalhe = () => {
       </div>
 
       <Tabs defaultValue="dietas">
-        <TabsList className="grid grid-cols-3 w-full">
+        <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="dietas">Dietas</TabsTrigger>
           <TabsTrigger value="treinos">Treinos</TabsTrigger>
           <TabsTrigger value="receitas">Receitas</TabsTrigger>
+          <TabsTrigger value="glicemia">Glicemia</TabsTrigger>
         </TabsList>
+        <TabsContent value="dietas"><AssignmentList items={filterAss("dieta")} icon={Utensils} empty="Nenhuma dieta enviada" /></TabsContent>
+        <TabsContent value="treinos"><AssignmentList items={filterAss("treino")} icon={Activity} empty="Nenhum treino enviado" /></TabsContent>
+        <TabsContent value="receitas"><AssignmentList items={filterAss("receita")} icon={FileText} empty="Nenhuma receita enviada" /></TabsContent>
+        <TabsContent value="glicemia" className="mt-3"><PacienteGlicemiaPanel patientId={patient.id} /></TabsContent>
+      </Tabs>
         <TabsContent value="dietas"><AssignmentList items={filterAss("dieta")} icon={Utensils} empty="Nenhuma dieta enviada" /></TabsContent>
         <TabsContent value="treinos"><AssignmentList items={filterAss("treino")} icon={Activity} empty="Nenhum treino enviado" /></TabsContent>
         <TabsContent value="receitas"><AssignmentList items={filterAss("receita")} icon={FileText} empty="Nenhuma receita enviada" /></TabsContent>
