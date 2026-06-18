@@ -56,6 +56,10 @@ const App = () => (
             <Route path="/minha-biblioteca" element={protect(<MinhaBiblioteca />)} />
             <Route path="/perfil" element={protect(<Perfil />)} />
             <Route path="/favoritos" element={protect(<Favoritos />)} />
+            <Route path="/profissional" element={protect(<ProDashboard />)} />
+            <Route path="/profissional/pacientes" element={protect(<Pacientes />)} />
+            <Route path="/profissional/pacientes/novo" element={protect(<NovoPaciente />)} />
+            <Route path="/profissional/paciente/:id" element={protect(<PacienteDetalhe />)} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
