@@ -19,6 +19,7 @@ import ProDashboard from "./pages/profissional/ProDashboard";
 import Pacientes from "./pages/profissional/Pacientes";
 import NovoPaciente from "./pages/profissional/NovoPaciente";
 import PacienteDetalhe from "./pages/profissional/PacienteDetalhe";
+import BibliotecaExercicios from "./pages/profissional/BibliotecaExercicios";
 import Glicemia from "./pages/Glicemia";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/profissional/pacientes" element={protect(<Pacientes />)} />
             <Route path="/profissional/pacientes/novo" element={protect(<NovoPaciente />)} />
             <Route path="/profissional/paciente/:id" element={protect(<PacienteDetalhe />)} />
+            <Route path="/profissional/exercicios" element={protect(<BibliotecaExercicios />)} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/sonner";
 import { openAIService } from "@/services/openai";
 import SaveToLibrary from "@/components/SaveToLibrary";
+import SendToPatient from "@/components/SendToPatient";
 
 const ReceitaPersonalizada = () => {
   const [formData, setFormData] = useState({
@@ -176,6 +177,11 @@ const ReceitaPersonalizada = () => {
                   title={`Receita ${formData.tipoAlimentacao || ""}`.trim()}
                   content={receitaGerada}
                   metadata={formData}
+                />
+                <SendToPatient
+                  contentType="receita"
+                  title={`Receita ${formData.tipoAlimentacao || ""}`.trim() || "Receita"}
+                  content={receitaGerada}
                 />
               </div>
               <div className="bg-white text-black p-6 rounded-lg shadow-sm border">

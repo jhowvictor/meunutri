@@ -11,6 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { openAIService } from "@/services/openai";
 import SaveToLibrary from "@/components/SaveToLibrary";
+import SendToPatient from "@/components/SendToPatient";
+import InteractiveWorkout from "@/components/InteractiveWorkout";
 import jsPDF from "jspdf";
 
 // Define types for workout form
@@ -307,6 +309,8 @@ const MontarTreino = () => {
                   title="Plano de Treino"
                   content={workoutPlan}
                 />
+                <InteractiveWorkout plan={isEditing ? editedWorkoutPlan : workoutPlan} />
+                <SendToPatient contentType="treino" title="Plano de Treino" content={isEditing ? editedWorkoutPlan : workoutPlan} />
                 {isEditing ? (
                   <Button size="sm" variant="outline" onClick={saveEditedPlan}>
                     <Check className="h-4 w-4 mr-1" />
