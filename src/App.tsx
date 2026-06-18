@@ -21,6 +21,8 @@ import NovoPaciente from "./pages/profissional/NovoPaciente";
 import PacienteDetalhe from "./pages/profissional/PacienteDetalhe";
 import BibliotecaExercicios from "./pages/profissional/BibliotecaExercicios";
 import Glicemia from "./pages/Glicemia";
+import EspecialistasIA from "./pages/EspecialistasIA";
+import EspecialistaChat from "./pages/EspecialistaChat";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ApiKeyConfig from "./components/ApiKeyConfig";
@@ -59,6 +61,8 @@ const App = () => (
             <Route path="/perfil" element={protect(<Perfil />)} />
             <Route path="/favoritos" element={protect(<Favoritos />)} />
             <Route path="/glicemia" element={protect(<Glicemia />)} />
+            <Route path="/especialistas" element={protect(<EspecialistasIA />)} />
+            <Route path="/especialistas/:id" element={protect(<EspecialistaChat />)} />
             <Route path="/profissional" element={protect(<ProDashboard />)} />
             <Route path="/profissional/pacientes" element={protect(<Pacientes />)} />
             <Route path="/profissional/pacientes/novo" element={protect(<NovoPaciente />)} />
