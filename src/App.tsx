@@ -20,6 +20,14 @@ import Pacientes from "./pages/profissional/Pacientes";
 import NovoPaciente from "./pages/profissional/NovoPaciente";
 import PacienteDetalhe from "./pages/profissional/PacienteDetalhe";
 import BibliotecaExercicios from "./pages/profissional/BibliotecaExercicios";
+import MotoresHub from "./pages/profissional/MotoresHub";
+import MotorCriacao from "./pages/profissional/motores/Criacao";
+import MotorAdaptacao from "./pages/profissional/motores/Adaptacao";
+import MotorComunicacao from "./pages/profissional/motores/Comunicacao";
+import MotorAcompanhamento from "./pages/profissional/motores/Acompanhamento";
+import MotorRelatorios from "./pages/profissional/motores/Relatorios";
+import MotorConteudo from "./pages/profissional/motores/Conteudo";
+import ProfessionalGuard from "./components/ProfessionalGuard";
 import Glicemia from "./pages/Glicemia";
 import EspecialistasIA from "./pages/EspecialistasIA";
 import EspecialistaChat from "./pages/EspecialistaChat";
@@ -66,6 +74,13 @@ const App = () => (
             <Route path="/profissional/pacientes/novo" element={protect(<NovoPaciente />)} />
             <Route path="/profissional/paciente/:id" element={protect(<PacienteDetalhe />)} />
             <Route path="/profissional/exercicios" element={protect(<BibliotecaExercicios />)} />
+            <Route path="/profissional/motores" element={protect(<ProfessionalGuard><MotoresHub /></ProfessionalGuard>)} />
+            <Route path="/profissional/motores/criacao" element={protect(<ProfessionalGuard><MotorCriacao /></ProfessionalGuard>)} />
+            <Route path="/profissional/motores/adaptacao" element={protect(<ProfessionalGuard><MotorAdaptacao /></ProfessionalGuard>)} />
+            <Route path="/profissional/motores/comunicacao" element={protect(<ProfessionalGuard><MotorComunicacao /></ProfessionalGuard>)} />
+            <Route path="/profissional/motores/acompanhamento" element={protect(<ProfessionalGuard><MotorAcompanhamento /></ProfessionalGuard>)} />
+            <Route path="/profissional/motores/relatorios" element={protect(<ProfessionalGuard><MotorRelatorios /></ProfessionalGuard>)} />
+            <Route path="/profissional/motores/conteudo" element={protect(<ProfessionalGuard><MotorConteudo /></ProfessionalGuard>)} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
