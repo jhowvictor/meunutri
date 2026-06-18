@@ -116,22 +116,14 @@ const PacienteDetalhe = () => {
         <TabsContent value="receitas"><AssignmentList items={filterAss("receita")} icon={FileText} empty="Nenhuma receita enviada" /></TabsContent>
         <TabsContent value="glicemia" className="mt-3"><PacienteGlicemiaPanel patientId={patient.id} /></TabsContent>
       </Tabs>
-        <TabsContent value="dietas"><AssignmentList items={filterAss("dieta")} icon={Utensils} empty="Nenhuma dieta enviada" /></TabsContent>
-        <TabsContent value="treinos"><AssignmentList items={filterAss("treino")} icon={Activity} empty="Nenhum treino enviado" /></TabsContent>
-        <TabsContent value="receitas"><AssignmentList items={filterAss("receita")} icon={FileText} empty="Nenhuma receita enviada" /></TabsContent>
-      </Tabs>
 
       <div>
         <h2 className="text-sm font-bold mb-2 mt-4">Mais</h2>
         <div className="grid grid-cols-2 gap-2">
           <QuickItem to="/analisar-refeicao" label="Refeições" icon={Camera} />
           <QuickItem to="/evolucao-corporal" label="Evolução" icon={TrendingUp} />
-          <QuickItem to="#" label="Glicemia" icon={Droplet} disabled />
           <QuickItem to="/lista-compras" label="Lista compras" icon={FileText} />
         </div>
-        <p className="text-[10px] text-muted-foreground mt-2 text-center">
-          Glicemia e relatórios consolidados estão na próxima fase
-        </p>
       </div>
     </div>
   );
