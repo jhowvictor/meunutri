@@ -65,6 +65,39 @@ export type Database = {
         }
         Relationships: []
       }
+      engine_message_templates: {
+        Row: {
+          body: string
+          category: string
+          created_at: string
+          id: string
+          is_default: boolean
+          professional_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          category: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          professional_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          category?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          professional_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       glucose_goals: {
         Row: {
           created_at: string
@@ -364,6 +397,44 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      plan_versions: {
+        Row: {
+          assignment_id: string
+          content: string
+          created_at: string
+          id: string
+          notes: string | null
+          professional_id: string
+          version_number: number
+        }
+        Insert: {
+          assignment_id: string
+          content: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          professional_id: string
+          version_number?: number
+        }
+        Update: {
+          assignment_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          professional_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_versions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "patient_assignments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       professional_profiles: {
         Row: {
