@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
 import PacienteGlicemiaPanel from "@/components/PacienteGlicemiaPanel";
+import PacienteRefeicoesPanel from "@/components/PacienteRefeicoesPanel";
+import PacienteEvolucaoPanel from "@/components/PacienteEvolucaoPanel";
+import MonthlyReportButton from "@/components/MonthlyReportButton";
 
 interface Patient {
   id: string;
@@ -19,6 +22,7 @@ interface Patient {
   notes: string | null;
   adherence_status: string;
   invite_status: string;
+  patient_user_id: string | null;
 }
 
 interface Assignment {
