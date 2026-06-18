@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Users, FileText, Activity, ClipboardList, ArrowRight, Stethoscope, Plus, Dumbbell } from "lucide-react";
+import { Users, FileText, Activity, ClipboardList, ArrowRight, Stethoscope, Plus, Dumbbell, Cpu } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -84,6 +84,22 @@ const ProDashboard = () => {
             {patients.map((p) => <PatientRow key={p.id} p={p} />)}
           </div>
         )}
+      </section>
+
+      <section>
+        <Link to="/profissional/motores" className="block rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/15 to-primary/5 p-4 hover:border-primary/60 transition">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 rounded-xl bg-primary/20 border border-primary/40 flex items-center justify-center">
+              <Cpu className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] font-bold uppercase text-primary">Plataforma operacional</div>
+              <div className="font-bold">Motores</div>
+              <div className="text-[11px] text-muted-foreground">Criação · Adaptação · Comunicação · Acompanhamento · Relatórios · Conteúdo</div>
+            </div>
+            <ArrowRight className="h-4 w-4 text-primary" />
+          </div>
+        </Link>
       </section>
 
       <section>
