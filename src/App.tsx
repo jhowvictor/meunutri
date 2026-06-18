@@ -24,8 +24,8 @@ import Glicemia from "./pages/Glicemia";
 import EspecialistasIA from "./pages/EspecialistasIA";
 import EspecialistaChat from "./pages/EspecialistaChat";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
 import { AuthProvider } from "./components/AuthProvider";
-import ProtectedRoute from "./components/ProtectedRoute";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AppShell from "./components/AppShell";
 
@@ -42,7 +42,6 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <ApiKeyConfig />
       <BrowserRouter>
         <AuthProvider>
           <Routes>
