@@ -1,204 +1,186 @@
-
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import {
-  Activity,
-  ArrowLeft,
-  BarChart3,
-  ChevronRight,
-  Dumbbell,
-  Scale,
-  TrendingUp,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowLeft, TrendingUp, Plus, Scale, Activity, Dumbbell, BarChart3, FileText, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import SaveToLibrary from "@/components/SaveToLibrary";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/sonner";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from "recharts";
+import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
+import jsPDF from "jspdf";
 
-interface Measurement {
-  date: string;
-  weight: number;
-  bodyFat?: number;
-  muscle?: number;
+interface BM {
+  id: string;
+  measured_at: string;
+  weight_kg: number | null;
+  body_fat_pct: number | null;
+  muscle_mass_kg: number | null;
+  waist_cm: number | null;
+  notes: string | null;
 }
 
-const initialData: Measurement[] = [
-  { date: "Jan", weight: 81 },
-  { date: "Fev", weight: 80 },
-  { date: "Mar", weight: 78 },
-  { date: "Abr", weight: 76.5 },
-  { date: "Mai", weight: 74 },
-  { date: "Jun", weight: 73 },
-];
-
 const EvolucaoCorporal = () => {
-  const navigate = useNavigate();
-  const [measurements, setMeasurements] = useState<Measurement[]>(initialData);
-  const [registerOpen, setRegisterOpen] = useState(false);
-  const [analyzeOpen, setAnalyzeOpen] = useState(false);
-  const [form, setForm] = useState({ date: "", weight: "", bodyFat: "", muscle: "" });
+  const { user } = useAuth();
+  const [items, setItems] = useState<BM[]>([]);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ measured_at: "", weight_kg: "", body_fat_pct: "", muscle_mass_kg: "", waist_cm: "", notes: "" });
 
-  const latest = measurements[measurements.length - 1];
-  const first = measurements[0];
-  const weightDiff = latest && first ? (latest.weight - first.weight).toFixed(1) : "0";
+  const load = async () => {
+    if (!user) return;
+    const { data } = await (supabase as any)
+      .from("body_measurements").select("*").eq("user_id", user.id).order("measured_at", { ascending: true });
+    setItems((data as BM[]) || []);
+  };
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [user]);
 
-  const handleRegister = () => {
-    if (!form.date || !form.weight) {
-      toast.error("Preencha pelo menos a data e o peso.");
-      return;
-    }
-    const newMeasurement: Measurement = {
-      date: form.date,
-      weight: parseFloat(form.weight),
-      bodyFat: form.bodyFat ? parseFloat(form.bodyFat) : undefined,
-      muscle: form.muscle ? parseFloat(form.muscle) : undefined,
+  const save = async () => {
+    if (!user) return;
+    if (!form.measured_at || !form.weight_kg) return toast.error("Informe a data e o peso.");
+    const payload: any = {
+      user_id: user.id,
+      measured_at: form.measured_at,
+      weight_kg: parseFloat(form.weight_kg),
+      body_fat_pct: form.body_fat_pct ? parseFloat(form.body_fat_pct) : null,
+      muscle_mass_kg: form.muscle_mass_kg ? parseFloat(form.muscle_mass_kg) : null,
+      waist_cm: form.waist_cm ? parseFloat(form.waist_cm) : null,
+      notes: form.notes || null,
     };
-    setMeasurements((prev) => [...prev, newMeasurement]);
-    setForm({ date: "", weight: "", bodyFat: "", muscle: "" });
-    setRegisterOpen(false);
-    toast.success("Medição registrada com sucesso!");
+    const { error } = await (supabase as any).from("body_measurements").insert(payload);
+    if (error) return toast.error(error.message);
+    toast.success("Medição registrada!");
+    setOpen(false);
+    setForm({ measured_at: "", weight_kg: "", body_fat_pct: "", muscle_mass_kg: "", waist_cm: "", notes: "" });
+    load();
+  };
+
+  const first = items[0];
+  const latest = items[items.length - 1];
+  const chartData = items.map((m) => ({
+    date: new Date(m.measured_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" }),
+    peso: m.weight_kg,
+    gordura: m.body_fat_pct,
+    musculo: m.muscle_mass_kg,
+  }));
+
+  const diff = first && latest && first.weight_kg && latest.weight_kg ? (latest.weight_kg - first.weight_kg).toFixed(1) : "0";
+
+  const exportPdf = () => {
+    if (items.length === 0) return toast.error("Nenhuma medição para exportar.");
+    const doc = new jsPDF();
+    doc.setFontSize(18); doc.setFont("helvetica", "bold");
+    doc.text("Relatório de Evolução Corporal", 14, 20);
+    doc.setFontSize(10); doc.setFont("helvetica", "normal");
+    doc.text(`Gerado em ${new Date().toLocaleDateString("pt-BR")}`, 14, 28);
+
+    if (first && latest) {
+      doc.setFontSize(12); doc.setFont("helvetica", "bold");
+      doc.text("Resumo", 14, 40);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(10);
+      doc.text(`Período: ${first.measured_at} → ${latest.measured_at}`, 14, 48);
+      doc.text(`Peso inicial: ${first.weight_kg ?? "-"} kg | atual: ${latest.weight_kg ?? "-"} kg | variação: ${diff} kg`, 14, 55);
+      if (first.body_fat_pct && latest.body_fat_pct)
+        doc.text(`% Gordura: ${first.body_fat_pct}% → ${latest.body_fat_pct}%`, 14, 62);
+      if (first.muscle_mass_kg && latest.muscle_mass_kg)
+        doc.text(`Massa muscular: ${first.muscle_mass_kg} kg → ${latest.muscle_mass_kg} kg`, 14, 69);
+    }
+
+    let y = 85;
+    doc.setFont("helvetica", "bold"); doc.setFontSize(12);
+    doc.text("Histórico", 14, y); y += 8;
+    doc.setFont("helvetica", "normal"); doc.setFontSize(9);
+    doc.text("Data | Peso | %Gord | Músculo | Cintura", 14, y); y += 6;
+    items.forEach((m) => {
+      if (y > 280) { doc.addPage(); y = 20; }
+      doc.text(`${m.measured_at} | ${m.weight_kg ?? "-"} | ${m.body_fat_pct ?? "-"} | ${m.muscle_mass_kg ?? "-"} | ${m.waist_cm ?? "-"}`, 14, y);
+      y += 6;
+    });
+    doc.save(`evolucao-${new Date().toISOString().slice(0, 10)}.pdf`);
+    toast.success("Relatório exportado!");
   };
 
   return (
-    <div className="container max-w-5xl mx-auto px-4 py-8">
-      <div className="flex items-center mb-8">
-        <Button variant="ghost" size="icon" className="mr-2" onClick={() => navigate("/")}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="text-3xl font-bold flex items-center">
-          <TrendingUp className="h-6 w-6 mr-2 text-primary" />
-          Evolução Corporal
-        </h1>
+    <div className="container max-w-5xl mx-auto px-4 py-6">
+      <div className="flex items-center mb-6">
+        <Link to="/"><Button variant="ghost" size="icon" className="mr-2"><ArrowLeft className="h-5 w-5" /></Button></Link>
+        <h1 className="text-2xl font-bold flex items-center"><TrendingUp className="h-6 w-6 mr-2 text-primary" />Evolução Corporal</h1>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <MetricCard icon={<Scale className="h-5 w-5" />} title="Peso Atual" value={`${latest.weight} kg`} trend={`${weightDiff} kg`} trendDirection={parseFloat(weightDiff) <= 0 ? "down" : "up"} />
-        <MetricCard icon={<Activity className="h-5 w-5" />} title="IMC" value="22.5" trend="-0.7" trendDirection="down" />
-        <MetricCard icon={<BarChart3 className="h-5 w-5" />} title="% Gordura" value="18.3%" trend="-1.2%" trendDirection="down" />
-        <MetricCard icon={<Dumbbell className="h-5 w-5" />} title="Massa Muscular" value="31.2 kg" trend="+0.5 kg" trendDirection="up" />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+        <Stat icon={Scale} label="Peso atual" value={latest?.weight_kg ? `${latest.weight_kg} kg` : "—"} />
+        <Stat icon={Activity} label="Variação" value={`${diff} kg`} />
+        <Stat icon={BarChart3} label="% Gordura" value={latest?.body_fat_pct ? `${latest.body_fat_pct}%` : "—"} />
+        <Stat icon={Dumbbell} label="Músculo" value={latest?.muscle_mass_kg ? `${latest.muscle_mass_kg} kg` : "—"} />
       </div>
 
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Evolução do Peso</CardTitle>
-          <CardDescription>Acompanhamento das suas medições</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-80">
+      {chartData.length > 1 && (
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 mb-6">
+          <h2 className="font-bold mb-2 text-sm">Evolução do peso</h2>
+          <div className="h-60">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={measurements} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8} />
-                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" />
-                <YAxis domain={["dataMin - 2", "dataMax + 2"]} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "hsl(var(--background))",
-                    borderColor: "hsl(var(--border))",
-                    borderRadius: "8px",
-                  }}
-                  formatter={(value) => [`${value} kg`, "Peso"]}
-                />
-                <Area type="monotone" dataKey="weight" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorWeight)" activeDot={{ r: 6 }} />
+              <AreaChart data={chartData}>
+                <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.7}/><stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.1}/></linearGradient></defs>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" /><YAxis domain={["dataMin - 2", "dataMax + 2"]} /><Tooltip />
+                <Area type="monotone" dataKey="peso" stroke="hsl(var(--primary))" fill="url(#g1)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <ActionCard icon={<Scale className="h-6 w-6" />} title="Registrar nova medição" description="Atualize suas medidas corporais para acompanhar seu progresso" buttonText="Registrar" onClick={() => setRegisterOpen(true)} />
-        <ActionCard icon={<BarChart3 className="h-6 w-6" />} title="Analisar progresso" description="Compare seus resultados e veja sua evolução detalhada" buttonText="Analisar" onClick={() => setAnalyzeOpen(true)} />
+      {chartData.some((d) => d.gordura || d.musculo) && (
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4 mb-6">
+          <h2 className="font-bold mb-2 text-sm">Composição corporal</h2>
+          <div className="h-60">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" /><YAxis /><Tooltip />
+                <Line type="monotone" dataKey="gordura" stroke="#f59e0b" name="% Gordura" />
+                <Line type="monotone" dataKey="musculo" stroke="#10b981" name="Músculo (kg)" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      )}
+
+      <div className="flex gap-2 mb-4">
+        <Button onClick={() => setOpen(true)} className="flex-1"><Plus className="h-4 w-4 mr-2" />Nova medição</Button>
+        <Button variant="outline" onClick={exportPdf}><FileText className="h-4 w-4 mr-2" />PDF</Button>
       </div>
 
-      <Dialog open={registerOpen} onOpenChange={setRegisterOpen}>
+      <div className="space-y-2">
+        {items.slice().reverse().map((m) => (
+          <div key={m.id} className="rounded-xl border border-white/10 bg-white/5 p-3 text-sm flex justify-between">
+            <div>
+              <div className="font-semibold">{new Date(m.measured_at).toLocaleDateString("pt-BR")}</div>
+              <div className="text-xs text-muted-foreground">
+                {m.weight_kg ? `${m.weight_kg} kg` : ""} {m.body_fat_pct ? ` • ${m.body_fat_pct}%` : ""} {m.muscle_mass_kg ? ` • ${m.muscle_mass_kg} kg músculo` : ""}
+              </div>
+            </div>
+          </div>
+        ))}
+        {items.length === 0 && <div className="text-center text-muted-foreground text-sm py-8">Nenhuma medição registrada ainda.</div>}
+      </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Registrar nova medição</DialogTitle>
-            <DialogDescription>Insira seus dados atuais para acompanhar sua evolução.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="space-y-2">
-              <Label htmlFor="date">Mês/Data</Label>
-              <Input id="date" placeholder="Ex: Jul" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} />
+          <DialogHeader><DialogTitle>Nova medição</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div><Label>Data</Label><Input type="date" value={form.measured_at} onChange={(e) => setForm({ ...form, measured_at: e.target.value })} /></div>
+            <div className="grid grid-cols-2 gap-2">
+              <div><Label>Peso (kg)</Label><Input type="number" step="0.1" value={form.weight_kg} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} /></div>
+              <div><Label>% Gordura</Label><Input type="number" step="0.1" value={form.body_fat_pct} onChange={(e) => setForm({ ...form, body_fat_pct: e.target.value })} /></div>
+              <div><Label>Massa muscular (kg)</Label><Input type="number" step="0.1" value={form.muscle_mass_kg} onChange={(e) => setForm({ ...form, muscle_mass_kg: e.target.value })} /></div>
+              <div><Label>Cintura (cm)</Label><Input type="number" step="0.1" value={form.waist_cm} onChange={(e) => setForm({ ...form, waist_cm: e.target.value })} /></div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="weight">Peso (kg)</Label>
-              <Input id="weight" type="number" step="0.1" placeholder="Ex: 72.5" value={form.weight} onChange={(e) => setForm({ ...form, weight: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bodyFat">% Gordura (opcional)</Label>
-              <Input id="bodyFat" type="number" step="0.1" placeholder="Ex: 18.3" value={form.bodyFat} onChange={(e) => setForm({ ...form, bodyFat: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="muscle">Massa muscular (kg) (opcional)</Label>
-              <Input id="muscle" type="number" step="0.1" placeholder="Ex: 31.2" value={form.muscle} onChange={(e) => setForm({ ...form, muscle: e.target.value })} />
-            </div>
+            <div><Label>Observações</Label><Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRegisterOpen(false)}>Cancelar</Button>
-            <Button onClick={handleRegister}>Salvar medição</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={analyzeOpen} onOpenChange={setAnalyzeOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Análise do Progresso</DialogTitle>
-            <DialogDescription>Resumo da sua evolução até o momento.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3 py-2 text-sm">
-            <p>📊 <strong>Total de medições:</strong> {measurements.length}</p>
-            <p>⚖️ <strong>Peso inicial:</strong> {first.weight} kg ({first.date})</p>
-            <p>⚖️ <strong>Peso atual:</strong> {latest.weight} kg ({latest.date})</p>
-            <p>📉 <strong>Variação total:</strong> {weightDiff} kg</p>
-            <p className="text-muted-foreground pt-2">
-              {parseFloat(weightDiff) < 0
-                ? "Excelente! Você está no caminho certo para seu objetivo. Continue mantendo a consistência!"
-                : parseFloat(weightDiff) > 0
-                ? "Houve aumento de peso. Avalie se está alinhado ao seu objetivo (ex: ganho de massa)."
-                : "Seu peso está estável. Continue monitorando para identificar tendências."}
-            </p>
-          </div>
-          <DialogFooter className="flex-col sm:flex-row gap-2">
-            <SaveToLibrary
-              contentType="evolucao"
-              title={`Análise de Progresso - ${latest.date}`}
-              content={`Total de medições: ${measurements.length}\nPeso inicial: ${first.weight} kg (${first.date})\nPeso atual: ${latest.weight} kg (${latest.date})\nVariação total: ${weightDiff} kg`}
-            />
-            <Button onClick={() => setAnalyzeOpen(false)}>Fechar</Button>
+            <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
+            <Button onClick={save}>Salvar</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -206,53 +188,12 @@ const EvolucaoCorporal = () => {
   );
 };
 
-interface MetricCardProps {
-  icon: React.ReactNode;
-  title: string;
-  value: string;
-  trend: string;
-  trendDirection: "up" | "down";
-}
-
-const MetricCard = ({ icon, title, value, trend, trendDirection }: MetricCardProps) => (
-  <Card>
-    <CardContent className="p-4">
-      <div className="flex justify-between items-center mb-2">
-        <span className="text-muted-foreground flex items-center">{icon}</span>
-        <span className={`text-xs px-2 py-1 rounded-full flex items-center ${trendDirection === "down" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"}`}>
-          {trend}
-        </span>
-      </div>
-      <div className="text-2xl font-bold">{value}</div>
-      <div className="text-sm text-muted-foreground">{title}</div>
-    </CardContent>
-  </Card>
-);
-
-interface ActionCardProps {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-  buttonText: string;
-  onClick: () => void;
-}
-
-const ActionCard = ({ icon, title, description, buttonText, onClick }: ActionCardProps) => (
-  <Card>
-    <CardHeader className="flex flex-row items-center gap-4">
-      <div className="bg-primary/10 p-3 rounded-full">{icon}</div>
-      <div>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
-      </div>
-    </CardHeader>
-    <CardFooter>
-      <Button className="w-full flex items-center justify-between" onClick={onClick}>
-        {buttonText}
-        <ChevronRight className="h-4 w-4 ml-2" />
-      </Button>
-    </CardFooter>
-  </Card>
+const Stat = ({ icon: Icon, label, value }: any) => (
+  <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
+    <Icon className="h-4 w-4 text-primary mb-1" />
+    <div className="text-lg font-extrabold">{value}</div>
+    <div className="text-[10px] text-muted-foreground">{label}</div>
+  </div>
 );
 
 export default EvolucaoCorporal;
