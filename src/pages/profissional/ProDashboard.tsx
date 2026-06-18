@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Users, FileText, Activity, ClipboardList, ArrowRight, Stethoscope, Plus } from "lucide-react";
+import { Users, FileText, Activity, ClipboardList, ArrowRight, Stethoscope, Plus, Dumbbell } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -92,6 +92,7 @@ const ProDashboard = () => {
           <ToolCard to="/receita-personalizada" label="Receitas" desc="Gerar e enviar" icon={FileText} />
           <ToolCard to="/dieta-personalizada" label="Dietas" desc="Planos completos" icon={ClipboardList} />
           <ToolCard to="/montar-treino" label="Treinos" desc="Banco e templates" icon={Activity} />
+          <ToolCard to="/profissional/exercicios" label="Exercícios" desc="Biblioteca completa" icon={Dumbbell} />
           <ToolCard to="/profissional/pacientes" label="Pacientes" desc="Painel completo" icon={Users} />
         </div>
       </section>
