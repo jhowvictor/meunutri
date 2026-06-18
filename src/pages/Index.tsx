@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import {
   Utensils, Camera, Calendar, BookOpen, TrendingUp, ShoppingCart, Dumbbell,
   Library, Sparkles, ArrowRight, Clock, Heart, ChefHat, Target, Flame
@@ -68,6 +68,11 @@ const PremiumIndex = () => {
   const [recent, setRecent] = useState<LibItem[]>([]);
   const [favorites, setFavorites] = useState<LibItem[]>([]);
   const [streak, setStreak] = useState(0);
+
+  if (profile?.account_type === "profissional") {
+    return <Navigate to="/profissional" replace />;
+  }
+
 
   useEffect(() => {
     if (!user) return;

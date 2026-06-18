@@ -1,87 +1,91 @@
-# Redesign Premium MeuNutri.AI
+## Visão geral
 
-Vou redesenhar toda a experiência logada (Home, Perfil, Onboarding) mantendo todas as funcionalidades já existentes (Receitas, Dietas, Treinos, E-books, Análise de Refeição, Evolução Corporal, Lista de Compras, Mini Chef, Biblioteca).
+Transformar o MeuNutri.AI em uma plataforma com duas experiências (B2C "Pessoa" e B2B "Profissional"), adicionar módulo de Controle Glicêmico, modo treino interativo, painel de pacientes, relatórios PDF profissionais e melhorias nos módulos existentes.
 
-## 1. Design System Premium
+Por ser um escopo muito grande (≈ 8-10 módulos novos + reformulação de 6 existentes), vou entregar em **fases**. Cada fase é funcional sozinha — você testa, aprova, e avançamos para a próxima.
 
-- Fundo preto premium `#050505`, verde neon `#00ff88` como cor principal
-- Glassmorphism leve em cards (`backdrop-blur`, bordas suaves `rounded-2xl`, glow sutil)
-- Atualizar `src/index.css` e `tailwind.config.ts` com novos tokens (background, primary, glow, glass-border)
-- Micro animações (fade-in, hover scale, glow pulse)
-- Remover botão "+" central da navegação
+---
 
-## 2. Nova Home (`src/pages/Index.tsx`)
+## FASE 1 — Fundação B2C / B2B (essencial, primeiro passo)
 
-Estrutura inspirada na referência (sem copiar):
+Sem isto nada do resto faz sentido.
 
-- **Header**: logo MeuNutri.AI + sino de notificações + avatar do usuário (puxa foto do perfil)
-- **Hero**: saudação personalizada ("Olá, {Nome} 👋"), headline, subheadline, CTA "Criar agora" + atalho Mini Chef, imagem premium de comida com orbitais de ícones
-- **Grid de Ferramentas** ("O que você deseja criar hoje?"): cards horizontais roláveis com TODAS as 8 funcionalidades (Receitas, Dietas, Treinos, E-books, Revolução Corporal, Análise de Refeição, Lista de Compras, Biblioteca)
-- **Continue de onde parou**: últimos itens da `library_items` + `recipes` agrupados por tipo, com miniatura, título e data
-- **Seus favoritos**: itens com `is_favorite=true`
-- **Dashboard pessoal**: cards opcionais com peso atual, meta, sequência de uso
+**Backend**
+- Adicionar `account_type` em `profiles`: `pessoa` | `profissional`
+- Tabela `professional_profiles`: nome de exibição, registro (CRN/CREF/CRM), especialidade, logotipo, branding (cor), bio
+- Tabela `patients`: vínculo profissional ↔ paciente (com convite por e-mail)
+- Tabela `patient_assignments`: itens enviados ao paciente (receita/dieta/treino/lista) com status
+- RLS: profissional só vê seus pacientes; paciente só vê o que recebeu
 
-## 3. Navegação Inferior (novo componente `BottomNav.tsx`)
+**Frontend**
+- Onboarding passo 0: escolher Pessoa ou Profissional
+- Fluxo profissional preenche dados extras (registro, logo, especialidade)
+- Roteamento condicional: Profissional vê dashboard `/profissional` no lugar da Home; Pessoa mantém a Home atual
+- Novo `BottomNav` adaptativo por tipo de conta
+- Página `/profissional/pacientes` com lista + semáforo (verde/amarelo/vermelho) por aderência
+- Página `/profissional/paciente/:id` com abas: Dietas, Treinos, Receitas, Refeições, Evolução, Glicemia
 
-- 🏠 Início → `/`
-- 📚 Biblioteca → `/minha-biblioteca`
-- ❤️ Favoritos → `/favoritos` (nova página filtrando library_items favoritos)
-- 👤 Perfil → `/perfil`
-- **Sem botão "+"**
+---
 
-## 4. Mini Chef flutuante (atualizar `MiniChef.tsx`)
+## FASE 2 — Controle Glicêmico (módulo novo, B2C + B2B)
 
-- Botão flutuante fixo bottom-right com glow verde pulsante
-- Balão de sugestão contextual ("Posso te ajudar? Fale comigo!")
-- Sugestões rápidas no chat: "Melhorar minha dieta", "Adaptar receita", "Ajuda com treino"
-- Não interfere na bottom nav
+- Tabela `glucose_readings`: valor, tipo (jejum / pós-refeição / antes de dormir), observação, timestamp
+- Tabela `glucose_goals`: metas definidas por profissional para paciente
+- Página `/glicemia`: registro rápido + gráficos diário/semanal/mensal (recharts)
+- Análise por IA via edge function: padrões, melhorias, alertas
+- No painel profissional: ver leituras do paciente, definir metas
 
-## 5. Sistema de Perfil Completo
+---
 
-**Banco** (nova migration):
-- Tabela `profiles` com: avatar_url, full_name, age, sex, height_cm, weight_kg, target_weight_kg, main_goal, activity_level, dietary_restrictions[], food_preferences[], onboarding_completed, streak_days
-- Bucket de storage `avatars` para fotos de perfil
-- RLS + GRANTs corretos
-- Trigger `handle_new_user` para criar profile no signup
+## FASE 3 — Receitas/Dietas/Treinos premium + PDFs profissionais
 
-**Páginas novas**:
-- `src/pages/Perfil.tsx`: foto, dados pessoais, objetivos, peso, medidas, preferências, configurações, segurança (com seções em accordion/tabs)
-- `src/pages/Onboarding.tsx`: 5 passos (foto+básicos → objetivos → preferências → atividade → conclusão), com barra de progresso
-- `src/pages/Favoritos.tsx`: lista de favoritos por categoria
+**Receitas**
+- Card premium com foto IA, macros completos, ações Salvar/Compartilhar/Exportar PDF
+- Modo profissional: botão "Enviar para paciente" (WhatsApp/e-mail/histórico)
+- PDF com cabeçalho do profissional (nome, logo, registro)
 
-**Hook** `useProfile.ts` para carregar/atualizar perfil em qualquer página.
+**Dietas**
+- Geração de plano de 30 dias estruturado
+- PDF com cabeçalho profissional, alimentos permitidos/evitados, orientações
+- Histórico e duplicação por paciente
 
-## 6. Personalização da experiência
+**Treinos**
+- Card com séries/repetições/descanso/GIF (usar API gratuita de GIFs de exercício)
+- **Modo treino interativo**: cronômetro, checklist de séries, registro automático
+- Banco profissional de exercícios com filtros (grupo muscular, equipamento, nível)
+- Templates e envio para aluno
 
-- Mini Chef e geradores (Dieta, Treino, Receita) recebem o perfil como contexto no prompt para personalizar resultados
-- Saudação dinâmica na Home baseada no objetivo do usuário
+---
 
-## 7. Fluxo de Auth
+## FASE 4 — Análise de Refeições, Evolução, Lista de Compras
 
-- Após signup, redirecionar para `/onboarding` se `onboarding_completed=false`
-- Após login, ir direto para `/` se já completou
+- Análise por foto: já existe — adicionar dashboard profissional (aderência, média calórica, alertas)
+- Evolução corporal: adicionar gordura % e massa muscular, comparativo antes/depois, relatório PDF
+- Lista de compras: agrupamento por categoria, estimativa de custo, envio ao paciente, tracking de aderência
 
-## Arquivos a criar
-- `supabase/migrations/...profiles.sql`
-- `src/hooks/useProfile.ts`
-- `src/components/BottomNav.tsx`
-- `src/components/AppShell.tsx` (wrapper com header + bottom nav + mini chef)
-- `src/pages/Perfil.tsx`
-- `src/pages/Onboarding.tsx`
-- `src/pages/Favoritos.tsx`
-- `src/assets/hero-food.jpg` (gerado)
+---
 
-## Arquivos a editar
-- `src/index.css`, `tailwind.config.ts` (tokens premium)
-- `src/pages/Index.tsx` (redesign completo)
-- `src/components/Header.tsx` (avatar + notificações)
-- `src/components/MiniChef.tsx` (flutuante + sugestões)
-- `src/App.tsx` (novas rotas + redirect onboarding)
-- `src/pages/Auth.tsx` (redirect para onboarding após signup)
+## FASE 5 — Refinamento
 
-## Escopo / não-objetivos
-- Tela de login permanece intacta visualmente
-- Notificações: apenas UI do sino (sem sistema de push real) — pode ser ampliado depois
-- Conquistas/streak: visual + contador básico baseado em `created_at` dos itens da biblioteca
+- Notificações in-app (treino programado, mensagens do profissional)
+- Relatório mensal automático em PDF para cada paciente
+- Comparação entre planos de dieta
 
-Posso prosseguir com a implementação?
+---
+
+## Considerações técnicas
+
+- **PDFs**: gerados client-side com `jspdf` + `jspdf-autotable` (sem custo de servidor)
+- **Gráficos**: `recharts` (já compatível com o stack)
+- **GIFs de exercício**: usar base estática (wger API ou assets internos)
+- **WhatsApp/e-mail**: links `wa.me` e `mailto:` (sem custo); envio real por servidor pode vir depois
+- **IA**: continuar usando Lovable AI Gateway via edge function
+- **Idioma**: tudo em português (regra do projeto)
+
+---
+
+## O que pergunto antes de começar
+
+Como o escopo é gigante, **começo pela Fase 1** (fundação B2C/B2B + painel profissional básico) para garantir uma base sólida. As fases seguintes virão em mensagens separadas conforme você aprovar cada entrega.
+
+**Confirma que posso iniciar pela Fase 1?** Se preferir outra ordem (por ex. começar pelo Controle Glicêmico ou pelos PDFs profissionais), me diga.
