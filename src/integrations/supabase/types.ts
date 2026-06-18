@@ -14,6 +14,91 @@ export type Database = {
   }
   public: {
     Tables: {
+      glucose_goals: {
+        Row: {
+          created_at: string
+          id: string
+          max_value: number
+          min_value: number
+          notes: string | null
+          patient_id: string
+          professional_id: string
+          reading_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          max_value: number
+          min_value: number
+          notes?: string | null
+          patient_id: string
+          professional_id: string
+          reading_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          max_value?: number
+          min_value?: number
+          notes?: string | null
+          patient_id?: string
+          professional_id?: string
+          reading_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "glucose_goals_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      glucose_readings: {
+        Row: {
+          created_at: string
+          id: string
+          measured_at: string
+          notes: string | null
+          patient_id: string | null
+          reading_type: string
+          user_id: string
+          value_mg_dl: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          measured_at?: string
+          notes?: string | null
+          patient_id?: string | null
+          reading_type: string
+          user_id: string
+          value_mg_dl: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          measured_at?: string
+          notes?: string | null
+          patient_id?: string | null
+          reading_type?: string
+          user_id?: string
+          value_mg_dl?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "glucose_readings_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       library_items: {
         Row: {
           content: string

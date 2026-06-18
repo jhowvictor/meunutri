@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import {
   Utensils, Camera, Calendar, BookOpen, TrendingUp, ShoppingCart, Dumbbell,
-  Library, Sparkles, ArrowRight, Clock, Heart, ChefHat, Target, Flame
+  Library, Sparkles, ArrowRight, Clock, Heart, ChefHat, Target, Flame, Droplet
 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useProfile } from "@/hooks/useProfile";
@@ -19,6 +19,7 @@ const tools = [
   { to: "/evolucao-corporal", label: "Evolução", desc: "Corporal", icon: TrendingUp, accent: "from-cyan-500/25 to-cyan-500/5", iconColor: "text-cyan-400" },
   { to: "/analisar-refeicao", label: "Analisar", desc: "Refeição", icon: Camera, accent: "from-fuchsia-500/25 to-fuchsia-500/5", iconColor: "text-fuchsia-400" },
   { to: "/lista-compras", label: "Compras", desc: "Inteligente", icon: ShoppingCart, accent: "from-orange-500/25 to-orange-500/5", iconColor: "text-orange-400" },
+  { to: "/glicemia", label: "Glicemia", desc: "Controle diário", icon: Droplet, accent: "from-rose-400/25 to-rose-400/5", iconColor: "text-rose-300" },
   { to: "/minha-biblioteca", label: "Biblioteca", desc: "Seus salvos", icon: Library, accent: "from-primary/30 to-primary/5", iconColor: "text-primary" },
 ];
 

@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
+import PacienteGlicemiaPanel from "@/components/PacienteGlicemiaPanel";
 
 interface Patient {
   id: string;
@@ -104,14 +105,16 @@ const PacienteDetalhe = () => {
       </div>
 
       <Tabs defaultValue="dietas">
-        <TabsList className="grid grid-cols-3 w-full">
+        <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="dietas">Dietas</TabsTrigger>
           <TabsTrigger value="treinos">Treinos</TabsTrigger>
           <TabsTrigger value="receitas">Receitas</TabsTrigger>
+          <TabsTrigger value="glicemia">Glicemia</TabsTrigger>
         </TabsList>
         <TabsContent value="dietas"><AssignmentList items={filterAss("dieta")} icon={Utensils} empty="Nenhuma dieta enviada" /></TabsContent>
         <TabsContent value="treinos"><AssignmentList items={filterAss("treino")} icon={Activity} empty="Nenhum treino enviado" /></TabsContent>
         <TabsContent value="receitas"><AssignmentList items={filterAss("receita")} icon={FileText} empty="Nenhuma receita enviada" /></TabsContent>
+        <TabsContent value="glicemia" className="mt-3"><PacienteGlicemiaPanel patientId={patient.id} /></TabsContent>
       </Tabs>
 
       <div>
@@ -119,12 +122,8 @@ const PacienteDetalhe = () => {
         <div className="grid grid-cols-2 gap-2">
           <QuickItem to="/analisar-refeicao" label="Refeições" icon={Camera} />
           <QuickItem to="/evolucao-corporal" label="Evolução" icon={TrendingUp} />
-          <QuickItem to="#" label="Glicemia" icon={Droplet} disabled />
           <QuickItem to="/lista-compras" label="Lista compras" icon={FileText} />
         </div>
-        <p className="text-[10px] text-muted-foreground mt-2 text-center">
-          Glicemia e relatórios consolidados estão na próxima fase
-        </p>
       </div>
     </div>
   );
