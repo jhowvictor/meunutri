@@ -4,6 +4,7 @@ import { ChefHat, LogOut, User, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "./AuthProvider";
 import { toast } from "@/components/ui/sonner";
+import NotificationBell from "./NotificationBell";
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -26,6 +27,7 @@ const Header = () => {
         <div className="flex items-center gap-3">
           {user && (
             <div className="flex items-center gap-2 sm:gap-3">
+              <NotificationBell />
               <Link to="/minha-biblioteca">
                 <Button variant="outline" size="sm" className="rounded-full">
                   <Library className="h-4 w-4 sm:mr-2 text-primary" />
