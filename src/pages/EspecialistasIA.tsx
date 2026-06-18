@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Circle, Sparkles, MessageCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Circle, Sparkles, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ESPECIALISTAS_LIST, type Especialista } from "@/lib/especialistas";
@@ -10,7 +10,16 @@ const EspecialistasIA = () => {
 
   return (
     <div className="space-y-6 animate-[fadeIn_0.4s]">
-      <section className="relative overflow-hidden rounded-3xl glass border border-white/10 px-5 py-6 mt-3">
+      <div className="flex items-center gap-2 pt-2">
+        <Link to="/">
+          <Button size="icon" variant="ghost" className="h-9 w-9 rounded-full">
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+        </Link>
+        <span className="text-sm font-medium text-muted-foreground">Voltar</span>
+      </div>
+
+      <section className="relative overflow-hidden rounded-3xl glass border border-white/10 px-5 py-6">
         <div className="absolute -top-16 -right-16 h-48 w-48 rounded-full bg-primary/20 blur-3xl pointer-events-none" />
         <div className="relative">
           <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 border border-primary/30 px-3 py-1 mb-3">
