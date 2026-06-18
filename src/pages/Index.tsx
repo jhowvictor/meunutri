@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import {
   Utensils, Camera, Calendar, BookOpen, TrendingUp, ShoppingCart, Dumbbell,
-  Library, Sparkles, ArrowRight, Clock, Heart, ChefHat, Target, Flame
+  Library, Sparkles, ArrowRight, Clock, Heart, ChefHat, Target, Flame, Droplet
 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { useProfile } from "@/hooks/useProfile";
