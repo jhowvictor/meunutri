@@ -12,6 +12,7 @@ import heroFood from "@/assets/hero-food.jpg";
 
 
 const tools = [
+  { to: "/especialistas", label: "Especialistas", desc: "IA 24h", icon: Sparkles, accent: "from-primary/40 to-primary/5", iconColor: "text-primary" },
   { to: "/receita-personalizada", label: "Receitas", desc: "Personalizadas", icon: Utensils, accent: "from-rose-500/20 to-rose-500/5", iconColor: "text-rose-400" },
   { to: "/dieta-personalizada", label: "Dietas", desc: "Sob medida", icon: Calendar, accent: "from-emerald-500/25 to-emerald-500/5", iconColor: "text-emerald-400" },
   { to: "/montar-treino", label: "Treinos", desc: "Personalizados", icon: Dumbbell, accent: "from-amber-500/25 to-amber-500/5", iconColor: "text-amber-400" },
