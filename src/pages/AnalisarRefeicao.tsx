@@ -8,8 +8,11 @@ import { toast } from "@/components/ui/sonner";
 import { openAIService } from "@/services/openai";
 import SaveToLibrary from "@/components/SaveToLibrary";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
 
 const AnalisarRefeicao = () => {
+  const { user } = useAuth();
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [mediaPreview, setMediaPreview] = useState<string | null>(null);
   const [analysis, setAnalysis] = useState<string>("");
@@ -138,6 +141,22 @@ const AnalisarRefeicao = () => {
       }
 
       setAnalysis(result.content);
+
+      // Persist meal log
+      if (user) {
+        const cal = result.content.match(/(\d{2,5})\s*kcal/i)?.[1];
+        const carbs = result.content.match(/Carboidratos[^\d]*(\d+(?:[.,]\d+)?)/i)?.[1]?.replace(",", ".");
+        const prot = result.content.match(/Prote[ií]nas[^\d]*(\d+(?:[.,]\d+)?)/i)?.[1]?.replace(",", ".");
+        const fat = result.content.match(/Gorduras[^\d]*(\d+(?:[.,]\d+)?)/i)?.[1]?.replace(",", ".");
+        await (supabase as any).from("meal_logs").insert({
+          user_id: user.id,
+          analysis: result.content,
+          calories: cal ? parseInt(cal) : null,
+          carbs_g: carbs ? parseFloat(carbs) : null,
+          protein_g: prot ? parseFloat(prot) : null,
+          fat_g: fat ? parseFloat(fat) : null,
+        });
+      }
     } catch (error) {
       console.error("Erro na análise:", error);
       const errorMsg = error instanceof Error ? error.message : "Ocorreu um erro ao analisar sua refeição.";
