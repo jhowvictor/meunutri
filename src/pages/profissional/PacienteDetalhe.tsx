@@ -8,6 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
 import PacienteGlicemiaPanel from "@/components/PacienteGlicemiaPanel";
+import PacienteRefeicoesPanel from "@/components/PacienteRefeicoesPanel";
+import PacienteEvolucaoPanel from "@/components/PacienteEvolucaoPanel";
+import MonthlyReportButton from "@/components/MonthlyReportButton";
 
 interface Patient {
   id: string;
@@ -19,6 +22,7 @@ interface Patient {
   notes: string | null;
   adherence_status: string;
   invite_status: string;
+  patient_user_id: string | null;
 }
 
 interface Assignment {
@@ -105,17 +109,30 @@ const PacienteDetalhe = () => {
       </div>
 
       <Tabs defaultValue="dietas">
-        <TabsList className="grid grid-cols-4 w-full">
+        <TabsList className="grid grid-cols-6 w-full">
           <TabsTrigger value="dietas">Dietas</TabsTrigger>
           <TabsTrigger value="treinos">Treinos</TabsTrigger>
           <TabsTrigger value="receitas">Receitas</TabsTrigger>
+          <TabsTrigger value="refeicoes">Refeições</TabsTrigger>
+          <TabsTrigger value="evolucao">Evolução</TabsTrigger>
           <TabsTrigger value="glicemia">Glicemia</TabsTrigger>
         </TabsList>
         <TabsContent value="dietas"><AssignmentList items={filterAss("dieta")} icon={Utensils} empty="Nenhuma dieta enviada" /></TabsContent>
         <TabsContent value="treinos"><AssignmentList items={filterAss("treino")} icon={Activity} empty="Nenhum treino enviado" /></TabsContent>
         <TabsContent value="receitas"><AssignmentList items={filterAss("receita")} icon={FileText} empty="Nenhuma receita enviada" /></TabsContent>
+        <TabsContent value="refeicoes"><PacienteRefeicoesPanel patientUserId={patient.patient_user_id || null} /></TabsContent>
+        <TabsContent value="evolucao"><PacienteEvolucaoPanel patientUserId={patient.patient_user_id || null} /></TabsContent>
         <TabsContent value="glicemia" className="mt-3"><PacienteGlicemiaPanel patientId={patient.id} /></TabsContent>
       </Tabs>
+
+      {user && (
+        <MonthlyReportButton
+          professionalId={user.id}
+          patientId={patient.id}
+          patientName={patient.full_name}
+          patientUserId={patient.patient_user_id || null}
+        />
+      )}
 
       <div>
         <h2 className="text-sm font-bold mb-2 mt-4">Mais</h2>

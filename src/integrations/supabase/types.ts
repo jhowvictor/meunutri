@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      body_measurements: {
+        Row: {
+          arm_cm: number | null
+          body_fat_pct: number | null
+          chest_cm: number | null
+          created_at: string
+          hip_cm: number | null
+          id: string
+          leg_cm: number | null
+          measured_at: string
+          muscle_mass_kg: number | null
+          notes: string | null
+          photo_url: string | null
+          user_id: string
+          waist_cm: number | null
+          weight_kg: number | null
+        }
+        Insert: {
+          arm_cm?: number | null
+          body_fat_pct?: number | null
+          chest_cm?: number | null
+          created_at?: string
+          hip_cm?: number | null
+          id?: string
+          leg_cm?: number | null
+          measured_at?: string
+          muscle_mass_kg?: number | null
+          notes?: string | null
+          photo_url?: string | null
+          user_id: string
+          waist_cm?: number | null
+          weight_kg?: number | null
+        }
+        Update: {
+          arm_cm?: number | null
+          body_fat_pct?: number | null
+          chest_cm?: number | null
+          created_at?: string
+          hip_cm?: number | null
+          id?: string
+          leg_cm?: number | null
+          measured_at?: string
+          muscle_mass_kg?: number | null
+          notes?: string | null
+          photo_url?: string | null
+          user_id?: string
+          waist_cm?: number | null
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
       glucose_goals: {
         Row: {
           created_at: string
@@ -131,6 +182,84 @@ export type Database = {
           metadata?: Json | null
           title?: string
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      meal_logs: {
+        Row: {
+          analysis: string | null
+          calories: number | null
+          carbs_g: number | null
+          created_at: string
+          fat_g: number | null
+          id: string
+          image_url: string | null
+          is_diet_compliant: boolean | null
+          logged_at: string
+          meal_type: string | null
+          protein_g: number | null
+          user_id: string
+        }
+        Insert: {
+          analysis?: string | null
+          calories?: number | null
+          carbs_g?: number | null
+          created_at?: string
+          fat_g?: number | null
+          id?: string
+          image_url?: string | null
+          is_diet_compliant?: boolean | null
+          logged_at?: string
+          meal_type?: string | null
+          protein_g?: number | null
+          user_id: string
+        }
+        Update: {
+          analysis?: string | null
+          calories?: number | null
+          carbs_g?: number | null
+          created_at?: string
+          fat_g?: number | null
+          id?: string
+          image_url?: string | null
+          is_diet_compliant?: boolean | null
+          logged_at?: string
+          meal_type?: string | null
+          protein_g?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          link: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          link?: string | null
+          title?: string
+          type?: string
           user_id?: string
         }
         Relationships: []
@@ -380,6 +509,86 @@ export type Database = {
           meal_type?: string | null
           portions?: string | null
           time?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      shopping_items: {
+        Row: {
+          category: string | null
+          created_at: string
+          estimated_price: number | null
+          id: string
+          is_purchased: boolean
+          list_id: string
+          name: string
+          position: number
+          quantity: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          estimated_price?: number | null
+          id?: string
+          is_purchased?: boolean
+          list_id: string
+          name: string
+          position?: number
+          quantity?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          estimated_price?: number | null
+          id?: string
+          is_purchased?: boolean
+          list_id?: string
+          name?: string
+          position?: number
+          quantity?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shopping_items_list_id_fkey"
+            columns: ["list_id"]
+            isOneToOne: false
+            referencedRelation: "shopping_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shopping_lists: {
+        Row: {
+          created_at: string
+          estimated_total: number | null
+          id: string
+          notes: string | null
+          patient_id: string | null
+          professional_id: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          estimated_total?: number | null
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          professional_id?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          estimated_total?: number | null
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          professional_id?: string | null
           title?: string
           updated_at?: string
           user_id?: string
