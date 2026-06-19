@@ -1,16 +1,22 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Mail, Phone, MapPin, Target, FileText, Activity, Utensils, Camera, Droplet, TrendingUp } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Mail, Phone, MapPin, Target, FileText, Activity, Utensils, Camera, Droplet, TrendingUp, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "@/components/ui/sonner";
 import PacienteGlicemiaPanel from "@/components/PacienteGlicemiaPanel";
 import PacienteRefeicoesPanel from "@/components/PacienteRefeicoesPanel";
 import PacienteEvolucaoPanel from "@/components/PacienteEvolucaoPanel";
 import MonthlyReportButton from "@/components/MonthlyReportButton";
+
 
 interface Patient {
   id: string;
