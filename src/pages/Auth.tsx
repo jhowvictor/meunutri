@@ -71,6 +71,11 @@ const Auth = () => {
       setLoading(false);
       return;
     }
+    if (accountType === "profissional" && !specialty) {
+      setError("Selecione sua especialidade");
+      setLoading(false);
+      return;
+    }
     
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -80,24 +85,38 @@ const Auth = () => {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: fullName,
-            phone_number: phoneNumber
+            phone_number: phoneNumber,
+            account_type: accountType,
           }
         }
       });
       
       if (error) throw error;
 
-      if (data.session) {
-        toast.success("Cadastro realizado com sucesso!");
-        navigate("/");
-      } else {
-        // Caso confirmação esteja exigida, faz login imediato
+      let activeSession = data.session;
+      if (!activeSession) {
         const { data: signIn, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
-        if (signIn.session) {
-          toast.success("Cadastro realizado com sucesso!");
-          navigate("/");
-        }
+        activeSession = signIn.session;
+      }
+
+      if (activeSession && accountType === "profissional") {
+        const { error: proError } = await (supabase as any)
+          .from("professional_profiles")
+          .upsert({
+            id: activeSession.user.id,
+            display_name: fullName,
+            specialty,
+            registration_number: registrationNumber || null,
+            whatsapp: phoneNumber,
+            email_contact: email,
+          }, { onConflict: "id" });
+        if (proError) console.error("Erro ao criar perfil profissional:", proError);
+      }
+
+      if (activeSession) {
+        toast.success("Cadastro realizado com sucesso!");
+        navigate(accountType === "profissional" ? "/profissional" : "/");
       }
     } catch (error: any) {
       setError(error.message || "Erro ao criar conta. Verifique seus dados.");
