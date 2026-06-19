@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChefHat, Eye, EyeOff } from "lucide-react";
+import { ChefHat, Eye, EyeOff, User, Briefcase } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,18 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const ESPECIALIDADES = [
+  "Nutricionista",
+  "Psicólogo(a)",
+  "Terapeuta",
+  "Personal Trainer",
+  "Fisioterapeuta",
+  "Médico(a)",
+  "Coach de Saúde",
+  "Outro",
+];
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -21,6 +33,9 @@ const Auth = () => {
   const [isResetMode, setIsResetMode] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [accountType, setAccountType] = useState<"pessoa" | "profissional">("pessoa");
+  const [specialty, setSpecialty] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
