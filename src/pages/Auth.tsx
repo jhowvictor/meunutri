@@ -283,6 +283,33 @@ const Auth = () => {
                     required
                   />
                 </div>
+                {accountType === "profissional" && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-specialty">Especialidade</Label>
+                      <Select value={specialty} onValueChange={setSpecialty}>
+                        <SelectTrigger id="signup-specialty">
+                          <SelectValue placeholder="Selecione sua área" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ESPECIALIDADES.map((s) => (
+                            <SelectItem key={s} value={s}>{s}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-reg">Registro profissional (opcional)</Label>
+                      <Input
+                        id="signup-reg"
+                        type="text"
+                        placeholder="Ex: CRN 12345, CREF 000000"
+                        value={registrationNumber}
+                        onChange={(e) => setRegistrationNumber(e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">E-mail</Label>
                   <Input
