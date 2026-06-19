@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Users, FileText, Activity, ClipboardList, ArrowRight, Stethoscope, Plus, Dumbbell, Cpu } from "lucide-react";
+import { Users, FileText, Activity, ClipboardList, ArrowRight, Stethoscope, Plus, Dumbbell, Cpu, Sparkles } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { ESPECIALISTAS } from "@/lib/especialistas";
+import { mapSpecialtyToAgent } from "@/lib/proAgents";
+
 
 interface Patient {
   id: string;
