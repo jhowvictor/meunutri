@@ -1,6 +1,6 @@
-import { ChefHat, Stethoscope, Dumbbell, Activity, type LucideIcon } from "lucide-react";
+import { ChefHat, Stethoscope, Dumbbell, Activity, Brain, type LucideIcon } from "lucide-react";
 
-export type EspecialistaId = "minichef" | "nutricionista" | "personal" | "coach";
+export type EspecialistaId = "minichef" | "nutricionista" | "personal" | "coach" | "psicologo";
 
 export interface Especialista {
   id: EspecialistaId;
