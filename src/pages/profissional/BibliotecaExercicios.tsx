@@ -58,6 +58,7 @@ export default function BibliotecaExercicios() {
   const [q, setQ] = useState("");
   const [group, setGroup] = useState("Todos");
   const [level, setLevel] = useState("Todos");
+  const [selected, setSelected] = useState<Exercise | null>(null);
 
   const filtered = useMemo(
     () =>
