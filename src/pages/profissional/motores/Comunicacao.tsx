@@ -62,11 +62,19 @@ const Comunicacao = () => {
     const phone = p.phone.replace(/\D/g, "");
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(body)}`, "_blank");
   };
-  const sendEmail = () => {
+  const sendEmail = async () => {
     const p = patients.find((x) => x.id === patientId);
     if (!p?.email) return toast.error("Paciente sem email cadastrado");
-    window.open(`mailto:${p.email}?subject=${encodeURIComponent("Mensagem")}&body=${encodeURIComponent(body)}`);
+    const { data, error } = await supabase.functions.invoke("send-email", {
+      body: { to: p.email, subject: "Mensagem", text: body, fromName: proName },
+    });
+    if (error || (data as any)?.error) {
+      toast.error("Falha no envio. Verifique a conexão Resend.");
+      return;
+    }
+    toast.success("E-mail enviado");
   };
+
   const copy = () => { navigator.clipboard.writeText(body); toast.success("Copiado"); };
 
   const createTmpl = async () => {
