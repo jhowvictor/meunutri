@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChefHat, Eye, EyeOff } from "lucide-react";
+import { ChefHat, Eye, EyeOff, User, Briefcase } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +9,18 @@ import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "@/components/ui/sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
+const ESPECIALIDADES = [
+  "Nutricionista",
+  "Psicólogo(a)",
+  "Terapeuta",
+  "Personal Trainer",
+  "Fisioterapeuta",
+  "Médico(a)",
+  "Coach de Saúde",
+  "Outro",
+];
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -21,6 +33,9 @@ const Auth = () => {
   const [isResetMode, setIsResetMode] = useState(false);
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
+  const [accountType, setAccountType] = useState<"pessoa" | "profissional">("pessoa");
+  const [specialty, setSpecialty] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +71,11 @@ const Auth = () => {
       setLoading(false);
       return;
     }
+    if (accountType === "profissional" && !specialty) {
+      setError("Selecione sua especialidade");
+      setLoading(false);
+      return;
+    }
     
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -65,24 +85,38 @@ const Auth = () => {
           emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: fullName,
-            phone_number: phoneNumber
+            phone_number: phoneNumber,
+            account_type: accountType,
           }
         }
       });
       
       if (error) throw error;
 
-      if (data.session) {
-        toast.success("Cadastro realizado com sucesso!");
-        navigate("/");
-      } else {
-        // Caso confirmação esteja exigida, faz login imediato
+      let activeSession = data.session;
+      if (!activeSession) {
         const { data: signIn, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
         if (signInError) throw signInError;
-        if (signIn.session) {
-          toast.success("Cadastro realizado com sucesso!");
-          navigate("/");
-        }
+        activeSession = signIn.session;
+      }
+
+      if (activeSession && accountType === "profissional") {
+        const { error: proError } = await (supabase as any)
+          .from("professional_profiles")
+          .upsert({
+            id: activeSession.user.id,
+            display_name: fullName,
+            specialty,
+            registration_number: registrationNumber || null,
+            whatsapp: phoneNumber,
+            email_contact: email,
+          }, { onConflict: "id" });
+        if (proError) console.error("Erro ao criar perfil profissional:", proError);
+      }
+
+      if (activeSession) {
+        toast.success("Cadastro realizado com sucesso!");
+        navigate(accountType === "profissional" ? "/profissional" : "/");
       }
     } catch (error: any) {
       setError(error.message || "Erro ao criar conta. Verifique seus dados.");
@@ -207,7 +241,28 @@ const Auth = () => {
                   </Alert>
                 )}
                 <div className="space-y-2">
-                  <Label htmlFor="signup-full-name">Nome Completo</Label>
+                  <Label>Tipo de conta</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAccountType("pessoa")}
+                      className={`flex flex-col items-center gap-1 rounded-lg border-2 p-3 text-sm transition ${accountType === "pessoa" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+                    >
+                      <User className="h-5 w-5" />
+                      <span className="font-medium">Pessoa Física</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAccountType("profissional")}
+                      className={`flex flex-col items-center gap-1 rounded-lg border-2 p-3 text-sm transition ${accountType === "profissional" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+                    >
+                      <Briefcase className="h-5 w-5" />
+                      <span className="font-medium">Profissional / Empresa</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-full-name">{accountType === "profissional" ? "Nome / Nome da empresa" : "Nome Completo"}</Label>
                   <Input
                     id="signup-full-name"
                     type="text"
@@ -228,6 +283,33 @@ const Auth = () => {
                     required
                   />
                 </div>
+                {accountType === "profissional" && (
+                  <>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-specialty">Especialidade</Label>
+                      <Select value={specialty} onValueChange={setSpecialty}>
+                        <SelectTrigger id="signup-specialty">
+                          <SelectValue placeholder="Selecione sua área" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ESPECIALIDADES.map((s) => (
+                            <SelectItem key={s} value={s}>{s}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-reg">Registro profissional (opcional)</Label>
+                      <Input
+                        id="signup-reg"
+                        type="text"
+                        placeholder="Ex: CRN 12345, CREF 000000"
+                        value={registrationNumber}
+                        onChange={(e) => setRegistrationNumber(e.target.value)}
+                      />
+                    </div>
+                  </>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">E-mail</Label>
                   <Input
