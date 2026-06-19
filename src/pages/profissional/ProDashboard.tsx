@@ -20,6 +20,8 @@ const ProDashboard = () => {
   const { user } = useAuth();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [stats, setStats] = useState({ total: 0, green: 0, yellow: 0, red: 0, assignments: 0 });
+  const [specialty, setSpecialty] = useState<string | null>(null);
+
 
   useEffect(() => {
     if (!user) return;
