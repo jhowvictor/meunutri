@@ -83,17 +83,25 @@ const Adaptacao = () => {
 
       <div className="space-y-2">
         <label className="text-[10px] uppercase font-bold text-muted-foreground">Plano enviado</label>
-        <Select value={selectedId} onValueChange={setSelectedId}>
-          <SelectTrigger><SelectValue placeholder="Selecione um plano" /></SelectTrigger>
-          <SelectContent>
-            {assignments.map((a) => (
-              <SelectItem key={a.id} value={a.id}>
-                [{a.assignment_type}] {a.title} — {patients[a.patient_id]?.full_name || ""}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {assignments.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-white/15 bg-white/5 p-4 text-center text-xs text-muted-foreground">
+            Você ainda não enviou nenhum plano. Acesse o Motor de Criação ou envie um plano para um paciente para poder adaptá-lo aqui.
+            <Link to="/profissional/motores/criacao" className="block mt-2 text-primary font-semibold">Ir para Criação →</Link>
+          </div>
+        ) : (
+          <Select value={selectedId} onValueChange={setSelectedId}>
+            <SelectTrigger><SelectValue placeholder="Selecione um plano" /></SelectTrigger>
+            <SelectContent className="z-[60] max-h-[60vh]">
+              {assignments.map((a) => (
+                <SelectItem key={a.id} value={a.id}>
+                  [{a.assignment_type}] {a.title} — {patients[a.patient_id]?.full_name || ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        )}
       </div>
+
 
       <div className="space-y-2">
         <label className="text-[10px] uppercase font-bold text-muted-foreground">Feedback / observações</label>
