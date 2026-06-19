@@ -71,13 +71,9 @@ const PremiumIndex = () => {
   const [favorites, setFavorites] = useState<LibItem[]>([]);
   const [streak, setStreak] = useState(0);
 
-  if (profile?.account_type === "profissional") {
-    return <Navigate to="/profissional" replace />;
-  }
-
-
   useEffect(() => {
     if (!user) return;
+    if (profile?.account_type === "profissional") return;
     (async () => {
       const [{ data: r }, { data: f }] = await Promise.all([
         supabase.from("library_items").select("id,title,content_type,created_at,is_favorite").eq("user_id", user.id).order("created_at", { ascending: false }).limit(6),
@@ -88,6 +84,10 @@ const PremiumIndex = () => {
       setStreak(profile?.streak_days ?? Math.max(1, Math.min(7, (r || []).length)));
     })();
   }, [user, profile]);
+
+  if (profile?.account_type === "profissional") {
+    return <Navigate to="/profissional" replace />;
+  }
 
   const firstName = profile?.full_name?.split(" ")[0] || "você";
   const goalText = profile?.target_weight_kg && profile?.weight_kg
