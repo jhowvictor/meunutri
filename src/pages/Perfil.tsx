@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Camera, LogOut, Save, Loader2, ArrowLeft } from "lucide-react";
+import { Camera, LogOut, Save, Loader2, ArrowLeft, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/components/ui/sonner";
 import { useAuth } from "@/components/AuthProvider";
 import { useProfile, useAvatarUrl } from "@/hooks/useProfile";
@@ -16,17 +17,26 @@ const goals = ["Perda de peso", "Ganho de massa", "Manutenção", "Melhorar saú
 const activities = ["Sedentário", "Leve (1-3x/sem)", "Moderado (3-5x/sem)", "Intenso (5-6x/sem)", "Atleta"];
 const restrictions = ["Lactose", "Glúten", "Frutos do mar", "Amendoim", "Ovos", "Vegano", "Vegetariano"];
 const preferences = ["Mediterrânea", "Low carb", "Cetogênica", "Tradicional brasileira", "Asiática", "Vegana"];
+const especialidades = [
+  "Nutricionista", "Nutrólogo(a)", "Psicólogo(a)", "Psiquiatra", "Terapeuta",
+  "Personal Trainer", "Fisioterapeuta", "Médico(a)", "Coach de Saúde", "Outro",
+];
 
 const Perfil = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { profile, update, reload } = useProfile();
   const avatarUrl = useAvatarUrl(profile?.avatar_url);
+  const isPro = profile?.account_type === "profissional";
 
   const [form, setForm] = useState({
     full_name: "", age: "", sex: "", height_cm: "", weight_kg: "",
     target_weight_kg: "", main_goal: "", activity_level: "",
     dietary_restrictions: [] as string[], food_preferences: [] as string[],
+  });
+  const [pro, setPro] = useState({
+    display_name: "", specialty: "", registration_number: "",
+    whatsapp: "", email_contact: "", bio: "",
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -48,6 +58,21 @@ const Perfil = () => {
     }
   }, [profile]);
 
+  useEffect(() => {
+    if (!user || !isPro) return;
+    (supabase as any).from("professional_profiles").select("*").eq("id", user.id).maybeSingle()
+      .then(({ data }: any) => {
+        if (data) setPro({
+          display_name: data.display_name || "",
+          specialty: data.specialty || "",
+          registration_number: data.registration_number || "",
+          whatsapp: data.whatsapp || "",
+          email_contact: data.email_contact || "",
+          bio: data.bio || "",
+        });
+      });
+  }, [user, isPro]);
+
   const toggleList = (key: "dietary_restrictions" | "food_preferences", v: string) => {
     setForm((f) => ({ ...f, [key]: f[key].includes(v) ? f[key].filter((x) => x !== v) : [...f[key], v] }));
   };
@@ -59,14 +84,21 @@ const Perfil = () => {
     const ext = file.name.split(".").pop();
     const path = `${user.id}/avatar-${Date.now()}.${ext}`;
     const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-    if (error) {
-      toast.error("Erro ao enviar foto");
-    } else {
-      await update({ avatar_url: path });
-      toast.success("Foto atualizada!");
-      reload();
-    }
+    if (error) toast.error("Erro ao enviar foto");
+    else { await update({ avatar_url: path }); toast.success("Foto atualizada!"); reload(); }
     setUploading(false);
+  };
+
+  const handleSavePro = async () => {
+    if (!user) return;
+    setSaving(true);
+    const { error: e1 } = await update({ full_name: pro.display_name || null });
+    const { error: e2 } = await (supabase as any)
+      .from("professional_profiles")
+      .upsert({ id: user.id, ...pro }, { onConflict: "id" });
+    setSaving(false);
+    if (e1 || e2) toast.error("Erro ao salvar");
+    else toast.success("Perfil atualizado!");
   };
 
   const handleSave = async () => {
@@ -88,11 +120,12 @@ const Perfil = () => {
     else toast.success("Perfil atualizado!");
   };
 
-  const initial = (form.full_name || "U").charAt(0).toUpperCase();
+  const displayName = isPro ? (pro.display_name || form.full_name) : form.full_name;
+  const initial = (displayName || "U").charAt(0).toUpperCase();
 
   return (
     <div className="space-y-5 animate-[fadeIn_0.4s_ease-out]">
-      <button onClick={() => navigate("/")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+      <button onClick={() => navigate(isPro ? "/profissional" : "/")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="h-4 w-4" /> Voltar
       </button>
 
@@ -108,76 +141,117 @@ const Perfil = () => {
           </label>
         </div>
         <div className="min-w-0">
-          <div className="font-bold text-lg truncate">{form.full_name || "Seu nome"}</div>
+          <div className="font-bold text-lg truncate">{displayName || "Seu nome"}</div>
           <div className="text-xs text-muted-foreground truncate">{user?.email}</div>
-          {form.main_goal && <div className="mt-1.5 inline-block text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30">{form.main_goal}</div>}
+          {isPro ? (
+            <div className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30">
+              <Briefcase className="h-3 w-3" /> {pro.specialty || "Profissional"}
+            </div>
+          ) : form.main_goal ? (
+            <div className="mt-1.5 inline-block text-[10px] font-medium px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/30">{form.main_goal}</div>
+          ) : null}
         </div>
       </div>
 
-      <Tabs defaultValue="dados" className="w-full">
-        <TabsList className="grid grid-cols-3 w-full glass border border-white/10">
-          <TabsTrigger value="dados">Dados</TabsTrigger>
-          <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
-          <TabsTrigger value="prefs">Prefs</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="dados" className="space-y-3 mt-4">
-          <Field label="Nome completo"><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></Field>
+      {isPro ? (
+        <div className="space-y-3 mt-2">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-primary">Dados profissionais</div>
+          <Field label="Nome / Nome da empresa">
+            <Input value={pro.display_name} onChange={(e) => setPro({ ...pro, display_name: e.target.value })} />
+          </Field>
+          <Field label="Especialidade">
+            <Select value={pro.specialty} onValueChange={(v) => setPro({ ...pro, specialty: v })}>
+              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+              <SelectContent>{especialidades.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
+            </Select>
+          </Field>
+          <Field label="Registro profissional (CRN, CRP, CREF, CRM...)">
+            <Input value={pro.registration_number} onChange={(e) => setPro({ ...pro, registration_number: e.target.value })} placeholder="Opcional" />
+          </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Idade"><Input type="number" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} /></Field>
-            <Field label="Sexo">
-              <Select value={form.sex} onValueChange={(v) => setForm({ ...form, sex: v })}>
-                <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-                <SelectContent><SelectItem value="Masculino">Masculino</SelectItem><SelectItem value="Feminino">Feminino</SelectItem><SelectItem value="Outro">Outro</SelectItem></SelectContent>
-              </Select>
+            <Field label="WhatsApp">
+              <Input value={pro.whatsapp} onChange={(e) => setPro({ ...pro, whatsapp: e.target.value })} />
+            </Field>
+            <Field label="E-mail de contato">
+              <Input type="email" value={pro.email_contact} onChange={(e) => setPro({ ...pro, email_contact: e.target.value })} />
             </Field>
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            <Field label="Altura (cm)"><Input type="number" value={form.height_cm} onChange={(e) => setForm({ ...form, height_cm: e.target.value })} /></Field>
-            <Field label="Peso (kg)"><Input type="number" step="0.1" value={form.weight_kg} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} /></Field>
-            <Field label="Meta (kg)"><Input type="number" step="0.1" value={form.target_weight_kg} onChange={(e) => setForm({ ...form, target_weight_kg: e.target.value })} /></Field>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="objetivos" className="space-y-3 mt-4">
-          <Field label="Objetivo principal">
-            <Select value={form.main_goal} onValueChange={(v) => setForm({ ...form, main_goal: v })}>
-              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-              <SelectContent>{goals.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
-            </Select>
+          <Field label="Bio / apresentação">
+            <Textarea value={pro.bio} onChange={(e) => setPro({ ...pro, bio: e.target.value })} rows={3} placeholder="Apresente-se brevemente para seus pacientes..." />
           </Field>
-          <Field label="Nível de atividade física">
-            <Select value={form.activity_level} onValueChange={(v) => setForm({ ...form, activity_level: v })}>
-              <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
-              <SelectContent>{activities.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}</SelectContent>
-            </Select>
-          </Field>
-        </TabsContent>
+          <Button onClick={handleSavePro} disabled={saving} className="w-full rounded-full bg-primary hover:bg-primary/90 neon-glow-sm font-semibold">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+            Salvar alterações
+          </Button>
+        </div>
+      ) : (
+        <>
+          <Tabs defaultValue="dados" className="w-full">
+            <TabsList className="grid grid-cols-3 w-full glass border border-white/10">
+              <TabsTrigger value="dados">Dados</TabsTrigger>
+              <TabsTrigger value="objetivos">Objetivos</TabsTrigger>
+              <TabsTrigger value="prefs">Prefs</TabsTrigger>
+            </TabsList>
 
-        <TabsContent value="prefs" className="space-y-4 mt-4">
-          <div>
-            <Label className="text-xs text-muted-foreground mb-2 block">Restrições alimentares</Label>
-            <div className="flex flex-wrap gap-2">
-              {restrictions.map((r) => (
-                <Chip key={r} active={form.dietary_restrictions.includes(r)} onClick={() => toggleList("dietary_restrictions", r)}>{r}</Chip>
-              ))}
-            </div>
-          </div>
-          <div>
-            <Label className="text-xs text-muted-foreground mb-2 block">Preferências alimentares</Label>
-            <div className="flex flex-wrap gap-2">
-              {preferences.map((p) => (
-                <Chip key={p} active={form.food_preferences.includes(p)} onClick={() => toggleList("food_preferences", p)}>{p}</Chip>
-              ))}
-            </div>
-          </div>
-        </TabsContent>
-      </Tabs>
+            <TabsContent value="dados" className="space-y-3 mt-4">
+              <Field label="Nome completo"><Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} /></Field>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Idade"><Input type="number" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} /></Field>
+                <Field label="Sexo">
+                  <Select value={form.sex} onValueChange={(v) => setForm({ ...form, sex: v })}>
+                    <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                    <SelectContent><SelectItem value="Masculino">Masculino</SelectItem><SelectItem value="Feminino">Feminino</SelectItem><SelectItem value="Outro">Outro</SelectItem></SelectContent>
+                  </Select>
+                </Field>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <Field label="Altura (cm)"><Input type="number" value={form.height_cm} onChange={(e) => setForm({ ...form, height_cm: e.target.value })} /></Field>
+                <Field label="Peso (kg)"><Input type="number" step="0.1" value={form.weight_kg} onChange={(e) => setForm({ ...form, weight_kg: e.target.value })} /></Field>
+                <Field label="Meta (kg)"><Input type="number" step="0.1" value={form.target_weight_kg} onChange={(e) => setForm({ ...form, target_weight_kg: e.target.value })} /></Field>
+              </div>
+            </TabsContent>
 
-      <Button onClick={handleSave} disabled={saving} className="w-full rounded-full bg-primary hover:bg-primary/90 neon-glow-sm font-semibold">
-        {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-        Salvar alterações
-      </Button>
+            <TabsContent value="objetivos" className="space-y-3 mt-4">
+              <Field label="Objetivo principal">
+                <Select value={form.main_goal} onValueChange={(v) => setForm({ ...form, main_goal: v })}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>{goals.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
+                </Select>
+              </Field>
+              <Field label="Nível de atividade física">
+                <Select value={form.activity_level} onValueChange={(v) => setForm({ ...form, activity_level: v })}>
+                  <SelectTrigger><SelectValue placeholder="Selecione" /></SelectTrigger>
+                  <SelectContent>{activities.map((a) => <SelectItem key={a} value={a}>{a}</SelectItem>)}</SelectContent>
+                </Select>
+              </Field>
+            </TabsContent>
+
+            <TabsContent value="prefs" className="space-y-4 mt-4">
+              <div>
+                <Label className="text-xs text-muted-foreground mb-2 block">Restrições alimentares</Label>
+                <div className="flex flex-wrap gap-2">
+                  {restrictions.map((r) => (
+                    <Chip key={r} active={form.dietary_restrictions.includes(r)} onClick={() => toggleList("dietary_restrictions", r)}>{r}</Chip>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground mb-2 block">Preferências alimentares</Label>
+                <div className="flex flex-wrap gap-2">
+                  {preferences.map((p) => (
+                    <Chip key={p} active={form.food_preferences.includes(p)} onClick={() => toggleList("food_preferences", p)}>{p}</Chip>
+                  ))}
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <Button onClick={handleSave} disabled={saving} className="w-full rounded-full bg-primary hover:bg-primary/90 neon-glow-sm font-semibold">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+            Salvar alterações
+          </Button>
+        </>
+      )}
 
       <Button onClick={async () => { await signOut(); toast.success("Até logo!"); }} variant="outline" className="w-full rounded-full border-white/10">
         <LogOut className="h-4 w-4 mr-2" /> Sair da conta
