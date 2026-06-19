@@ -116,6 +116,23 @@ const ProDashboard = () => {
       </section>
 
       <section>
+        <Link to={`/especialistas/${agentId}`} className="block rounded-2xl border border-violet-500/30 bg-gradient-to-br from-violet-500/15 to-fuchsia-500/5 p-4 hover:border-violet-500/60 transition">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 rounded-xl bg-violet-500/20 border border-violet-500/40 flex items-center justify-center text-2xl">
+              {agent.emoji}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] font-bold uppercase text-violet-300 flex items-center gap-1"><Sparkles className="h-3 w-3" /> Seu agente de I.A</div>
+              <div className="font-bold">{agent.nome}</div>
+              <div className="text-[11px] text-muted-foreground">{agent.descricaoCurta}</div>
+            </div>
+            <ArrowRight className="h-4 w-4 text-violet-300" />
+          </div>
+        </Link>
+      </section>
+
+
+      <section>
         <h2 className="text-lg font-bold mb-2">Ferramentas profissionais</h2>
         <div className="grid grid-cols-2 gap-3">
           <ToolCard to="/receita-personalizada" label="Receitas" desc="Gerar e enviar" icon={FileText} />
