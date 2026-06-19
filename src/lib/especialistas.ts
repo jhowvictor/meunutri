@@ -141,7 +141,6 @@ Objetivo: acompanhar a jornada do usuário, detectar padrões nos dados disponí
 Sempre que possível, cite números concretos do contexto do usuário (ex: "você perdeu 3kg em 45 dias", "sua aderência foi de 84% na semana") e termine com 1 ação prática para os próximos dias.` +
       baseLimits,
   },
-  },
   psicologo: {
     id: "psicologo",
     nome: "Psicólogo IA",
