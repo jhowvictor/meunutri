@@ -45,8 +45,10 @@ const typeLabel: Record<string, string> = { receita: "Receita", dieta: "Dieta", 
 const PacienteDetalhe = () => {
   const { id } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+
 
   useEffect(() => {
     if (!user || !id) return;
