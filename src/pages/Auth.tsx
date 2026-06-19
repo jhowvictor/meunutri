@@ -241,7 +241,28 @@ const Auth = () => {
                   </Alert>
                 )}
                 <div className="space-y-2">
-                  <Label htmlFor="signup-full-name">Nome Completo</Label>
+                  <Label>Tipo de conta</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setAccountType("pessoa")}
+                      className={`flex flex-col items-center gap-1 rounded-lg border-2 p-3 text-sm transition ${accountType === "pessoa" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+                    >
+                      <User className="h-5 w-5" />
+                      <span className="font-medium">Pessoa Física</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setAccountType("profissional")}
+                      className={`flex flex-col items-center gap-1 rounded-lg border-2 p-3 text-sm transition ${accountType === "profissional" ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"}`}
+                    >
+                      <Briefcase className="h-5 w-5" />
+                      <span className="font-medium">Profissional / Empresa</span>
+                    </button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="signup-full-name">{accountType === "profissional" ? "Nome / Nome da empresa" : "Nome Completo"}</Label>
                   <Input
                     id="signup-full-name"
                     type="text"
