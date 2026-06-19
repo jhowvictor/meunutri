@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Users, FileText, Activity, ClipboardList, ArrowRight, Stethoscope, Plus, Dumbbell, Cpu } from "lucide-react";
+import { Users, FileText, Activity, ClipboardList, ArrowRight, Stethoscope, Plus, Dumbbell, Cpu, Sparkles } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { ESPECIALISTAS } from "@/lib/especialistas";
+import { mapSpecialtyToAgent } from "@/lib/proAgents";
+
 
 interface Patient {
   id: string;
@@ -17,6 +20,8 @@ const ProDashboard = () => {
   const { user } = useAuth();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [stats, setStats] = useState({ total: 0, green: 0, yellow: 0, red: 0, assignments: 0 });
+  const [specialty, setSpecialty] = useState<string | null>(null);
+
 
   useEffect(() => {
     if (!user) return;
@@ -41,8 +46,16 @@ const ProDashboard = () => {
         if (counts[s] !== undefined) counts[s]++;
       });
       setStats({ total: total ?? 0, ...counts, assignments: assigns ?? 0 });
+
+      const { data: pp } = await (supabase as any)
+        .from("professional_profiles").select("specialty").eq("id", user.id).maybeSingle();
+      setSpecialty(pp?.specialty || null);
     })();
   }, [user]);
+
+  const agentId = mapSpecialtyToAgent(specialty);
+  const agent = ESPECIALISTAS[agentId];
+
 
   return (
     <div className="space-y-5 pb-4">
@@ -101,6 +114,23 @@ const ProDashboard = () => {
           </div>
         </Link>
       </section>
+
+      <section>
+        <Link to={`/especialistas/${agentId}`} className="block rounded-2xl border border-violet-500/30 bg-gradient-to-br from-violet-500/15 to-fuchsia-500/5 p-4 hover:border-violet-500/60 transition">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 rounded-xl bg-violet-500/20 border border-violet-500/40 flex items-center justify-center text-2xl">
+              {agent.emoji}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[10px] font-bold uppercase text-violet-300 flex items-center gap-1"><Sparkles className="h-3 w-3" /> Seu agente de I.A</div>
+              <div className="font-bold">{agent.nome}</div>
+              <div className="text-[11px] text-muted-foreground">{agent.descricaoCurta}</div>
+            </div>
+            <ArrowRight className="h-4 w-4 text-violet-300" />
+          </div>
+        </Link>
+      </section>
+
 
       <section>
         <h2 className="text-lg font-bold mb-2">Ferramentas profissionais</h2>

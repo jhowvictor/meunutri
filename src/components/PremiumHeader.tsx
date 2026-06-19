@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
-import { ChefHat, Bell } from "lucide-react";
+import { ChefHat } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useProfile, useAvatarUrl } from "@/hooks/useProfile";
+import NotificationBell from "./NotificationBell";
 
 const PremiumHeader = () => {
   const { profile } = useProfile();
@@ -21,15 +22,7 @@ const PremiumHeader = () => {
         </Link>
 
         <div className="flex items-center gap-3">
-          <button
-            className="relative h-10 w-10 rounded-full glass border border-white/10 flex items-center justify-center hover:border-primary/40 transition"
-            aria-label="Notificações"
-          >
-            <Bell className="h-4 w-4" />
-            <span className="absolute -top-0.5 -right-0.5 h-4 min-w-4 px-1 rounded-full bg-primary text-[10px] font-bold text-primary-foreground flex items-center justify-center">
-              2
-            </span>
-          </button>
+          <NotificationBell />
           <Link to="/perfil">
             <Avatar className="h-10 w-10 border-2 border-primary/60 neon-glow-sm">
               <AvatarImage src={avatarUrl ?? undefined} alt="Avatar" />

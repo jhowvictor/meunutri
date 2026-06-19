@@ -1,16 +1,22 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Mail, Phone, MapPin, Target, FileText, Activity, Utensils, Camera, Droplet, TrendingUp } from "lucide-react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { ArrowLeft, Mail, Phone, MapPin, Target, FileText, Activity, Utensils, Camera, Droplet, TrendingUp, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "@/components/ui/sonner";
 import PacienteGlicemiaPanel from "@/components/PacienteGlicemiaPanel";
 import PacienteRefeicoesPanel from "@/components/PacienteRefeicoesPanel";
 import PacienteEvolucaoPanel from "@/components/PacienteEvolucaoPanel";
 import MonthlyReportButton from "@/components/MonthlyReportButton";
+
 
 interface Patient {
   id: string;
@@ -39,8 +45,10 @@ const typeLabel: Record<string, string> = { receita: "Receita", dieta: "Dieta", 
 const PacienteDetalhe = () => {
   const { id } = useParams();
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [patient, setPatient] = useState<Patient | null>(null);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+
 
   useEffect(() => {
     if (!user || !id) return;
@@ -70,10 +78,43 @@ const PacienteDetalhe = () => {
 
   return (
     <div className="space-y-4 pb-4">
-      <header className="flex items-center gap-3">
+      <header className="flex items-center gap-2">
         <Link to="/profissional/pacientes" className="text-muted-foreground"><ArrowLeft className="h-5 w-5" /></Link>
         <h1 className="text-xl font-extrabold flex-1 truncate">{patient.full_name}</h1>
+        <button
+          onClick={() => navigate(`/profissional/pacientes/novo?edit=${patient.id}`)}
+          className="h-8 w-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:border-primary/40"
+          aria-label="Editar"
+        ><Pencil className="h-3.5 w-3.5 text-muted-foreground" /></button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button className="h-8 w-8 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center hover:bg-rose-500/20" aria-label="Excluir">
+              <Trash2 className="h-3.5 w-3.5 text-rose-400" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir paciente?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir <strong>{patient.full_name}</strong>? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={async () => {
+                  const { error } = await (supabase as any).from("patients").delete().eq("id", patient.id);
+                  if (error) return toast.error(error.message);
+                  toast.success("Paciente removido");
+                  navigate("/profissional/pacientes");
+                }}
+                className="bg-rose-500 hover:bg-rose-600"
+              >Sim, excluir</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </header>
+
 
       <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
         <div className="flex items-center gap-3">
