@@ -78,10 +78,43 @@ const PacienteDetalhe = () => {
 
   return (
     <div className="space-y-4 pb-4">
-      <header className="flex items-center gap-3">
+      <header className="flex items-center gap-2">
         <Link to="/profissional/pacientes" className="text-muted-foreground"><ArrowLeft className="h-5 w-5" /></Link>
         <h1 className="text-xl font-extrabold flex-1 truncate">{patient.full_name}</h1>
+        <button
+          onClick={() => navigate(`/profissional/pacientes/novo?edit=${patient.id}`)}
+          className="h-8 w-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:border-primary/40"
+          aria-label="Editar"
+        ><Pencil className="h-3.5 w-3.5 text-muted-foreground" /></button>
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button className="h-8 w-8 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center hover:bg-rose-500/20" aria-label="Excluir">
+              <Trash2 className="h-3.5 w-3.5 text-rose-400" />
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Excluir paciente?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Tem certeza que deseja excluir <strong>{patient.full_name}</strong>? Esta ação não pode ser desfeita.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={async () => {
+                  const { error } = await (supabase as any).from("patients").delete().eq("id", patient.id);
+                  if (error) return toast.error(error.message);
+                  toast.success("Paciente removido");
+                  navigate("/profissional/pacientes");
+                }}
+                className="bg-rose-500 hover:bg-rose-600"
+              >Sim, excluir</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </header>
+
 
       <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-3">
         <div className="flex items-center gap-3">
