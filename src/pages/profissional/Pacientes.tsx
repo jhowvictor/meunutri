@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Plus, Search, ArrowLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Plus, Search, ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "@/components/ui/sonner";
 
 interface Patient {
   id: string;
@@ -22,21 +27,30 @@ const statusLabel: Record<string, string> = { green: "Evoluindo bem", yellow: "O
 
 const Pacientes = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [list, setList] = useState<Patient[]>([]);
   const [q, setQ] = useState("");
   const [filter, setFilter] = useState<string>("all");
+  const [toDelete, setToDelete] = useState<Patient | null>(null);
 
-  useEffect(() => {
+  const load = async () => {
     if (!user) return;
-    (async () => {
-      const { data } = await (supabase as any)
-        .from("patients")
-        .select("*")
-        .eq("professional_id", user.id)
-        .order("created_at", { ascending: false });
-      setList((data as Patient[]) || []);
-    })();
-  }, [user]);
+    const { data } = await (supabase as any)
+      .from("patients").select("*").eq("professional_id", user.id)
+      .order("created_at", { ascending: false });
+    setList((data as Patient[]) || []);
+  };
+
+  useEffect(() => { load(); }, [user]);
+
+  const confirmDelete = async () => {
+    if (!toDelete) return;
+    const { error } = await (supabase as any).from("patients").delete().eq("id", toDelete.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Paciente removido");
+    setToDelete(null);
+    load();
+  };
 
   const filtered = list.filter((p) => {
     const matchQ = !q || p.full_name.toLowerCase().includes(q.toLowerCase()) || (p.email || "").toLowerCase().includes(q.toLowerCase());
@@ -83,25 +97,57 @@ const Pacientes = () => {
       ) : (
         <div className="space-y-2">
           {filtered.map((p) => (
-            <Link key={p.id} to={`/profissional/paciente/${p.id}`}
-              className="flex items-center gap-3 p-3 rounded-2xl border border-white/10 bg-white/5 hover:border-primary/40 transition">
-              <div className="h-11 w-11 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center font-bold text-primary">
-                {p.full_name.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold truncate">{p.full_name}</div>
-                <div className="text-[11px] text-muted-foreground truncate">
-                  {p.goal || "Sem objetivo"} {p.city ? `• ${p.city}` : ""}
+            <div key={p.id} className="flex items-center gap-2 p-3 rounded-2xl border border-white/10 bg-white/5 hover:border-primary/40 transition">
+              <Link to={`/profissional/paciente/${p.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="h-11 w-11 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center font-bold text-primary">
+                  {p.full_name.charAt(0).toUpperCase()}
                 </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold truncate">{p.full_name}</div>
+                  <div className="text-[11px] text-muted-foreground truncate">
+                    {p.goal || "Sem objetivo"} {p.city ? `• ${p.city}` : ""}
+                  </div>
+                </div>
+                <div className="flex flex-col items-end">
+                  <span className={`h-2.5 w-2.5 rounded-full ${dotColor[p.adherence_status || "green"]}`} />
+                  <span className="text-[9px] text-muted-foreground mt-1">{statusLabel[p.adherence_status || "green"]}</span>
+                </div>
+              </Link>
+              <div className="flex flex-col gap-1">
+                <button
+                  onClick={() => navigate(`/profissional/pacientes/novo?edit=${p.id}`)}
+                  className="h-7 w-7 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:border-primary/40"
+                  aria-label="Editar"
+                >
+                  <Pencil className="h-3 w-3 text-muted-foreground" />
+                </button>
+                <button
+                  onClick={() => setToDelete(p)}
+                  className="h-7 w-7 rounded-full bg-rose-500/10 border border-rose-500/30 flex items-center justify-center hover:bg-rose-500/20"
+                  aria-label="Excluir"
+                >
+                  <Trash2 className="h-3 w-3 text-rose-400" />
+                </button>
               </div>
-              <div className="flex flex-col items-end">
-                <span className={`h-2.5 w-2.5 rounded-full ${dotColor[p.adherence_status || "green"]}`} />
-                <span className="text-[9px] text-muted-foreground mt-1">{statusLabel[p.adherence_status || "green"]}</span>
-              </div>
-            </Link>
+            </div>
           ))}
         </div>
       )}
+
+      <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && setToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir paciente?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir <strong>{toDelete?.full_name}</strong>? Esta ação não pode ser desfeita e todos os dados associados serão removidos.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-rose-500 hover:bg-rose-600">Sim, excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
