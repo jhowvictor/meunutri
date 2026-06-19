@@ -46,8 +46,16 @@ const ProDashboard = () => {
         if (counts[s] !== undefined) counts[s]++;
       });
       setStats({ total: total ?? 0, ...counts, assignments: assigns ?? 0 });
+
+      const { data: pp } = await (supabase as any)
+        .from("professional_profiles").select("specialty").eq("id", user.id).maybeSingle();
+      setSpecialty(pp?.specialty || null);
     })();
   }, [user]);
+
+  const agentId = mapSpecialtyToAgent(specialty);
+  const agent = ESPECIALISTAS[agentId];
+
 
   return (
     <div className="space-y-5 pb-4">
