@@ -12,6 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 interface Exercise {
   name: string;
@@ -51,6 +58,7 @@ export default function BibliotecaExercicios() {
   const [q, setQ] = useState("");
   const [group, setGroup] = useState("Todos");
   const [level, setLevel] = useState("Todos");
+  const [selected, setSelected] = useState<Exercise | null>(null);
 
   const filtered = useMemo(
     () =>
@@ -103,7 +111,11 @@ export default function BibliotecaExercicios() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {filtered.map((ex) => (
-          <Card key={ex.name} className="p-4">
+          <Card
+            key={ex.name}
+            className="p-4 cursor-pointer hover:bg-accent/40 hover:border-primary/40 transition-colors"
+            onClick={() => setSelected(ex)}
+          >
             <div className="flex items-start justify-between gap-2 mb-2">
               <h3 className="font-semibold">{ex.name}</h3>
               <Badge variant="outline" className="text-xs capitalize">{ex.level}</Badge>
@@ -121,6 +133,40 @@ export default function BibliotecaExercicios() {
           </p>
         )}
       </div>
+
+      <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{selected?.name}</DialogTitle>
+            <DialogDescription className="flex flex-wrap gap-2 pt-2">
+              <Badge variant="secondary">{selected?.group}</Badge>
+              <Badge variant="secondary">{selected?.equipment}</Badge>
+              <Badge variant="outline" className="capitalize">{selected?.level}</Badge>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <div>
+              <h4 className="font-semibold mb-1">Descrição</h4>
+              <p className="text-muted-foreground">{selected?.description}</p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Sugestão de execução</h4>
+              <p className="text-muted-foreground">
+                3 a 4 séries de 10 a 12 repetições, com 60s de descanso entre séries. Ajuste a carga conforme o nível do paciente.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Dicas técnicas</h4>
+              <ul className="list-disc pl-5 text-muted-foreground space-y-1">
+                <li>Mantenha a respiração controlada durante o movimento.</li>
+                <li>Priorize a execução correta antes de aumentar a carga.</li>
+                <li>Evite compensações com outras articulações.</li>
+              </ul>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
